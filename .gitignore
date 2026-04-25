@@ -16,3 +16,5 @@ keyboard/__pycache__/
 utils/__pycache__/
 middleware/__pycache__/
 handlers/__pycache__/__init__.cpython-314.pyc
+data/__pycache__/__init__.cpython-314.pyc
+*.pyc

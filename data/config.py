@@ -64,13 +64,13 @@ GEO_CATALOG: dict = {
         # FD
         # ════════════════════════════════════════════════════════
         "fd": {
-            "label": "📁 FD",
+            "label": "📁 Bolivia FD",
             "sections": {
                 "proofs_fd": {
-                    "label": "Proofs FD",
+                    "label": "Bolivia Proofs FD",
                     "items": {
                         "fd_proof1": {
-                            "label": "PSD 1", "asset": "assets/fd/proofs/psd1.png",
+                            "label": "Bolivia FD 1", "asset": "assets/fd/proofs/psd1.png",
                             "fields": [
                                 {"key": "name",   "prompt": "✏️ Введите ФИО (пример: Ivanov Ivan)",
                                  "text_config": {"font": "montserrat", "size": 36, "color": (0,0,0), "pos": (100, 200)}},
@@ -79,7 +79,7 @@ GEO_CATALOG: dict = {
                             ],
                         },
                         "fd_proof2": {
-                            "label": "PSD 2", "asset": "assets/fd/proofs/psd2.png",
+                            "label": "Bolivia FD 2", "asset": "assets/fd/proofs/psd2.png",
                             "fields": [
                                 {"key": "name",   "prompt": "✏️ Введите ФИО (пример: Ivanov Ivan)",
                                  "text_config": {"font": "montserrat", "size": 36, "color": (0,0,0), "pos": (100, 200)}},
@@ -88,7 +88,7 @@ GEO_CATALOG: dict = {
                             ],
                         },
                         "fd_proof3": {
-                            "label": "PSD 3", "asset": "assets/fd/proofs/psd3.png",
+                            "label": "Bolivia FD 3", "asset": "assets/fd/proofs/psd3.png",
                             "fields": [
                                 {"key": "name",   "prompt": "✏️ Введите ФИО (пример: Ivanov Ivan)",
                                  "text_config": {"font": "montserrat", "size": 36, "color": (0,0,0), "pos": (100, 200)}},
@@ -101,16 +101,16 @@ GEO_CATALOG: dict = {
             },
         },
         "rd": {
-            "label": "📁 RD",
+            "label": "📁 Bolivia RD",
             "sections": {
 
                 "rd_main": {
-                    "label": "RD",
+                    "label": "Bolivia RD",
                     "items": {
 
                         # ── RD1 ──────────────────────────────────────────────────
                         "rd1": {
-                            "label": "RD1", "asset": "assets/rd/rd1.png", "preview": "assets/preview/RD1_prew.jpg",
+                            "label": "Bolivia RD 1", "asset": "assets/rd/rd1.png", "preview": "assets/preview/RD1_prew.jpg",
                             "fields": [
                                 {
                                     "key": "name",
@@ -139,7 +139,7 @@ GEO_CATALOG: dict = {
 
                         # ── RD2 ──────────────────────────────────────────────────
                         "rd2": {
-                            "label": "RD2", "asset": "assets/rd/rd2.png", "preview": "assets/preview/RD2_prew.jpg",
+                            "label": "Bolivia RD 2", "asset": "assets/rd/rd2.jpg", "preview": "assets/preview/RD2_prew.jpg",
                             "fields": [
                                 {
                                     "key": "name",
@@ -150,14 +150,54 @@ GEO_CATALOG: dict = {
                                         "template": "Cuenta bancaria del cliente {name}.",
                                         "area": (2235, 1420, 3050, 1460),
                                         "line_spacing": 1.2,
-                                    },
+                                    }
                                 },
+                                {
+                                    "key": "amount",
+                                    "prompt": "💰 Введите сумму",
+                                    "text_config": {"collect_only": True}
+                                },
+                                {
+                                    "key": "_body_line1",
+                                    "prompt": "",
+                                    "text_config": {
+                                        "area": (2240, 490, 2992, 540),
+                                        "segments": [
+                                            {"text": "Es necesario pagar una tarifa por la", "font": "montserrat_light", "size": 44, "color": (255, 255, 255)}
+                                        ]
+                                    }
+                                },
+                                {
+                                    "key": "_body_line2",
+                                    "prompt": "",
+                                    "text_config": {
+                                        "area": (2240, 537, 2992, 587),
+                                        "segments": [
+                                            {"text": "conversión de ", "font": "montserrat_light", "size": 44, "color": (255, 255, 255)},
+                                            {"text": "USDT", "font": "montserrat_medium", "size": 44, "color": (136, 255, 164)},
+                                            {"text": " a ", "font": "montserrat_light", "size": 44, "color": (255, 255, 255)},
+                                            {"text": "BOB.", "font": "montserrat_medium", "size": 44, "color": (254, 68, 92)}
+                                        ]
+                                    }
+                                },
+                                {
+                                    "key": "_body_line3",
+                                    "prompt": "",
+                                    "text_config": {
+                                        "area": (2240, 615, 2992, 665),
+                                        "segments": [
+                                            {"text": "Importe de la tarifa: ", "font": "montserrat_light", "size": 44, "color": (255, 255, 255)},
+                                            {"text": "Bs. {amount}", "font": "montserrat_medium", "size": 44, "color": (255, 13, 13), "format_number_comma": True},
+                                            {"text": ".", "font": "montserrat_light", "size": 44, "color": (255, 255, 255)}
+                                        ]
+                                    }
+                                }
                             ],
                         },
 
                         # ── RD3 ──────────────────────────────────────────────────
                         "rd3": {
-                            "label": "RD3", "asset": "assets/rd/rd3.png", "preview": "assets/preview/RD3_prew.jpg",
+                            "label": "Bolivia RD 3", "asset": "assets/rd/rd3.png", "preview": "assets/preview/RD3_prew.jpg",
                             "fields": [
                                 {
                                     "key": "time",
@@ -196,7 +236,7 @@ GEO_CATALOG: dict = {
 
                         # ── RD4 ──────────────────────────────────────────────────
                         "rd4": {
-                            "label": "RD4", "asset": "assets/rd/rd4.png", "preview": "assets/preview/RD4_prew.jpg",
+                            "label": "Bolivia RD 4", "asset": "assets/rd/rd4.png", "preview": "assets/preview/RD4_prew.jpg",
                             "fields": [
                                 {
                                     "key": "date",
@@ -301,7 +341,7 @@ GEO_CATALOG: dict = {
 
                         # ── RD5 ──────────────────────────────────────────────────
                         "rd5": {
-                            "label": "RD5", "asset": "assets/rd/rd5.png", "preview": "assets/preview/RD5_prew.jpg",
+                            "label": "Bolivia RD 5", "asset": "assets/rd/rd5.png", "preview": "assets/preview/RD5_prew.jpg",
                             "fields": [
                                 {
                                     "key": "time",
@@ -344,7 +384,7 @@ GEO_CATALOG: dict = {
 
                         # RD6 - Видеоролик
                         "rd6":  {
-                            "label": "RD6 (Видео)", 
+                            "label": "Bolivia RD 6 (Видео)", 
                             "asset": "assets/Bolivia/RD/rd6.mp4",
                             # "preview": "assets/Bolivia/Preview/RD/rd6_prew.mp4",
                             "render_mode": "video",
@@ -689,16 +729,16 @@ GEO_CATALOG: dict = {
                                 }
                             ]
                         },
-                        "rd7":  {"label": "RD7",  "asset": "assets/rd/rd7.png",
+                        "rd7":  {"label": "Bolivia RD 7",  "asset": "assets/rd/rd7.png",
                                  "fields": [{"key": "name", "prompt": "✏️ Введите ФИО (пример: Ivanov Ivan Ivanovich)",
                                   "text_config": {"font": "montserrat", "size": 36, "color": (0,0,0), "pos": (100, 200)}}]},
-                        "rd8":  {"label": "RD8",  "asset": "assets/rd/rd8.png",
+                        "rd8":  {"label": "Bolivia RD 8",  "asset": "assets/rd/rd8.png",
                                  "fields": [{"key": "name", "prompt": "✏️ Введите ФИО (пример: Ivanov Ivan Ivanovich)",
                                   "text_config": {"font": "montserrat", "size": 36, "color": (0,0,0), "pos": (100, 200)}}]},
-                        "rd9":  {"label": "RD9",  "asset": "assets/rd/rd9.png",
+                        "rd9":  {"label": "Bolivia RD 9",  "asset": "assets/rd/rd9.png",
                                  "fields": [{"key": "name", "prompt": "✏️ Введите ФИО (пример: Ivanov Ivan Ivanovich)",
                                   "text_config": {"font": "montserrat", "size": 36, "color": (0,0,0), "pos": (100, 200)}}]},
-                        "rd10": {"label": "RD10", "asset": "assets/rd/rd10.png",
+                        "rd10": {"label": "Bolivia RD 10", "asset": "assets/rd/rd10.png",
                                  "fields": [{"key": "name", "prompt": "✏️ Введите ФИО (пример: Ivanov Ivan Ivanovich)",
                                   "text_config": {"font": "montserrat", "size": 36, "color": (0,0,0), "pos": (100, 200)}}]},
                     },
@@ -706,12 +746,12 @@ GEO_CATALOG: dict = {
 
                 # ── Proofs RD ────────────────────────────────────────────────────
                 "proofs_rd": {
-                    "label": "Proofs RD",
+                    "label": "Bolivia Proofs RD",
                     "items": {
 
                         # ── PROOF №1 ─────────────────────────────────────────────
                         "rd_proof1": {
-                            "label": "PROOF №1", "asset": "assets/rd/proofs/psd1.png", "preview": "assets/preview/RDPROOF_prew.jpg",
+                            "label": "Bolivia PROOF 1", "asset": "assets/rd/proofs/psd1.png", "preview": "assets/preview/RDPROOF_prew.jpg",
                             "fields": [
                                 {
                                     "key": "time",
@@ -816,7 +856,7 @@ GEO_CATALOG: dict = {
 
                         # PROOF №2–3 (заготовки)
                         "rd_proof2": {
-                            "label": "PROOF №2", "asset": "assets/rd/proofs/psd2.png",
+                            "label": "Bolivia PROOF 2", "asset": "assets/rd/proofs/psd2.png",
                             "fields": [
                                 {"key": "name",   "prompt": "✏️ Введите ФИО (пример: Ivanov Ivan Ivanovich)",
                                  "text_config": {"font": "opensans_semi", "size": 32, "color": (0,0,0), "pos": (100, 200)}},
@@ -825,7 +865,7 @@ GEO_CATALOG: dict = {
                             ],
                         },
                         "rd_proof3": {
-                            "label": "PROOF №3", "asset": "assets/rd/proofs/psd3.png",
+                            "label": "Bolivia PROOF 3", "asset": "assets/rd/proofs/psd3.png",
                             "fields": [
                                 {"key": "name",   "prompt": "✏️ Введите ФИО (пример: Ivanov Ivan Ivanovich)",
                                  "text_config": {"font": "opensans_semi", "size": 32, "color": (0,0,0), "pos": (100, 200)}},
@@ -838,13 +878,13 @@ GEO_CATALOG: dict = {
             },
         },
         "check": {
-            "label": "🧾 Чек",
+            "label": "🧾 Bolivia Чек",
             "sections": {
                 "check_main": {
-                    "label": "Чек",
+                    "label": "Bolivia Чек",
                     "items": {
                         "check_doc": {
-                            "label": "Чек",
+                            "label": "Bolivia Чек",
                             "asset": "assets/other/Check.png",
                             "preview": "assets/preview/Check_prew.png",
                             "fields": [
@@ -917,13 +957,13 @@ GEO_CATALOG: dict = {
             },
         },
         "qr": {
-            "label": "📷 QR Code",
+            "label": "📷 Bolivia QR Code",
             "sections": {
                 "qr_main": {
-                    "label": "QR Code",
+                    "label": "Bolivia QR Code",
                     "items": {
                         "qr_code": {
-                            "label": "QR Code",
+                            "label": "Bolivia QR",
                             "asset": "assets/other/QR_code.png",
                             "preview": "assets/preview/QRcode_prew.png",
                             "fields": [
@@ -965,13 +1005,13 @@ GEO_CATALOG: dict = {
             },
         },
         "support": {
-            "label": "💬 SUPPORT",
+            "label": "💬 Bolivia SUPPORT",
             "sections": {
                 "support_main": {
-                    "label": "SUPPORT",
+                    "label": "Bolivia SUPPORT",
                     "items": {
                         "support_chat": {
-                            "label": "Chat",
+                            "label": "Bolivia Support",
                             "asset": "assets/other/SUPPORT.jpg",
                             "preview": "assets/preview/SUPPORT_prew.jpg",
                             "fields": [
@@ -1006,10 +1046,10 @@ GEO_CATALOG: dict = {
         "label": "🇵🇪 Peru",
         "catalog": {
             "fd": {
-                "label": "📁 FD",
+                "label": "📁 Peru FD",
                 "sections": {
                     "proofs_fd": {
-                        "label": "Proofs FD",
+                        "label": "Peru Proofs FD",
                         "items": {
                             "fd_proof1_pe": {
                                 "label": "Peru FD 1",
@@ -1064,13 +1104,13 @@ GEO_CATALOG: dict = {
                 },
             },
             "rd": {
-                "label": "📁 RD",
+                "label": "📁 Peru RD",
                 "sections": {
                     "rd_main": {
-                        "label": "RD",
+                        "label": "Peru RD",
                         "items": {
                             "rd1": {
-                                "label": "RD1", "asset": "assets/Peru/RD/rd1.png", "preview": "assets/Peru/Prew/RD1_prew.jpg",
+                                "label": "Peru RD 1", "asset": "assets/Peru/RD/rd1.png", "preview": "assets/Peru/Prew/RD1_prew.jpg",
                                 "fields": [
                                     {
                                         "key": "name",
@@ -1328,13 +1368,13 @@ GEO_CATALOG: dict = {
                 },
             },
             "check": {
-                "label": "🧾 Чек",
+                "label": "🧾 Peru Чек",
                 "sections": {
                     "check_main": {
-                        "label": "Чек",
+                        "label": "Peru Чек",
                         "items": {
                             "check_pe": {
-                                "label": "Peru Check",
+                                "label": "Peru Чек",
                                 "asset": "assets/Peru/Чек/Check.png",
                                 "fields": [
                                     {
@@ -1354,10 +1394,10 @@ GEO_CATALOG: dict = {
                 },
             },
             "qr": {
-                "label": "📷 QR Code",
+                "label": "📷 Peru QR Code",
                 "sections": {
                     "qr_main": {
-                        "label": "QR Code",
+                        "label": "Peru QR Code",
                         "items": {
                             "qr_pe": {
                                 "label": "Peru QR",
@@ -1380,10 +1420,10 @@ GEO_CATALOG: dict = {
                 },
             },
             "support": {
-                "label": "💬 SUPPORT",
+                "label": "💬 Peru SUPPORT",
                 "sections": {
                     "support_main": {
-                        "label": "SUPPORT",
+                        "label": "Peru SUPPORT",
                         "items": {
                             "support_pe": {
                                 "label": "Peru Support",

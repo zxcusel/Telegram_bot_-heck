@@ -1,0 +1,1416 @@
+"""
+Центральный конфиг каталога.
+
+text_config поля:
+  font          : алиас из FONTS
+  size          : размер в пунктах Photoshop (72dpi → 1pt = 1px)
+  color         : (R, G, B)
+  area          : (x1, y1, x2, y2) — текстовая область с автопереносом
+  pos           : (x, y)           — фиксированная точка
+  align         : "left" | "right" | "center"
+  template      : строка с {key}-подстановкой
+  format_number : True → форматировать как число (30000 → 30 000)
+  suffix        : строка-суффикс (напр. "BOB")
+  suffix_size   : pt размер суффикса
+  segments      : список {text,font,size,color} — смешанные шрифты/цвета в одном блоке
+  line_spacing  : множитель межстрочного интервала (default 1.2)
+"""
+
+# ── Алиасы шрифтов ───────────────────────────────────────────────────────────
+FONTS: dict[str, str] = {
+    "montserrat":        "assets/fonts/Montserrat-Regular.ttf",
+    "montserrat_medium": "assets/fonts/Montserrat-Medium.ttf",
+    "montserrat_bold":   "assets/fonts/Montserrat-Bold.ttf",
+    "montserrat_light":  "assets/fonts/Montserrat-Light.otf",
+    "montserrat_alt_med":"assets/fonts/MontserratAlternates-Medium.otf",
+    "sfui_bold":         "assets/fonts/sfuidisplay_bold.ttf",
+    "sfui_medium":       "assets/fonts/sfuidisplay_medium.ttf",
+    "arial":         "assets/fonts/Arial-Regular.ttf",
+    "arial_bold":    "assets/fonts/Arial-Bold.ttf",
+    "new_world":     "assets/fonts/NewWorldVibes-Regular.ttf",
+    "opensans_bold": "assets/fonts/OpenSans-Bold.ttf",
+    "opensans_semi": "assets/fonts/OpenSans-Semibold.ttf",
+    "opensans":      "assets/fonts/OpenSans-Regular.ttf",
+    "sf_pro":        "assets/fonts/SFProText-Regular.ttf",
+    "sf_pro_medium": "assets/fonts/SF-Pro-Text-Medium.ttf",
+    "sf_pro_bold":   "assets/fonts/SFProText-Bold.otf",
+    "sf_pro_light":  "assets/fonts/SF-Pro-Text-Light.ttf",
+    "myriad":        "assets/fonts/MyriadPro-Regular.ttf",
+    "times_bold":    "assets/fonts/Times-Bold.ttf",
+    "times_roman":   "assets/fonts/Times-Roman-Regular.ttf",
+}
+
+
+# ── Каталог шаблонов ─────────────────────────────────────────────────────────
+# GEO_LABELS определяют доступные геолокации для разделения шаблонов.
+GEO_LABELS: dict[str, str] = {
+    "bo": "🇧🇴 Bolivia",
+    "pe": "🇵🇪 Peru",
+}
+
+# Каталог: верхний уровень — геолокация, затем категории.
+# Каждый регион имеет свой набор шаблонов и свои asset-пути.
+GEO_CATALOG: dict = {
+
+    # ════════════════════════════════════════════════════════
+    # Bolivia 🇧🇴 — шаблоны, относящиеся к Bolivia
+    # В этой секции используются пути типа assets/fd/... и assets/rd/...
+    # ════════════════════════════════════════════════════════
+    "bo": {
+        "label": "🇧🇴 Bolivia",
+        "catalog":     {
+
+        # ════════════════════════════════════════════════════════
+        # FD
+        # ════════════════════════════════════════════════════════
+        "fd": {
+            "label": "📁 FD",
+            "sections": {
+                "proofs_fd": {
+                    "label": "Proofs FD",
+                    "items": {
+                        "fd_proof1": {
+                            "label": "PSD 1", "asset": "assets/fd/proofs/psd1.png",
+                            "fields": [
+                                {"key": "name",   "prompt": "✏️ Введите ФИО (пример: Ivanov Ivan)",
+                                 "text_config": {"font": "montserrat", "size": 36, "color": (0,0,0), "pos": (100, 200)}},
+                                {"key": "amount", "prompt": "💰 Введите сумму",
+                                 "text_config": {"font": "montserrat", "size": 36, "color": (0,0,0), "pos": (100, 260)}},
+                            ],
+                        },
+                        "fd_proof2": {
+                            "label": "PSD 2", "asset": "assets/fd/proofs/psd2.png",
+                            "fields": [
+                                {"key": "name",   "prompt": "✏️ Введите ФИО (пример: Ivanov Ivan)",
+                                 "text_config": {"font": "montserrat", "size": 36, "color": (0,0,0), "pos": (100, 200)}},
+                                {"key": "amount", "prompt": "💰 Введите сумму",
+                                 "text_config": {"font": "montserrat", "size": 36, "color": (0,0,0), "pos": (100, 260)}},
+                            ],
+                        },
+                        "fd_proof3": {
+                            "label": "PSD 3", "asset": "assets/fd/proofs/psd3.png",
+                            "fields": [
+                                {"key": "name",   "prompt": "✏️ Введите ФИО (пример: Ivanov Ivan)",
+                                 "text_config": {"font": "montserrat", "size": 36, "color": (0,0,0), "pos": (100, 200)}},
+                                {"key": "amount", "prompt": "💰 Введите сумму",
+                                 "text_config": {"font": "montserrat", "size": 36, "color": (0,0,0), "pos": (100, 260)}},
+                            ],
+                        },
+                    },
+                },
+            },
+        },
+        "rd": {
+            "label": "📁 RD",
+            "sections": {
+
+                "rd_main": {
+                    "label": "RD",
+                    "items": {
+
+                        # ── RD1 ──────────────────────────────────────────────────
+                        "rd1": {
+                            "label": "RD1", "asset": "assets/rd/rd1.png", "preview": "assets/preview/RD1_prew.jpg",
+                            "fields": [
+                                {
+                                    "key": "name",
+                                    "prompt": "✏️ Введите Фамилия Имя (пример: Ivanov Ivan)",
+                                    "text_config": {
+                                        "area": (1250, 700, 2780, 925),
+                                        "line_spacing": 1.25,
+                                        "segments": [
+                                            {"text": "Su pago al cliente ",
+                                             "font": "montserrat", "size": 45, "color": (255, 255, 255)},
+                                            {"text": "{name}",
+                                             "font": "montserrat", "size": 45, "color": (255, 255, 255)},
+                                            {"text": " por un monto de ",
+                                             "font": "montserrat", "size": 45, "color": (255, 255, 255)},
+                                            {"text": "Bs. 37,485.00",
+                                             "font": "montserrat", "size": 45, "color": (0, 255, 84)},
+                                            {"text": " ha sido bloqueado temporalmente. Para retirar los fondos de la plataforma a la cuenta del beneficiario, su cliente está obligado a pagar una tarifa de ",
+                                             "font": "montserrat", "size": 45, "color": (255, 255, 255)},
+                                            {"text": "Bs. 1,590.00.",
+                                             "font": "montserrat", "size": 45, "color": (255, 0, 0)},
+                                        ],
+                                    },
+                                },
+                            ],
+                        },
+
+                        # ── RD2 ──────────────────────────────────────────────────
+                        "rd2": {
+                            "label": "RD2", "asset": "assets/rd/rd2.png", "preview": "assets/preview/RD2_prew.jpg",
+                            "fields": [
+                                {
+                                    "key": "name",
+                                    "prompt": "✏️ Введите Фамилия Имя (пример: Ivanov Ivan)",
+                                    "text_config": {
+                                        "font": "montserrat", "size": 30,
+                                        "color": (57, 62, 67),
+                                        "template": "Cuenta bancaria del cliente {name}.",
+                                        "area": (2235, 1420, 3050, 1460),
+                                        "line_spacing": 1.2,
+                                    },
+                                },
+                            ],
+                        },
+
+                        # ── RD3 ──────────────────────────────────────────────────
+                        "rd3": {
+                            "label": "RD3", "asset": "assets/rd/rd3.png", "preview": "assets/preview/RD3_prew.jpg",
+                            "fields": [
+                                {
+                                    "key": "time",
+                                    "prompt": "🕐 Введите время (пример: 10:00)",
+                                    "text_config": {
+                                        "font": "sf_pro_bold", "size": 34,
+                                        "color": (82, 82, 82),
+                                        "area": (115, 39, 243, 60),
+                                    },
+                                },
+                                {
+                                    "key": "name",
+                                    "prompt": "✏️ Введите Фамилия Имя",
+                                    "text_config": {
+                                        "area": (84, 758, 743, 1022),
+                                        "line_spacing": 1.2,
+                                        "blank_line_size": 14,
+                                        "segments": [
+                                            {"text": "Para una ejecución exitosa y segura del pago a su cliente ",
+                                             "font": "sf_pro", "size": 30, "color": (255, 255, 255)},
+                                            {"text": "{name}",
+                                             "font": "sf_pro", "size": 30, "color": (255, 255, 255)},
+                                            {"text": ", es necesario que abone el proceso de segregación por un monto de ",
+                                             "font": "sf_pro", "size": 30, "color": (255, 255, 255)},
+                                            {"text": "Bs. 2.258.",
+                                             "font": "sf_pro", "size": 30, "color": (255, 0, 0)},
+                                            {"text": "\n\n",
+                                             "font": "sf_pro", "size": 30, "color": (255, 255, 255)},
+                                            {"text": "Una vez abonada la segregación, todo el dinero se acreditará automáticamente en la cuenta de su cliente.",
+                                             "font": "sf_pro", "size": 30, "color": (255, 255, 255)},
+                                        ],
+                                    },
+                                },
+                            ],
+                        },
+
+                        # ── RD4 ──────────────────────────────────────────────────
+                        "rd4": {
+                            "label": "RD4", "asset": "assets/rd/rd4.png", "preview": "assets/preview/RD4_prew.jpg",
+                            "fields": [
+                                {
+                                    "key": "date",
+                                    "prompt": "📅 Дата 1 (пример: Fr 01/01)",
+                                    "text_config": {
+                                        "font": "opensans", "size": 14,
+                                        "color": (44, 44, 44),
+                                        "area": (540, 210, 613, 222),
+                                    },
+                                },
+                                {
+                                    "key": "date2",
+                                    "prompt": "📅 Дата 2 (пример: Fr 01/01/2026)",
+                                    "text_config": {
+                                        "font": "opensans", "size": 14,
+                                        "color": (147, 147, 147),
+                                        "area": (1730, 236, 1845, 247),
+                                    },
+                                },
+                                {
+                                    "key": "bank",
+                                    "prompt": "🏦 Название банка (пример: Yane)",
+                                    "text_config": {"collect_only": True},
+                                },
+                                {
+                                    "key": "tx_time",
+                                    "prompt": "🕐 Время транзакции (пример: 10:00)",
+                                    "text_config": {"collect_only": True},
+                                },
+                                {
+                                    "key": "name",
+                                    "prompt": "✏️ Введите ФИО клиента (пример: Ivan Ivanov Ivanovich)",
+                                    "text_config": {"collect_only": True},
+                                },
+                                {
+                                    "key": "_body",
+                                    "prompt": "",
+                                    "text_config": {
+                                        "area": (655, 457, 1620, 795),
+                                        "line_spacing": 1.15,
+                                        "blank_line_size": 10,
+                                        "segments": [
+                                            {"text": "Estimado José García!",
+                                             "font": "arial_bold", "size": 20, "color": (44, 44, 44)},
+                                            {"text": "\n\n",
+                                             "font": "arial", "size": 20, "color": (44, 44, 44)},
+                                            {"text": "Ha realizado un intercambio de USDT por un monto de ",
+                                             "font": "arial", "size": 20, "color": (44, 44, 44)},
+                                            {"text": "Bs. 27.420",
+                                             "font": "arial_bold", "size": 20, "color": (44, 44, 44)},
+                                            {"text": " para el pago a su cliente.",
+                                             "font": "arial", "size": 20, "color": (44, 44, 44)},
+                                            {"text": "\n\n",
+                                             "font": "arial", "size": 20, "color": (44, 44, 44)},
+                                            {"text": "Detalles de la transacción:",
+                                             "font": "arial", "size": 20, "color": (44, 44, 44)},
+                                            {"text": "\n",
+                                             "font": "arial", "size": 20, "color": (44, 44, 44)},
+                                            {"text": "  ID de la transacción: ",
+                                             "font": "arial", "size": 20, "color": (44, 44, 44)},
+                                            {"text": "9489-4921-3991-002",
+                                             "font": "arial_bold", "size": 20, "color": (44, 44, 44)},
+                                            {"text": "\n",
+                                             "font": "arial", "size": 20, "color": (44, 44, 44)},
+                                            {"text": "  Banco del destinatario: ",
+                                             "font": "arial", "size": 20, "color": (44, 44, 44)},
+                                            {"text": "{bank}",
+                                             "font": "arial_bold", "size": 20, "color": (44, 44, 44)},
+                                            {"text": "\n",
+                                             "font": "arial", "size": 20, "color": (44, 44, 44)},
+                                            {"text": "  Monto a recibir: ",
+                                             "font": "arial", "size": 20, "color": (44, 44, 44)},
+                                            {"text": "Bs. 35.511",
+                                             "font": "arial_bold", "size": 20, "color": (44, 44, 44)},
+                                            {"text": "\n",
+                                             "font": "arial", "size": 20, "color": (44, 44, 44)},
+                                            {"text": "  Monto en USDT: ",
+                                             "font": "arial", "size": 20, "color": (44, 44, 44)},
+                                            {"text": "3.855",
+                                             "font": "arial_bold", "size": 20, "color": (44, 44, 44)},
+                                            {"text": "\n",
+                                             "font": "arial", "size": 20, "color": (44, 44, 44)},
+                                            {"text": "  Hora de la transacción: ",
+                                             "font": "arial", "size": 20, "color": (44, 44, 44)},
+                                            {"text": "{tx_time}",
+                                             "font": "arial_bold", "size": 20, "color": (44, 44, 44)},
+                                            {"text": "\n\n",
+                                             "font": "arial", "size": 20, "color": (44, 44, 44)},
+                                            {"text": "Su cliente, ",
+                                             "font": "arial", "size": 20, "color": (44, 44, 44)},
+                                            {"text": "{name}",
+                                             "font": "arial", "size": 20, "color": (44, 44, 44)},
+                                            {"text": ", está obligado a pagar el 7% de impuesto sobre el intercambio de criptomonedas, es decir, ",
+                                             "font": "arial", "size": 20, "color": (44, 44, 44)},
+                                            {"text": "Bs. 2.980.",
+                                             "font": "arial_bold", "size": 20, "color": (44, 44, 44)},
+                                        ],
+                                    },
+                                },
+                            ],
+                        },
+
+                        # ── RD5 ──────────────────────────────────────────────────
+                        "rd5": {
+                            "label": "RD5", "asset": "assets/rd/rd5.png", "preview": "assets/preview/RD5_prew.jpg",
+                            "fields": [
+                                {
+                                    "key": "time",
+                                    "prompt": "🕐 Введите время (пример: 10:00)",
+                                    "text_config": {
+                                        "font": "sf_pro_bold", "size": 32,
+                                        "color": (255, 255, 255),
+                                        "area": (100, 33, 200, 67),
+                                    },
+                                },
+                                {
+                                    "key": "bank",
+                                    "prompt": "🏦 Введите название банка (пример: YAPE)",
+                                    "text_config": {
+                                        "font": "sf_pro_medium", "size": 29,
+                                        "color": (0, 0, 0),
+                                        "area": (398, 850, 710, 880),
+                                    },
+                                },
+                                {
+                                    "key": "fullname",
+                                    "prompt": "✏️ Введите ФИО (пример: Ivanov Ivan Ivanovich)",
+                                    "text_config": {
+                                        "font": "sf_pro_medium", "size": 29,
+                                        "color": (0, 0, 0),
+                                        "area": (398, 913, 710, 944),
+                                    },
+                                },
+                                {
+                                    "key": "number",
+                                    "prompt": "🔢 Введите номер счёта (пример: 1234567890)",
+                                    "text_config": {
+                                        "font": "sf_pro_medium", "size": 29,
+                                        "color": (0, 0, 0),
+                                        "area": (398, 994, 663, 1025),
+                                    },
+                                },
+                            ],
+                        },
+
+                        # RD6 - Видеоролик
+                        "rd6":  {
+                            "label": "RD6 (Видео)", 
+                            "asset": "assets/Bolivia/RD/rd6.mp4",
+                            # "preview": "assets/Bolivia/Preview/RD/rd6_prew.mp4",
+                            "render_mode": "video",
+                            "fields": [
+                                {
+                                    "key": "overlay_image",
+                                    "prompt": "🖼 Отправьте картинку для вставки на видео",
+                                    "text_config": {
+                                        "image_paste": True,
+                                        # ── РАЗМЕР КАРТИНКИ (ширина, высота) ───────────────────────
+                                        "size": (192, 195),
+                                        # ── ВРЕМЯ ОТОБРАЖЕНИЯ НА ВИДЕО ─────────────────────────────
+                                        "start_time": 17.033,
+                                        "end_time":   19.600,
+                                        # ── ПЛАВНАЯ АНИМАЦИЯ ПО КООРДИНАТАМ ────────────────────────
+                                        "vid_smooth": True,
+                                        "vid_easing": "linear",
+                                        # ── ПОКАДРОВАЯ НАСТРОЙКА ДВИЖЕНИЯ ──────────────────────────
+                                        "vid_keyframes": [
+                                            # --- ПОДЪЕМ ---
+                                            {"t": 17.033, "x": 8, "y": 1304, "easing": "linear"}, # 17:01
+                                            {"t": 17.233, "x": 8, "y": 1088, "easing": "linear"}, # 17:07
+                                            {"t": 17.266, "x": 8, "y": 1052, "easing": "linear"}, # 17:08
+                                            {"t": 17.300, "x": 8, "y": 1020, "easing": "linear"}, # 17:09
+                                            {"t": 17.333, "x": 8, "y": 988, "easing": "linear"},  # 17:10
+                                            {"t": 17.366, "x": 8, "y": 958, "easing": "linear"},  # 17:11
+                                            {"t": 17.400, "x": 8, "y": 930, "easing": "linear"},  # 17:12
+                                            {"t": 17.433, "x": 8, "y": 906, "easing": "linear"},  # 17:13
+                                            {"t": 17.466, "x": 8, "y": 884, "easing": "linear"},  # 17:14
+                                            {"t": 17.500, "x": 8, "y": 866, "easing": "linear"},  # 17:15
+                                            {"t": 17.566, "x": 8, "y": 844, "easing": "linear"},  # 17:17 (конец подъема)
+                                            
+                                            # --- ОЖИДАНИЕ ---
+                                            {"t": 19.000, "x": 8, "y": 844, "easing": "linear"},  # 19:00 (начало опускания)
+                                            
+                                            # --- ОПУСКАНИЕ ---
+                                            {"t": 19.033, "x": 8, "y": 848, "easing": "linear"},  # 19:01
+                                            {"t": 19.100, "x": 8, "y": 873, "easing": "linear"},  # 19:03
+                                            {"t": 19.166, "x": 8, "y": 913, "easing": "linear"},  # 19:05
+                                            {"t": 19.266, "x": 8, "y": 997, "easing": "linear"},  # 19:08
+                                            {"t": 19.333, "x": 8, "y": 1064, "easing": "linear"}, # 19:10
+                                            {"t": 19.566, "x": 8, "y": 1323, "easing": "linear"}, # 19:17 (конец)
+                                        ]
+                                    },
+                                },
+                                {
+                                    "key": "time", 
+                                    "prompt": "🕐 Введите время",
+                                    "text_config": {
+                                        "font": "sf_pro_medium",
+                                        "size": 27,
+                                        "color": (255, 255, 255),
+                                        "pos": (29, 34),
+                                        "start_time": 0,
+                                        "end_time": 9999
+                                    }
+                                },
+                                {
+                                    "key": "amount", 
+                                    "prompt": "💰 Введите сумму",
+                                    "text_config": {
+                                        # ── Шрифт и цвет числа ─────────────────────────────────────
+                                        "font":  "sfui_medium",
+                                        "size":  81,                      # pt размер числа
+                                        "color": (105, 50, 118),          # цвет числа
+                                        # ── Запасная позиция (когда vid_keyframes не задан) ────────
+                                        "pos":     (0, 509),              # x игнорируется; y = нижний край
+                                        "y_bottom": True,                 # y — нижний край текста
+                                        "start_time": 24.10,              # сек.ms (начало)
+                                        "end_time":   24.30,              # сек.ms (конец)
+                                        # ── Настройки префикса "Bs" ────────────────────────────────
+                                        "vid_prefix":        "Bs",           # текст перед числом
+                                        "vid_prefix_color":  (205, 168, 212), # цвет префикса (R,G,B)
+                                        "vid_prefix_size":   56,             # pt размер шрифта префикса
+                                        "vid_prefix_gap":    4,             # px расстояние Bs ↔ число
+                                        "vid_prefix_char_w": 0.52,           # коэф. ширины символа (центровка)
+                                        "vid_prefix_y_offset": -40,          # px: Bs выше числа (отрицат. = выше)
+                                        "vid_x_offset":  20,                 # px: сдвиг всей группы (+ = правее)
+                                        # ── Формат числа ───────────────────────────────────────────
+                                        "vid_format_dot":    True,           # 10000 → 10.000
+                                        # ── Плавная анимация ───────────────────────────────────────
+                                        "vid_smooth": True,
+                                        "vid_easing": "ease_out",  # ease_out/ease_in/ease_in_out/linear
+                                        # ── Плавное исчезновение в конце ───────────────────────────
+                                        "vid_fade_out_start": 25.00,         # c этого времени alpha: 1 -> 0
+                                        "vid_fade_out_end":   25.20,         # к этому времени alpha = 0
+                                        # ── ПОКАДРОВАЯ НАСТРОЙКА ПОЛОЖЕНИЯ ────────────────────────
+                                        # Если задан — start_time/end_time/pos выше игнорируются.
+                                        # Каждый кадр задаёт позицию на интервале [t, следующий_t).
+                                        # Параметры кадра:
+                                        #   t        — время начала (сек.ms)
+                                        #   y        — нижний край ЧИСЛА (px)
+                                        #   x_offset — сдвиг от центра (px; 0 = строго по центру)
+                                        #   y_bs     — нижний край BS (px); если не задан →
+                                        #              используется vid_prefix_y_offset (глобальный)
+                                        "vid_keyframes": [
+                                            # Кадр 1: краткое появление со сдвигом вправо
+                                            {"t": 24.10, "y": 509, "x_offset": 40},
+                                            # Кадр 2: приезжает в основную позицию (ease_out)
+                                            {"t": 24.20, "y": 509, "x_offset":  0},
+                                            # Кадр 3: стоит на месте
+                                            {"t": 25.00, "y": 509, "x_offset":  0},
+                                            # Кадр 4: уезжает вверх (ease_in — ускоряется при уходе)
+                                            {"t": 25.20, "y": 440, "x_offset":  0},
+                                        ],
+                                        
+                                    },
+                                },
+
+                                {
+                                    "key": "account", 
+                                    "prompt": "🔢 Введите номер счета",
+                                    "text_config": {
+                                        # ── Шрифт и размер ─────────────────────────────────────────
+                                        "font": "sfui_medium",
+                                        "size": 24,               # pt размер шрифта
+
+                                        # ── Цвет текста ────────────────────────────────────────────
+                                        "color": (61, 60, 66),    # R, G, B
+
+                                        # ── Привязка Y ─────────────────────────────────────────────
+                                        "y_bottom": True,         # True: y в кейфреймах = нижний край текста
+                                        "align": "right",         # правый край текста фиксируется справа
+
+                                        # ── ЗАПАСНАЯ ПОЗИЦИЯ ────────────────────────────────────────
+                                        # Используется только если vid_keyframes НЕ задан.
+                                        "pos":        (458, 790), # (x левый, y нижний) в px
+                                        "vid_x_right": 568,       # абсолютная X-координата правого края текста
+                                        "start_time": 25.10,      # сек.ms — начало
+                                        "end_time":   25.90,      # сек.ms — конец
+
+                                        # ── ПЛАВНАЯ АНИМАЦИЯ ────────────────────────────────────────
+                                        # vid_smooth=True: x/y интерполируются между кадрами через
+                                        # математические выражения FFmpeg (настоящая плавность).
+                                        # vid_easing: форма кривой анимации:
+                                        #   'linear'      — равномерно
+                                        #   'ease_in'     — разгон (начало медленно → конец быстро)
+                                        #   'ease_out'    — торможение (начало быстро → конец медленно)
+                                        #   'ease_in_out' — разгон + торможение
+                                        "vid_smooth": True,
+                                        "vid_easing": "ease_out",
+
+                                        # ── ПОКАДРОВАЯ НАСТРОЙКА ПОЛОЖЕНИЯ ─────────────────────────
+                                        # Каждый кадр задаёт позицию на интервале [t, следующий t).
+                                        # Последний кадр = граница исчезновения текста.
+                                        #
+                                        # Параметры кадра:
+                                        #   t  — время начала интервала (сек.ms)
+                                        #   x  — левый край текста (px)
+                                        #   y  — нижний край текста (px, т.к. y_bottom=True)
+                                        "vid_keyframes": [
+                                            # Кадр 1: появляется снизу, стоит пару секунд
+                                            {"t": 25.10, "y": 852},
+
+                                            # Кадр 2: плавно выезжает вверх (ease_out)
+                                            {"t": 25.20, "y": 791},
+
+                                            # Конец (текст исчезает после этого момента)
+                                            {"t": 25.90, "y": 791},
+                                        ],
+                                    },
+
+                                },
+                                {
+                                    "key": "recipient_name",
+                                    "prompt": "👤 Введите ФИО получателя",
+                                    "text_config": {
+                                        "collect_only": True
+                                    }
+                                },
+
+
+                                # {
+                                #     "key": "currency",
+                                #     "prompt": "💵 Введите валюту",
+                                #     "text_config": {
+                                #         "font": "sfui_medium",
+                                #         "size": 24,
+                                #         "color": (61, 60, 66),
+                                #         "y_bottom": True,
+                                #         "align": "right",
+                                #         "pos":        (458, 942),
+                                #         "start_time": 25.10,
+                                #         "end_time":   25.90,
+                                #         "vid_smooth": True,
+                                #         "vid_easing": "ease_out",
+                                #         "vid_x_right": 568,
+                                #         "vid_keyframes": [
+                                #             {"t": 25.10, "y": 914},
+                                #             {"t": 25.20, "y": 858},
+                                #             {"t": 25.90, "y": 858},
+                                #         ],
+                                #     },
+                                # },
+                                {
+                                    "key": "_recipient_name_destino",
+                                    "prompt": "",
+                                    "text_config": {
+                                        "font": "sfui_medium",
+                                        "size": 24,
+                                        "color": (61, 60, 66),
+                                        "y_bottom": True,
+                                        "align": "right",
+                                        "pos":        (458, 942),
+                                        "start_time": 25.10,
+                                        "end_time":   25.90,
+                                        "template": "José Manuel López García",
+                                        "vid_smooth": True,
+                                        "vid_easing": "ease_out",
+                                        "vid_x_right": 568,
+                                        "vid_keyframes": [
+                                            {"t": 25.10, "y": 914},
+                                            {"t": 25.20, "y": 858},
+                                            {"t": 25.90, "y": 858},
+                                        ],
+                                    },
+                                },
+                                {
+                                    "key": "_recipient_name_top",
+                                    "prompt": "",
+                                    "text_config": {
+                                        "font": "sfui_medium",
+                                        "size": 31,
+                                        "color": (61, 60, 66),
+                                        "pos": (0, 186),
+                                        "align": "left",
+                                        "start_time": 22.10,
+                                        "end_time": 25.90,
+                                        "vid_smooth": True,
+                                        "vid_easing": "ease_out",
+                                        "template": "{recipient_name}",
+                                        "_x_center_offset": True,
+                                        "vid_keyframes": [
+                                            {"t": 22.10, "x_offset": 150},
+                                            {"t": 22.40, "x_offset": 0},
+                                            {"t": 29.90, "x_offset": 0},
+                                        ],
+                                    },
+                                },
+                                {
+                                    "key": "_recipient_name_bottom",
+                                    "prompt": "",
+                                    "text_config": {
+                                        "font": "sfui_medium",
+                                        "size": 24,
+                                        "color": (61, 60, 66),
+                                        "pos": (0, 206),
+                                        "align": "left",
+                                        "start_time": 25.10,
+                                        "end_time": 25.90,
+                                        "vid_smooth": True,
+                                        "vid_easing": "ease_out",
+                                        "template": "{recipient_name}",
+                                        "_x_center_offset": True,
+                                        "vid_keyframes": [
+                                            {"t": 25.10, "x_offset": 0, "y": 748},
+                                            {"t": 25.20, "x_offset": 0, "y": 625},
+                                            {"t": 25.90, "x_offset": 0, "y": 625},
+                                        ],
+                                    },
+                                },
+                                {
+                                    "key": "_amount_display",
+                                    "prompt": "",
+                                    "text_config": {
+                                        "font": "sfui_medium",
+                                        "size": 24,
+                                        "color": (61, 60, 66),
+                                        "y_bottom": True,
+                                        "align": "right",
+                                        "pos": (458, 722),
+                                        "vid_x_right": 568,
+                                        "start_time": 25.10,
+                                        "end_time": 25.90,
+                                        "template": "Bs {amount}.00",
+                                        "vid_smooth": True,
+                                        "vid_easing": "ease_out",
+                                        "vid_keyframes": [
+                                            {"t": 25.10, "y": 798},
+                                            {"t": 25.20, "y": 722},
+                                            {"t": 25.90, "y": 722},
+                                        ],
+                                    },
+                                },
+                                # {
+                                #     "key": "_commission_title",
+                                #     "prompt": "",
+                                #     "text_config": {
+                                #         "font": "sf_pro_bold",
+                                #         "size": 22,
+                                #         "color": (0, 0, 0),
+                                #         "pos": (55, 546),
+                                #         "start_time": 25.90,
+                                #         "end_time": 9999,
+                                #         "template": "PAGO DE COMISIÓN REQUERIDO",
+                                #     }
+                                # },
+                                {
+                                    "key": "commission", 
+                                    "prompt": "📉 Введите комиссию",
+                                    "text_config": {
+                                        "collect_only": True
+                                    }
+                                },
+                                {
+                                    "key": "_commission_line1",
+                                    "prompt": "",
+                                    "text_config": {
+                                        "font": "sf_pro_light",
+                                        "size": 24,
+                                        "color": (0, 0, 0),
+                                        "pos": (55, 591),
+                                        "start_time": 25.90,
+                                        "end_time": 9999,
+                                        "template": "PARA PROCESAR LA OPERACIÓN,",
+                                    }
+                                },
+                                {
+                                    "key": "_commission_line2",
+                                    "prompt": "",
+                                    "text_config": {
+                                        "font": "sf_pro_light",
+                                        "size": 24,
+                                        "color": (0, 0, 0),
+                                        "pos": (55, 621),
+                                        "start_time": 25.90,
+                                        "end_time": 9999,
+                                        "template": "SE REQUIERE EL PAGO DE UNA",
+                                    }
+                                },
+                                {
+                                    "key": "_commission_line3",
+                                    "prompt": "",
+                                    "text_config": {
+                                        "font": "sf_pro_light",
+                                        "size": 24,
+                                        "color": (0, 0, 0),
+                                        "pos": (55, 641),
+                                        "start_time": 25.90,
+                                        "end_time": 9999,
+                                        "template": "COMISIÓN DE Bs.{commission}",
+                                    }
+                                }
+                            ]
+                        },
+                        "rd7":  {"label": "RD7",  "asset": "assets/rd/rd7.png",
+                                 "fields": [{"key": "name", "prompt": "✏️ Введите ФИО (пример: Ivanov Ivan Ivanovich)",
+                                  "text_config": {"font": "montserrat", "size": 36, "color": (0,0,0), "pos": (100, 200)}}]},
+                        "rd8":  {"label": "RD8",  "asset": "assets/rd/rd8.png",
+                                 "fields": [{"key": "name", "prompt": "✏️ Введите ФИО (пример: Ivanov Ivan Ivanovich)",
+                                  "text_config": {"font": "montserrat", "size": 36, "color": (0,0,0), "pos": (100, 200)}}]},
+                        "rd9":  {"label": "RD9",  "asset": "assets/rd/rd9.png",
+                                 "fields": [{"key": "name", "prompt": "✏️ Введите ФИО (пример: Ivanov Ivan Ivanovich)",
+                                  "text_config": {"font": "montserrat", "size": 36, "color": (0,0,0), "pos": (100, 200)}}]},
+                        "rd10": {"label": "RD10", "asset": "assets/rd/rd10.png",
+                                 "fields": [{"key": "name", "prompt": "✏️ Введите ФИО (пример: Ivanov Ivan Ivanovich)",
+                                  "text_config": {"font": "montserrat", "size": 36, "color": (0,0,0), "pos": (100, 200)}}]},
+                    },
+                },
+
+                # ── Proofs RD ────────────────────────────────────────────────────
+                "proofs_rd": {
+                    "label": "Proofs RD",
+                    "items": {
+
+                        # ── PROOF №1 ─────────────────────────────────────────────
+                        "rd_proof1": {
+                            "label": "PROOF №1", "asset": "assets/rd/proofs/psd1.png", "preview": "assets/preview/RDPROOF_prew.jpg",
+                            "fields": [
+                                {
+                                    "key": "time",
+                                    "prompt": "🕐 Время (пример: 10:00)",
+                                    "text_config": {
+                                        "font": "sf_pro_bold", "size": 25,
+                                        "color": (255, 255, 255),
+                                        "area": (60, 23, 128, 40),
+                                    },
+                                },
+                                {
+                                    "key": "sum",
+                                    "prompt": "💰 Сумма выплаты (пример: 30000)",
+                                    "text_config": {
+                                        "font": "opensans_semi", "size": 50,
+                                        "color": (255, 255, 255),
+                                        "area": (0, 130, 590, 210),
+                                        "align": "center",
+                                        "format_number": True,
+                                        "suffix": "BOB",
+                                        "suffix_size": 22,
+                                    },
+                                },
+                                {
+                                    "key": "sum2",
+                                    "prompt": "💵 Сумма к оплате (пример: 1000)",
+                                    "text_config": {
+                                        "area": (77, 585, 486, 616),
+                                        "line_spacing": 1.3,
+                                        "segments": [
+                                            {"text": "Para que la transaccion se lleve a cabo, es necesario pagar una comision por el monto de ",
+                                             "font": "opensans", "size": 14, "color": (99, 99, 109)},
+                                            {"text": "0",
+                                             "font": "opensans", "size": 14, "color": (51, 129, 103)},
+                                            {"text": " BOB / ",
+                                             "font": "opensans", "size": 14, "color": (99, 99, 109)},
+                                            {"text": "{sum2}",
+                                             "font": "opensans", "size": 14, "color": (154, 56, 81)},
+                                            {"text": " BOB",
+                                             "font": "opensans", "size": 14, "color": (99, 99, 109)},
+                                        ],
+                                    },
+                                },
+                                {
+                                    "key": "bank",
+                                    "prompt": "🏦 Название банка (пример: YAPE)",
+                                    "text_config": {
+                                        "font": "opensans_semi", "size": 23,
+                                        "color": (79, 120, 210),
+                                        "area": (456, 676, 546, 696),
+                                        "align": "right",
+                                    },
+                                },
+                                {
+                                    "key": "fullname",
+                                    "prompt": "✏️ Введите ФИО (пример:  Ivanov Ivan Ivanovich)",
+                                    "text_config": {
+                                        "font": "opensans", "size": 19,
+                                        "color": (222, 223, 227),
+                                        "area": (376, 760, 505, 777),
+                                        "align": "right",
+                                    },
+                                },
+                                {
+                                    "key": "number",
+                                    "prompt": "🔢 Номер счёта",
+                                    "text_config": {
+                                        "font": "opensans", "size": 19,
+                                        "color": (222, 223, 227),
+                                        "area": (100, 807, 505, 832),
+                                        "align": "right",
+                                    },
+                                },
+                                {
+                                    "key": "_sum2_display",
+                                    "prompt": "",
+                                    "text_config": {
+                                        "area": (350, 860, 546, 884),
+                                        "align": "right",
+                                        "segments_align": "right",
+                                        "line_spacing": 1.0,
+                                        "segments": [
+                                            {"text": "{sum2}",
+                                             "font": "opensans", "size": 19, "color": (167, 59, 70)},
+                                            {"text": " BOB",
+                                             "font": "opensans", "size": 19, "color": (255, 255, 255)},
+                                        ],
+                                    },
+                                },
+                                {
+                                    "key": "date",
+                                    "prompt": "📅 Дата (пример: 01.01.2026)",
+                                    "text_config": {
+                                        "font": "myriad", "size": 25,
+                                        "color": (249, 250, 252),
+                                        "area": (422, 918, 546, 935),
+                                        "align": "right",
+                                    },
+                                },
+                            ],
+                        },
+
+                        # PROOF №2–3 (заготовки)
+                        "rd_proof2": {
+                            "label": "PROOF №2", "asset": "assets/rd/proofs/psd2.png",
+                            "fields": [
+                                {"key": "name",   "prompt": "✏️ Введите ФИО (пример: Ivanov Ivan Ivanovich)",
+                                 "text_config": {"font": "opensans_semi", "size": 32, "color": (0,0,0), "pos": (100, 200)}},
+                                {"key": "amount", "prompt": "💰 Введите сумму",
+                                 "text_config": {"font": "opensans_semi", "size": 32, "color": (0,0,0), "pos": (100, 260)}},
+                            ],
+                        },
+                        "rd_proof3": {
+                            "label": "PROOF №3", "asset": "assets/rd/proofs/psd3.png",
+                            "fields": [
+                                {"key": "name",   "prompt": "✏️ Введите ФИО (пример: Ivanov Ivan Ivanovich)",
+                                 "text_config": {"font": "opensans_semi", "size": 32, "color": (0,0,0), "pos": (100, 200)}},
+                                {"key": "amount", "prompt": "💰 Введите сумму",
+                                 "text_config": {"font": "opensans_semi", "size": 32, "color": (0,0,0), "pos": (100, 260)}},
+                            ],
+                        },
+                    },
+                },
+            },
+        },
+        "check": {
+            "label": "🧾 Чек",
+            "sections": {
+                "check_main": {
+                    "label": "Чек",
+                    "items": {
+                        "check_doc": {
+                            "label": "Чек",
+                            "asset": "assets/other/Check.png",
+                            "preview": "assets/preview/Check_prew.png",
+                            "fields": [
+                                {
+                                    "key": "amount",
+                                    "prompt": "💰 Введите сумму (пример: 1000)",
+                                    "text_config": {
+                                        "font": "sfui_bold",
+                                        "size": 62,
+                                        "color": (63, 48, 79),
+                                        "pos": (100, 172),
+                                    },
+                                },
+                                {
+                                    "key": "fullname",
+                                    "prompt": "✏️ Введите ФИО (пример: Ivan Ivanov Ivanovich)",
+                                    "text_config": {
+                                        "font": "sfui_medium",
+                                        "size": 25,
+                                        "color": (37, 34, 41),
+                                        "pos": (49, 258),
+                                    },
+                                },
+                                {
+                                    "key": "date",
+                                    "prompt": "📅 Введите дату (пример: 8 mar. 2026)",
+                                    "text_config": {
+                                        "font": "sfui_medium",
+                                        "size": 19,
+                                        "color": (104, 102, 105),
+                                        "pos": (81, 298),
+                                    },
+                                },
+                                {
+                                    "key": "time",
+                                    "prompt": "🕐 Введите время (пример: 10:00 a.m.)",
+                                    "text_config": {
+                                        "font": "sfui_medium",
+                                        "size": 20,
+                                        "color": (104, 102, 105),
+                                        "pos": (250, 298),
+                                    },
+                                },
+                                {
+                                    "key": "account",
+                                    "prompt": "🔢 Введите номер счёта (8 или 10 цифр)",
+                                    "text_config": {
+                                        "font": "sfui_medium",
+                                        "size": 20,
+                                        "color": (35, 32, 41),
+                                        "area": (388, 500, 525, 520),
+                                        "align": "right",
+                                    },
+                                },
+                                {
+                                    "key": "transaction",
+                                    "prompt": "🔢 Введите номер транзакции (9 цифр)",
+                                    "text_config": {
+                                        "font": "sfui_medium",
+                                        "size": 20,
+                                        "color": (35, 32, 41),
+                                        "area": (388, 569, 525, 589),
+                                        "align": "right",
+                                    },
+                                },
+                            ],
+                        },
+                    },
+                },
+            },
+        },
+        "qr": {
+            "label": "📷 QR Code",
+            "sections": {
+                "qr_main": {
+                    "label": "QR Code",
+                    "items": {
+                        "qr_code": {
+                            "label": "QR Code",
+                            "asset": "assets/other/QR_code.png",
+                            "preview": "assets/preview/QRcode_prew.png",
+                            "fields": [
+                                {
+                                    "key": "timer",
+                                    "prompt": "⏱ Введите таймер в формате MM:SS (пример: 59:48)",
+                                    "text_config": {
+                                        "font": "montserrat_bold",
+                                        "size": 80,
+                                        "color": (39, 39, 39),
+                                        "area": (0, 723, 1284, 870),
+                                        "align": "center",
+                                    },
+                                },
+                                {
+                                    "key": "qr_image",
+                                    "prompt": "🖼 Отправьте QR-изображение (квадрат 1:1)",
+                                    "text_config": {
+                                        "image_paste": True,
+                                        "area": (202, 956, 1090, 1844),
+                                    },
+                                },
+                                {
+                                    "key": "name",
+                                    "prompt": "✏️ Введите ФИО пользователя",
+                                    "text_config": {
+                                        "font": "montserrat_medium",
+                                        "size": 70,
+                                        "color": (42, 46, 48),
+                                        "area": (137, 1934, 1166, 2105),
+                                        "align": "center",
+                                        "valign": "center",
+                                    },
+                                },
+                            ],
+                        },
+                    },
+                },
+            },
+        },
+        "support": {
+            "label": "💬 SUPPORT",
+            "sections": {
+                "support_main": {
+                    "label": "SUPPORT",
+                    "items": {
+                        "support_chat": {
+                            "label": "Chat",
+                            "asset": "assets/other/SUPPORT.jpg",
+                            "preview": "assets/preview/SUPPORT_prew.jpg",
+                            "fields": [
+                                {
+                                    "key": "msg1",
+                                    "prompt": "✉️ Введите текст первого сообщения (синий пузырь, справа)",
+                                    "text_config": {"collect_only": True},
+                                },
+                                {
+                                    "key": "msg2",
+                                    "prompt": "✉️ Введите текст второго сообщения (тёмный пузырь, слева)",
+                                    "text_config": {"collect_only": True},
+                                },
+                            ],
+                            "render_mode": "support_bubbles",
+                        },
+                    },
+                },
+            },
+        },
+    },
+    },
+
+    # ════════════════════════════════════════════════════════
+    # Peru 🇵🇪 — пустые категории (те же группы, свои шаблоны)
+    # ════════════════════════════════════════════════════════
+    # ════════════════════════════════════════════════════════
+    # Peru 🇵🇪 — шаблоны, относящиеся к Peru
+    # В этой секции используются пути типа assets/Peru/FD/... и assets/Peru/RD/...
+    # ════════════════════════════════════════════════════════
+    "pe": {
+        "label": "🇵🇪 Peru",
+        "catalog": {
+            "fd": {
+                "label": "📁 FD",
+                "sections": {
+                    "proofs_fd": {
+                        "label": "Proofs FD",
+                        "items": {
+                            "fd_proof1_pe": {
+                                "label": "Peru FD 1",
+                                "asset": "assets/Peru/FD/proofs/psd1.png",
+                                "fields": [
+                                    {
+                                        "key": "name",
+                                        "prompt": "✏️ Введите ФИО (пример: Ivanov Ivan)",
+                                        "text_config": {
+                                            "font": "montserrat",
+                                            "size": 36,
+                                            "color": (0, 0, 0),
+                                            "pos": (100, 120)
+                                        }
+                                    }
+                                ]
+                            },
+                            "fd_proof2_pe": {
+                                "label": "Peru FD 2",
+                                "asset": "assets/Peru/FD/proofs/psd2.png",
+                                "fields": [
+                                    {
+                                        "key": "name",
+                                        "prompt": "✏️ Введите ФИО (пример: Ivanov Ivan)",
+                                        "text_config": {
+                                            "font": "montserrat",
+                                            "size": 36,
+                                            "color": (0, 0, 0),
+                                            "pos": (100, 120)
+                                        }
+                                    }
+                                ]
+                            },
+                            "fd_proof3_pe": {
+                                "label": "Peru FD 3",
+                                "asset": "assets/Peru/FD/proofs/psd3.png",
+                                "fields": [
+                                    {
+                                        "key": "name",
+                                        "prompt": "✏️ Введите ФИО (пример: Ivanov Ivan)",
+                                        "text_config": {
+                                            "font": "montserrat",
+                                            "size": 36,
+                                            "color": (0, 0, 0),
+                                            "pos": (100, 120)
+                                        }
+                                    }
+                                ]
+                            }
+                        },
+                    },
+                },
+            },
+            "rd": {
+                "label": "📁 RD",
+                "sections": {
+                    "rd_main": {
+                        "label": "RD",
+                        "items": {
+                            "rd1": {
+                                "label": "RD1", "asset": "assets/Peru/RD/rd1.png", "preview": "assets/Peru/Prew/RD1_prew.jpg",
+                                "fields": [
+                                    {
+                                        "key": "name",
+                                        "prompt": "✏️ Введите Фамилия Имя (пример: Ivanov Ivan)",
+                                        "text_config": {
+                                            "area": (1250, 700, 2780, 925),
+                                            "line_spacing": 1.40,
+                                            "segments": [
+                                                {"text": "Su pago al cliente ",
+                                                 "font": "montserrat", "size": 46, "color": (255, 255, 255)},
+                                                {"text": "{name}",
+                                                 "font": "montserrat", "size": 46, "color": (255, 255, 255)},
+                                                {"text": " por un monto de ",
+                                                 "font": "montserrat", "size": 46, "color": (255, 255, 255)},
+                                                {"text": "S/. 17,811.00",
+                                                 "font": "montserrat", "size": 46, "color": (0, 255, 84)},
+                                                {"text": " ha sido bloqueado temporalmente. Para retirar los fondos de la plataforma a la cuenta del beneficiario, su cliente está obligado a pagar una tarifa de ",
+                                                 "font": "montserrat", "size": 46, "color": (255, 255, 255)},
+                                                {"text": "S/. 567.00.",
+                                                 "font": "montserrat", "size": 46, "color": (255, 0, 0)},
+                                            ],
+                                        },
+                                    },
+                                ],
+                            },
+                            "rd2_pe": {
+                                "label": "Peru RD 2",
+                                "asset": "assets/Peru/RD/rd2.jpg",
+                                "fields": [
+                                    {
+                                        "key": "name",
+                                        "prompt": "✏️ Введите Фамилия Имя (пример: Ivanov Ivan)",
+                                        "text_config": {
+                                            "font": "montserrat", "size": 30,
+                                            "color": (57, 62, 67),
+                                            "template": "Cuenta bancaria del cliente {name}.",
+                                            "area": (2235, 1420, 3050, 1460),
+                                            "line_spacing": 1.2,
+                                        }
+                                    },
+                                    {
+                                        "key": "amount",
+                                        "prompt": "💰 Введите сумму (рекомендуется 809)",
+                                        "text_config": {"collect_only": True}
+                                    },
+                                    {
+                                        "key": "_body_line1",
+                                        "prompt": "",
+                                        "text_config": {
+                                            "area": (2240, 490, 2992, 540),
+                                            "segments": [
+                                                {"text": "Es necesario pagar una tarifa por la", "font": "montserrat_light", "size": 44, "color": (255, 255, 255)}
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        "key": "_body_line2",
+                                        "prompt": "",
+                                        "text_config": {
+                                            "area": (2240, 537, 2992, 587),
+                                            "segments": [
+                                                {"text": "conversión de ", "font": "montserrat_light", "size": 44, "color": (255, 255, 255)},
+                                                {"text": "USDT", "font": "montserrat_medium", "size": 44, "color": (136, 255, 164)},
+                                                {"text": " a ", "font": "montserrat_light", "size": 44, "color": (255, 255, 255)},
+                                                {"text": "PEN.", "font": "montserrat_medium", "size": 44, "color": (254, 68, 92)}
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        "key": "_body_line3",
+                                        "prompt": "",
+                                        "text_config": {
+                                            "area": (2240, 615, 2992, 665),
+                                            "segments": [
+                                                {"text": "Importe de la tarifa: ", "font": "montserrat_light", "size": 44, "color": (255, 255, 255)},
+                                                {"text": "S/. {amount}", "font": "montserrat_medium", "size": 44, "color": (255, 13, 13), "format_number_comma": True},
+                                                {"text": ".", "font": "montserrat_light", "size": 44, "color": (255, 255, 255)}
+                                            ]
+                                        }
+                                    }
+                                ]
+                            },
+                            "rd3_pe": {
+                                "label": "Peru RD 3",
+                                "asset": "assets/Peru/RD/rd3.jpg",
+                                "fields": [
+                                    {
+                                        "key": "name",
+                                        "prompt": "✏️ Введите ФИО (пример: Nilda Mamani Apaza)",
+                                        "text_config": {
+                                            "font": "times_bold",
+                                            "size": 59,
+                                            "color": (0, 0, 0),
+                                            "pos": (68, 474),
+                                            "template": "Notificación para {name}"
+                                        }
+                                    },
+                                    {
+                                        "key": "gender",
+                                        "prompt": "👤 Выберите пол (введите 'o' для мужского, 'a' для женского):",
+                                        "text_config": {"collect_only": True}
+                                    },
+                                    {
+                                        "key": "amount",
+                                        "prompt": "💰 Введите сумму (рекомендуется 1 165)",
+                                        "text_config": {"collect_only": True}
+                                    },
+                                    {
+                                        "key": "_greeting",
+                                        "prompt": "",
+                                        "text_config": {
+                                            "area": (69, 1230, 2412, 1350),
+                                            "segments": [
+                                                {"text": "Estimad{gender} ", "font": "times_roman", "size": 59, "color": (0, 0, 0)},
+                                                {"text": "{name}:", "font": "times_bold", "size": 59, "color": (0, 0, 0)}
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        "key": "_body",
+                                        "prompt": "",
+                                        "text_config": {
+                                            "area": (70, 1663, 2414, 2200),
+                                            "line_spacing": 0.76,
+                                            "segments": [
+                                                {"text": "Le informamos acerca de una condición importante relacionada con la retirada de fondos a\nla cuenta bancaria que usted indicó. El pago estará disponible únicamente después de\nrealizar el abono por servicios por un importe de ", 
+                                                 "font": "times_roman", "size": 60, "color": (0, 0, 0)},
+                                                {"text": "S/. {amount}", 
+                                                 "font": "times_bold", "size": 60, "color": (0, 0, 0), "format_number": True},
+                                                {"text": ". Le rogamos efectuar dicho\npago a la mayor brevedad; tras su confirmación y el procesamiento por parte de nuestros\ndepartamentos, recibirá inmediatamente en su cuenta bancaria la suma total de ", 
+                                                 "font": "times_roman", "size": 60, "color": (0, 0, 0)},
+                                                {"text": "S/. 17 811", 
+                                                 "font": "times_bold", "size": 60, "color": (0, 0, 0)},
+                                                {"text": ".", 
+                                                 "font": "times_roman", "size": 60, "color": (0, 0, 0)}
+                                            ]
+                                        }
+                                    }
+                                ]
+                            },
+                            "rd4_pe": {
+                                "label": "Peru RD 4",
+                                "asset": "assets/Peru/RD/rd4.png",
+                                "fields": [
+                                    {
+                                        "key": "name",
+                                        "prompt": "✏️ Введите ФИО (пример: Ivanov Ivan)",
+                                        "text_config": {
+                                            "font": "montserrat",
+                                            "size": 36,
+                                            "color": (0, 0, 0),
+                                            "pos": (100, 120)
+                                        }
+                                    }
+                                ]
+                            },
+                            "rd5_pe": {
+                                "label": "Peru RD 5",
+                                "asset": "assets/Peru/RD/rd5.png",
+                                "fields": [
+                                    {
+                                        "key": "name",
+                                        "prompt": "✏️ Введите ФИО (пример: Ivanov Ivan)",
+                                        "text_config": {
+                                            "font": "montserrat",
+                                            "size": 36,
+                                            "color": (0, 0, 0),
+                                            "pos": (100, 120)
+                                        }
+                                    }
+                                ]
+                            },
+                            "rd6_pe": {
+                                "label": "Peru RD 6",
+                                "asset": "assets/Peru/RD/rd6.png",
+                                "fields": [
+                                    {
+                                        "key": "name",
+                                        "prompt": "✏️ Введите ФИО (пример: Ivanov Ivan)",
+                                        "text_config": {
+                                            "font": "montserrat",
+                                            "size": 36,
+                                            "color": (0, 0, 0),
+                                            "pos": (100, 120)
+                                        }
+                                    }
+                                ]
+                            },
+                            "rd7_pe": {
+                                "label": "Peru RD 7",
+                                "asset": "assets/Peru/RD/rd7.png",
+                                "fields": [
+                                    {
+                                        "key": "name",
+                                        "prompt": "✏️ Введите ФИО (пример: Ivanov Ivan)",
+                                        "text_config": {
+                                            "font": "montserrat",
+                                            "size": 36,
+                                            "color": (0, 0, 0),
+                                            "pos": (100, 120)
+                                        }
+                                    }
+                                ]
+                            },
+                            "rd8_pe": {
+                                "label": "Peru RD 8",
+                                "asset": "assets/Peru/RD/rd8.png",
+                                "fields": [
+                                    {
+                                        "key": "name",
+                                        "prompt": "✏️ Введите ФИО (пример: Ivanov Ivan)",
+                                        "text_config": {
+                                            "font": "montserrat",
+                                            "size": 36,
+                                            "color": (0, 0, 0),
+                                            "pos": (100, 120)
+                                        }
+                                    }
+                                ]
+                            },
+                            "rd9_pe": {
+                                "label": "Peru RD 9",
+                                "asset": "assets/Peru/RD/rd9.png",
+                                "fields": [
+                                    {
+                                        "key": "name",
+                                        "prompt": "✏️ Введите ФИО (пример: Ivanov Ivan)",
+                                        "text_config": {
+                                            "font": "montserrat",
+                                            "size": 36,
+                                            "color": (0, 0, 0),
+                                            "pos": (100, 120)
+                                        }
+                                    }
+                                ]
+                            },
+                            "rd10_pe": {
+                                "label": "Peru RD 10",
+                                "asset": "assets/Peru/RD/rd10.png",
+                                "fields": [
+                                    {
+                                        "key": "name",
+                                        "prompt": "✏️ Введите ФИО (пример: Ivanov Ivan)",
+                                        "text_config": {
+                                            "font": "montserrat",
+                                            "size": 36,
+                                            "color": (0, 0, 0),
+                                            "pos": (100, 120)
+                                        }
+                                    }
+                                ]
+                            }
+                        },
+                    },
+                },
+            },
+            "check": {
+                "label": "🧾 Чек",
+                "sections": {
+                    "check_main": {
+                        "label": "Чек",
+                        "items": {
+                            "check_pe": {
+                                "label": "Peru Check",
+                                "asset": "assets/Peru/Чек/Check.png",
+                                "fields": [
+                                    {
+                                        "key": "name",
+                                        "prompt": "✏️ Введите ФИО (пример: Ivanov Ivan)",
+                                        "text_config": {
+                                            "font": "montserrat",
+                                            "size": 36,
+                                            "color": (0, 0, 0),
+                                            "pos": (100, 120)
+                                        }
+                                    }
+                                ]
+                            }
+                        },
+                    },
+                },
+            },
+            "qr": {
+                "label": "📷 QR Code",
+                "sections": {
+                    "qr_main": {
+                        "label": "QR Code",
+                        "items": {
+                            "qr_pe": {
+                                "label": "Peru QR",
+                                "asset": "assets/Peru/QRCode/QR_code.png",
+                                "fields": [
+                                    {
+                                        "key": "name",
+                                        "prompt": "✏️ Введите ФИО (пример: Ivanov Ivan)",
+                                        "text_config": {
+                                            "font": "montserrat",
+                                            "size": 36,
+                                            "color": (0, 0, 0),
+                                            "pos": (100, 120)
+                                        }
+                                    }
+                                ]
+                            }
+                        },
+                    },
+                },
+            },
+            "support": {
+                "label": "💬 SUPPORT",
+                "sections": {
+                    "support_main": {
+                        "label": "SUPPORT",
+                        "items": {
+                            "support_pe": {
+                                "label": "Peru Support",
+                                "asset": "assets/Peru/SUPPORT/SUPPORT.jpg",
+                                "fields": [
+                                    {
+                                        "key": "name",
+                                        "prompt": "✏️ Введите ФИО (пример: Ivanov Ivan)",
+                                        "text_config": {
+                                            "font": "montserrat",
+                                            "size": 36,
+                                            "color": (0, 0, 0),
+                                            "pos": (100, 120)
+                                        }
+                                    }
+                                ]
+                            }
+                        },
+                    },
+                },
+            },
+        },
+    },
+}
+
+# Обратная совместимость — Bolivia как CATALOG по умолчанию.
+# Старый код, который импортирует CATALOG, будет по-прежнему работать
+# и будет использовать Bolivia-шаблоны, если geo не указана явно.
+CATALOG = GEO_CATALOG["bo"]["catalog"]

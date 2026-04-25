@@ -1,0 +1,9 @@
+venv/
+pycache/
+*.pyc
+.env
+.idea/
+.vscode/
+logs/
+temp/
+assets/

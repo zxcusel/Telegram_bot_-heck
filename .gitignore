@@ -8,4 +8,4 @@ logs/
 temp/
 assets/
 *.exe
-info.json
+*.json

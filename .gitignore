@@ -8,3 +8,4 @@ logs/
 temp/
 assets/
 *.exe
+info.json

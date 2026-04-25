@@ -9,3 +9,9 @@ temp/
 assets/
 *.exe
 *.json
+data/__pycache__/
+*.db
+handlers/__pycache__/
+keyboard/__pycache__/
+utils/__pycache__/
+middleware/__pycache__/

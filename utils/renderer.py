@@ -294,6 +294,9 @@ def _draw_segments(draw, segments: list[dict], area: tuple,
             # measure total line width, then draw from right edge
             line_w = sum(f.getlength(t) for t, f, _ in line if f)
             x = float(x2) - line_w
+        elif align == "center":
+            line_w = sum(f.getlength(t) for t, f, _ in line if f)
+            x = float(x1) + (max_w - line_w) / 2
         else:
             x = float(x1)
             

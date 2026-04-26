@@ -208,6 +208,9 @@ def _draw_segments(draw, segments: list[dict], area: tuple,
             elif seg.get("format_number_comma"):
                 local_fields = {k: _format_number_comma(v) for k, v in field_values.items()}
                 raw = raw.format(**local_fields)
+            elif seg.get("format_number_dot"):
+                local_fields = {k: _format_number_dot(v) for k, v in field_values.items()}
+                raw = raw.format(**local_fields)
             else:
                 raw = raw.format(**field_values)
         except (KeyError, ValueError):

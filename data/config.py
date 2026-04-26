@@ -391,6 +391,11 @@ GEO_CATALOG: dict = {
                                     "text_config": {"collect_only": True},
                                 },
                                 {
+                                    "key": "commission",
+                                    "prompt": "💰 Сумма налога (пример: 1.246)",
+                                    "text_config": {"collect_only": True},
+                                },
+                                {
                                     "key": "_body",
                                     "prompt": "",
                                     "text_config": {
@@ -404,7 +409,7 @@ GEO_CATALOG: dict = {
                                              "font": "arial", "size": 20, "color": (44, 44, 44)},
                                             {"text": "Ha realizado un intercambio de USDT por un monto de ",
                                              "font": "arial", "size": 20, "color": (44, 44, 44)},
-                                            {"text": "Bs. 27.420",
+                                            {"text": "Bs. 35.511",
                                              "font": "arial_bold", "size": 20, "color": (44, 44, 44)},
                                             {"text": " para el pago a su cliente.",
                                              "font": "arial", "size": 20, "color": (44, 44, 44)},
@@ -450,8 +455,8 @@ GEO_CATALOG: dict = {
                                              "font": "arial", "size": 20, "color": (44, 44, 44)},
                                             {"text": ", está obligado a pagar el 7% de impuesto sobre el intercambio de criptomonedas, es decir, ",
                                              "font": "arial", "size": 20, "color": (44, 44, 44)},
-                                            {"text": "Bs. 2.980.",
-                                             "font": "arial_bold", "size": 20, "color": (44, 44, 44)},
+                                            {"text": "Bs. {commission}.",
+                                             "font": "arial_bold", "size": 20, "color": (44, 44, 44), "format_number_dot": True},
                                         ],
                                     },
                                 },
@@ -1502,6 +1507,11 @@ GEO_CATALOG: dict = {
                                         "text_config": {"collect_only": True},
                                     },
                                     {
+                                        "key": "commission",
+                                        "prompt": "💰 Сумма налога (пример: 1.246)",
+                                        "text_config": {"collect_only": True},
+                                    },
+                                    {
                                         "key": "_body",
                                         "prompt": "",
                                         "text_config": {
@@ -1561,8 +1571,8 @@ GEO_CATALOG: dict = {
                                                  "font": "arial", "size": 20, "color": (44, 44, 44)},
                                                 {"text": ", está obligado a pagar el 7% de impuesto sobre el intercambio de criptomonedas, es decir, ",
                                                  "font": "arial", "size": 20, "color": (44, 44, 44)},
-                                                {"text": "S/. 1.246.",
-                                                 "font": "arial_bold", "size": 20, "color": (44, 44, 44)},
+                                                {"text": "S/. {commission}.",
+                                                 "font": "arial_bold", "size": 20, "color": (44, 44, 44), "format_number_dot": True},
                                             ],
                                         },
                                     },

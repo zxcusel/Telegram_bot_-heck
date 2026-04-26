@@ -36,7 +36,29 @@ def _to_es_date(val: str) -> str:
         day, month, year = m.group(1), m.group(2), m.group(3)
         month_es = _ES_MONTHS.get(month, month)
         return f"{int(day)} {month_es}. {year}"
-    return val  # если формат не распознан — вернуть как есть
+    return val
+
+_ES_MONTHS_FULL = {
+    "01": "Enero",    "02": "Febrero", "03": "Marzo",    "04": "Abril",
+    "05": "Mayo",     "06": "Junio",   "07": "Julio",    "08": "Agosto",
+    "09": "Septiembre","10": "Octubre","11": "Noviembre","12": "Diciembre",
+}
+_ES_DAYS = ["Lunes","Martes","Miércoles","Jueves","Viernes","Sábado","Domingo"]
+
+def _to_es_date2(val: str) -> str:
+    """Конвертирует '22.04.2026' в 'Lunes 22 Abril 2026'."""
+    import re, datetime
+    m = re.match(r"(\d{1,2})[./](\d{2})[./](\d{4})", val.strip())
+    if m:
+        day, month, year = int(m.group(1)), int(m.group(2)), int(m.group(3))
+        try:
+            dt = datetime.date(year, month, day)
+            day_name = _ES_DAYS[dt.weekday()]
+            month_name = _ES_MONTHS_FULL[f"{month:02d}"]
+            return f"{day_name} {day} {month_name} {year}"
+        except Exception:
+            pass
+    return val
 
 BASE_DIR = os.path.normpath(os.path.join(os.path.dirname(__file__), ".."))
 
@@ -49,7 +71,7 @@ def _get_field_keyboard(field_key: str, s: dict, item_key: str = None) -> Inline
     buttons = []
     
     # 🎲 Рандомайзер
-    if s["rand_enabled"] and field_key in ("sum", "amount", "number", "account", "transaction"):
+    if s["rand_enabled"] and field_key in ("sum", "amount", "number", "account", "transaction", "operation", "card_recipient", "card_sender"):
         buttons.append([InlineKeyboardButton(text="🎲 Сгенерировать", callback_data="render:random")])
         
     # 📅 Закрепленная дата
@@ -403,9 +425,14 @@ async def collect_text_field(message: Message, state: FSMContext):
     if item_key in ("check_doc", "check_pe") and "time" in askable[step]["key"]:
         val = val.replace("AM", "a. m.").replace("PM", "p. m.").replace("A.M.", "a. m.").replace("P.M.", "p. m.")
     
-    # Конвертация даты в испанский формат для чека Перу
+    # Конвертация даты в испанский формат для чеков Перу
     if item_key == "check_pe" and askable[step]["key"] == "date":
         val = _to_es_date(val)
+    if item_key == "check2_pe" and askable[step]["key"] == "date":
+        val = _to_es_date2(val)
+    if item_key == "check2_pe" and askable[step]["key"] == "time":
+        val = val.replace("A.M.", "am.").replace("P.M.", "pm.").replace("a. m.", "am.").replace("p. m.", "pm.")\
+                 .replace("a.m.", "am.").replace("p.m.", "pm.").replace("AM", "am.").replace("PM", "pm.")
 
     values[askable[step]["key"]] = val
     done_step = step + 1
@@ -564,6 +591,10 @@ async def cb_render_shortcuts(call: CallbackQuery, state: FSMContext):
         elif key == "transaction":
             digits = 8 if item_key == "check_pe" else 9
             val = "".join([str(random.randint(0, 9)) for _ in range(digits)])
+        elif key == "operation":
+            val = "".join([str(random.randint(0, 9)) for _ in range(8)])
+        elif key in ("card_recipient", "card_sender"):
+            val = "".join([str(random.randint(0, 9)) for _ in range(4)])
         else:
             val = "0"
     elif action == "suffix":
@@ -597,6 +628,8 @@ async def cb_render_shortcuts(call: CallbackQuery, state: FSMContext):
     # Конвертация даты в испанский формат для чека Перу
     if item_key == "check_pe" and askable[step]["key"] == "date":
         val = _to_es_date(val)
+    if item_key == "check2_pe" and askable[step]["key"] == "date":
+        val = _to_es_date2(val)
     values[askable[step]["key"]] = val
     done_step = step + 1
 

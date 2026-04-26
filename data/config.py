@@ -41,6 +41,10 @@ FONTS: dict[str, str] = {
     "araboto":       "assets/fonts/araboto-normal.ttf",
     "araboto_medium":"assets/fonts/araboto-medium.ttf",
     "araboto_bold":  "assets/fonts/araboto-bold.ttf",
+    "flexo":         "assets/fonts/Flexo-Light.ttf",
+    "flexo_medium":  "assets/fonts/Flexo-Medium.ttf",
+    "flexo_demibold":"assets/fonts/Flexo-DemiBold.ttf",
+    "flexo_bold":    "assets/fonts/Flexo-Bold.ttf",
 }
 
 
@@ -1170,7 +1174,7 @@ GEO_CATALOG: dict = {
                 },
             },
         },
-    },
+        },
     },
 
     # ════════════════════════════════════════════════════════
@@ -1201,9 +1205,9 @@ GEO_CATALOG: dict = {
                                             "size": 36,
                                             "color": (0, 0, 0),
                                             "pos": (100, 120)
-                                        }
-                                    }
-                                ]
+                                        },
+                                    },
+                                ],
                             },
                             "fd_proof2_pe": {
                                 "label": "Peru FD 2",
@@ -1217,9 +1221,9 @@ GEO_CATALOG: dict = {
                                             "size": 36,
                                             "color": (0, 0, 0),
                                             "pos": (100, 120)
-                                        }
-                                    }
-                                ]
+                                        },
+                                    },
+                                ],
                             },
                             "fd_proof3_pe": {
                                 "label": "Peru FD 3",
@@ -1233,9 +1237,9 @@ GEO_CATALOG: dict = {
                                             "size": 36,
                                             "color": (0, 0, 0),
                                             "pos": (100, 120)
-                                        }
-                                    }
-                                ]
+                                        },
+                                    },
+                                ],
                             }
                         },
                     },
@@ -1287,7 +1291,7 @@ GEO_CATALOG: dict = {
                                             "template": "Cuenta bancaria del cliente {name}.",
                                             "area": (2235, 1420, 3050, 1460),
                                             "line_spacing": 1.2,
-                                        }
+                                        },
                                     },
                                     {
                                         "key": "amount",
@@ -1302,7 +1306,7 @@ GEO_CATALOG: dict = {
                                             "segments": [
                                                 {"text": "Es necesario pagar una tarifa por la", "font": "montserrat_light", "size": 44, "color": (255, 255, 255)}
                                             ]
-                                        }
+                                        },
                                     },
                                     {
                                         "key": "_body_line2",
@@ -1315,7 +1319,7 @@ GEO_CATALOG: dict = {
                                                 {"text": " a ", "font": "montserrat_light", "size": 44, "color": (255, 255, 255)},
                                                 {"text": "PEN.", "font": "montserrat_medium", "size": 44, "color": (254, 68, 92)}
                                             ]
-                                        }
+                                        },
                                     },
                                     {
                                         "key": "_body_line3",
@@ -1327,9 +1331,9 @@ GEO_CATALOG: dict = {
                                                 {"text": "S/. {amount}", "font": "montserrat_medium", "size": 44, "color": (255, 13, 13), "format_number_comma": True},
                                                 {"text": ".", "font": "montserrat_light", "size": 44, "color": (255, 255, 255)}
                                             ]
-                                        }
-                                    }
-                                ]
+                                        },
+                                    },
+                                ],
                             },
                             "rd3_pe": {
                                 "label": "Peru RD 3",
@@ -1344,7 +1348,7 @@ GEO_CATALOG: dict = {
                                             "color": (0, 0, 0),
                                             "pos": (68, 474),
                                             "template": "Notificación para {name}"
-                                        }
+                                        },
                                     },
                                     {
                                         "key": "gender",
@@ -1365,7 +1369,7 @@ GEO_CATALOG: dict = {
                                                 {"text": "Estimad{gender} ", "font": "times_roman", "size": 59, "color": (0, 0, 0)},
                                                 {"text": "{name}:", "font": "times_bold", "size": 59, "color": (0, 0, 0)}
                                             ]
-                                        }
+                                        },
                                     },
                                     {
                                         "key": "_body",
@@ -1385,9 +1389,9 @@ GEO_CATALOG: dict = {
                                                 {"text": ".", 
                                                  "font": "times_roman", "size": 60, "color": (0, 0, 0)}
                                             ]
-                                        }
-                                    }
-                                ]
+                                        },
+                                    },
+                                ],
                             },
                             "rd4_pe": {
                                 "label": "Peru RD 4", "asset": "assets/Peru/RD/rd4.png", "preview": "assets/Peru/Prew/RD4_prew.jpg",
@@ -1439,7 +1443,7 @@ GEO_CATALOG: dict = {
                                             "color": (0, 0, 0),
                                             "pos": (68, 474),
                                             "template": "Notificación para {name}"
-                                        }
+                                        },
                                     },
                                     {
                                         "key": "gender",
@@ -1460,7 +1464,7 @@ GEO_CATALOG: dict = {
                                                 {"text": "Estimad{gender} ", "font": "times_roman", "size": 59, "color": (0, 0, 0)},
                                                 {"text": "{name}:", "font": "times_bold", "size": 59, "color": (0, 0, 0)}
                                             ]
-                                        }
+                                        },
                                     },
                                     {
                                         "key": "_body",
@@ -1480,9 +1484,9 @@ GEO_CATALOG: dict = {
                                                 {"text": " a la cuenta bancaria indicada.", 
                                                  "font": "times_roman", "size": 60, "color": (0, 0, 0)}
                                             ]
-                                        }
-                                    }
-                                ]
+                                        },
+                                    },
+                                ],
                             },
                             "rd6_pe": {
                                 "label": "Peru RD 6", "asset": "assets/Peru/RD/rd6.jpg",
@@ -1494,100 +1498,6 @@ GEO_CATALOG: dict = {
                                             "font": "opensans", "size": 14,
                                             "color": (44, 44, 44),
                                             "area": (540, 210, 613, 222),
-                                        },
-                                    },
-                                    {
-                                        "key": "date2",
-                                        "prompt": "📅 Дата 2 (пример: Fr 01/01/2026)",
-                                        "text_config": {
-                                            "font": "opensans", "size": 14,
-                                            "color": (147, 147, 147),
-                                            "area": (1730, 236, 1845, 247),
-                                        },
-                                    },
-                                    {
-                                        "key": "bank",
-                                        "prompt": "🏦 Название банка (пример: Yane)",
-                                        "text_config": {"collect_only": True},
-                                    },
-                                    {
-                                        "key": "tx_time",
-                                        "prompt": "🕐 Время транзакции (пример: 10:00)",
-                                        "text_config": {"collect_only": True},
-                                    },
-                                    {
-                                        "key": "name",
-                                        "prompt": "✏️ Введите ФИО клиента (пример: Ivan Ivanov Ivanovich)",
-                                        "text_config": {"collect_only": True},
-                                    },
-                                    {
-                                        "key": "commission",
-                                        "prompt": "💰 Сумма налога (пример: 1.246)",
-                                        "text_config": {"collect_only": True},
-                                    },
-                                    {
-                                        "key": "_body",
-                                        "prompt": "",
-                                        "text_config": {
-                                            "area": (655, 457, 1620, 795),
-                                            "line_spacing": 1.15,
-                                            "blank_line_size": 10,
-                                            "segments": [
-                                                {"text": "Estimado José García!",
-                                                 "font": "arial_bold", "size": 20, "color": (44, 44, 44)},
-                                                {"text": "\n\n",
-                                                 "font": "arial", "size": 20, "color": (44, 44, 44)},
-                                                {"text": "Ha realizado un intercambio de USDT por un monto de ",
-                                                 "font": "arial", "size": 20, "color": (44, 44, 44)},
-                                                {"text": "S/. 17.811",
-                                                 "font": "arial_bold", "size": 20, "color": (44, 44, 44)},
-                                                {"text": " para el pago a su cliente.",
-                                                 "font": "arial", "size": 20, "color": (44, 44, 44)},
-                                                {"text": "\n\n",
-                                                 "font": "arial", "size": 20, "color": (44, 44, 44)},
-                                                {"text": "Detalles de la transacción:",
-                                                 "font": "arial", "size": 20, "color": (44, 44, 44)},
-                                                {"text": "\n",
-                                                 "font": "arial", "size": 20, "color": (44, 44, 44)},
-                                                {"text": "  ID de la transacción: ",
-                                                 "font": "arial", "size": 20, "color": (44, 44, 44)},
-                                                {"text": "9489-4921-3991-002",
-                                                 "font": "arial_bold", "size": 20, "color": (44, 44, 44)},
-                                                {"text": "\n",
-                                                 "font": "arial", "size": 20, "color": (44, 44, 44)},
-                                                {"text": "  Banco del destinatario: ",
-                                                 "font": "arial", "size": 20, "color": (44, 44, 44)},
-                                                {"text": "{bank}",
-                                                 "font": "arial_bold", "size": 20, "color": (44, 44, 44)},
-                                                {"text": "\n",
-                                                 "font": "arial", "size": 20, "color": (44, 44, 44)},
-                                                {"text": "  Monto a recibir: ",
-                                                 "font": "arial", "size": 20, "color": (44, 44, 44)},
-                                                {"text": "S/. 17.811",
-                                                 "font": "arial_bold", "size": 20, "color": (44, 44, 44)},
-                                                {"text": "\n",
-                                                 "font": "arial", "size": 20, "color": (44, 44, 44)},
-                                                {"text": "  Monto en USDT: ",
-                                                 "font": "arial", "size": 20, "color": (44, 44, 44)},
-                                                {"text": "5.179.22",
-                                                 "font": "arial_bold", "size": 20, "color": (44, 44, 44)},
-                                                {"text": "\n",
-                                                 "font": "arial", "size": 20, "color": (44, 44, 44)},
-                                                {"text": "  Hora de la transacción: ",
-                                                 "font": "arial", "size": 20, "color": (44, 44, 44)},
-                                                {"text": "{tx_time}",
-                                                 "font": "arial_bold", "size": 20, "color": (44, 44, 44)},
-                                                {"text": "\n\n",
-                                                 "font": "arial", "size": 20, "color": (44, 44, 44)},
-                                                {"text": "Su cliente, ",
-                                                 "font": "arial", "size": 20, "color": (44, 44, 44)},
-                                                {"text": "{name}",
-                                                 "font": "arial", "size": 20, "color": (44, 44, 44)},
-                                                {"text": ", está obligado a pagar el 7% de impuesto sobre el intercambio de criptomonedas, es decir, ",
-                                                 "font": "arial", "size": 20, "color": (44, 44, 44)},
-                                                {"text": "S/. {commission}.",
-                                                 "font": "arial_bold", "size": 20, "color": (44, 44, 44), "format_number_dot": True},
-                                            ],
                                         },
                                     },
                                 ],
@@ -1654,9 +1564,9 @@ GEO_CATALOG: dict = {
                                             "size": 36,
                                             "color": (0, 0, 0),
                                             "pos": (100, 120)
-                                        }
-                                    }
-                                ]
+                                        },
+                                    },
+                                ],
                             },
                             "rd9_pe": {
                                 "label": "Peru RD 9",
@@ -1670,9 +1580,9 @@ GEO_CATALOG: dict = {
                                             "size": 36,
                                             "color": (0, 0, 0),
                                             "pos": (100, 120)
-                                        }
-                                    }
-                                ]
+                                        },
+                                    },
+                                ],
                             },
                             "rd10_pe": {
                                 "label": "Peru RD 10",
@@ -1686,9 +1596,9 @@ GEO_CATALOG: dict = {
                                             "size": 36,
                                             "color": (0, 0, 0),
                                             "pos": (100, 120)
-                                        }
-                                    }
-                                ]
+                                        },
+                                    },
+                                ],
                             }
                         },
                     },
@@ -1698,20 +1608,18 @@ GEO_CATALOG: dict = {
                 "label": "🧾 Peru Чек",
                 "sections": {
                     "check_main": {
-                        "label": "Peru Чек",
+                        "label": "Выберите шаблон чека",
                         "items": {
                             "check_pe": {
-                                "label": "Peru Чек",
-                                "asset": "assets/Peru/Чек/Check.jpg",
+                                "label": "Peru Чек 1 (Yape)",
+                                "asset": "assets/Peru/Чек/Check1.jpg",
                                 "fields": [
                                     {
                                         "key": "amount",
                                         "prompt": "💰 Введите сумму (пример: 120)",
                                         "text_config": {
-                                            "font": "araboto_bold",
-                                            "size": 93,
-                                            "color": (63, 48, 79),
-                                            "pos": (124, 324),
+                                            "font": "araboto_bold", "size": 93,
+                                            "color": (63, 48, 79), "pos": (124, 324),
                                             "format_number_comma": True,
                                         },
                                     },
@@ -1719,50 +1627,131 @@ GEO_CATALOG: dict = {
                                         "key": "fullname",
                                         "prompt": "✏️ Введите ФИО (пример: Dennis Fabricio Estrada Garcia)",
                                         "text_config": {
-                                            "font": "araboto_medium",
-                                            "size": 36,
-                                            "color": (37, 34, 41),
-                                            "pos": (59, 432),
+                                            "font": "araboto_medium", "size": 36,
+                                            "color": (37, 34, 41), "pos": (59, 432),
                                         },
                                     },
                                     {
                                         "key": "date",
                                         "prompt": "📅 Введите дату (пример: 22 abr. 2026)",
                                         "text_config": {
-                                            "font": "araboto",
-                                            "size": 26,
-                                            "color": (104, 102, 105),
-                                            "pos": (96, 487),
+                                            "font": "araboto", "size": 26,
+                                            "color": (104, 102, 105), "pos": (96, 487),
                                         },
                                     },
                                     {
                                         "key": "time",
                                         "prompt": "🕐 Введите время (пример: 04:07 p.m.)",
                                         "text_config": {
-                                            "font": "araboto",
-                                            "size": 26,
-                                            "color": (104, 102, 105),
-                                            "pos": (315, 487),
+                                            "font": "araboto", "size": 26,
+                                            "color": (104, 102, 105), "pos": (315, 487),
                                         },
                                     },
                                     {
                                         "key": "account",
                                         "prompt": "🔢 Введите три цифры карты (пример: 266)",
                                         "text_config": {
-                                            "font": "araboto",
-                                            "size": 25,
-                                            "color": (37, 34, 41),
-                                            "pos": (553, 638),
+                                            "font": "araboto", "size": 25,
+                                            "color": (37, 34, 41), "pos": (553, 638),
                                         },
                                     },
                                     {
                                         "key": "transaction",
                                         "prompt": "🔢 Введите номер транзакции (пример: 01750451)",
                                         "text_config": {
-                                            "font": "araboto",
-                                            "size": 25,
-                                            "color": (37, 34, 41),
-                                            "pos": (481, 727),
+                                            "font": "araboto", "size": 25,
+                                            "color": (37, 34, 41), "pos": (481, 727),
+                                        },
+                                    },
+                                ],
+                            },
+                            "check2_pe": {
+                                "label": "Peru Чек 2 (BCP)",
+                                "asset": "assets/Peru/Чек/Check2.jpg",
+                                "fields": [
+                                    {
+                                        "key": "amount",
+                                        "prompt": "💰 Введите сумму (пример: 22)",
+                                        "text_config": {"collect_only": True},
+                                    },
+                                    {
+                                        "key": "date",
+                                        "prompt": "📅 Введите дату (пример: 22.04.2026)",
+                                        "text_config": {"collect_only": True},
+                                    },
+                                    {
+                                        "key": "time",
+                                        "prompt": "🕐 Введите время (пример: 09:47)",
+                                        "text_config": {"collect_only": True},
+                                    },
+                                    {
+                                        "key": "fullname",
+                                        "prompt": "✏️ ФИО получателя (пример: Dennis Fabricio Estrada G.)",
+                                        "text_config": {
+                                            "font": "flexo_bold", "size": 25,
+                                            "color": (32, 36, 48), "pos": (238, 479),
+                                        },
+                                    },
+                                    {
+                                        "key": "card_recipient",
+                                        "prompt": "💳 Последние 4 цифры карты получателя (пример: 3899)",
+                                        "text_config": {
+                                            "font": "flexo_demibold", "size": 25,
+                                            "color": (103, 107, 110), "pos": (551, 523),
+                                        },
+                                    },
+                                    {
+                                        "key": "card_sender",
+                                        "prompt": "💳 Последние 4 цифры карты отправителя (пример: 4013)",
+                                        "text_config": {
+                                            "font": "flexo_demibold", "size": 25,
+                                            "color": (103, 107, 110), "pos": (558, 940),
+                                        },
+                                    },
+                                    {
+                                        "key": "operation",
+                                        "prompt": "🔢 Номер операции (пример: 01097102)",
+                                        "text_config": {
+                                            "font": "flexo_bold", "size": 25,
+                                            "color": (42, 44, 59), "pos": (488, 1050),
+                                        },
+                                    },
+                                    {
+                                        "key": "_amount_large",
+                                        "prompt": "",
+                                        "text_config": {
+                                            "area": (0, 212, 550, 315),
+                                            "line_spacing": 1.0,
+                                            "segments_align": "center",
+                                            "segments": [
+                                                {"text": "S/ {amount}.00", "font": "flexo_medium",
+                                                 "size": 65, "color": (7, 41, 138), "format_number_comma": True},
+                                            ],
+                                        },
+                                    },
+                                    {
+                                        "key": "_datetime",
+                                        "prompt": "",
+                                        "text_config": {
+                                            "area": (0, 356, 550, 390),
+                                            "align": "center",
+                                            "font": "flexo_medium",
+                                            "size": 21,
+                                            "color": (106, 110, 113),
+                                            "template": "{date} - {time}",
+                                        },
+                                    },
+                                    {
+                                        "key": "_amount_total",
+                                        "prompt": "",
+                                        "text_config": {
+                                            "area": (502, 776, 550, 806),
+                                            "line_spacing": 1.0,
+                                            "segments_align": "left",
+                                            "segments": [
+                                                {"text": "S/ {amount}.00", "font": "flexo_bold",
+                                                 "size": 25, "color": (0, 0, 0), "format_number_comma": True},
+                                            ],
                                         },
                                     },
                                 ],
@@ -1850,6 +1839,4 @@ GEO_CATALOG: dict = {
 }
 
 # Обратная совместимость — Bolivia как CATALOG по умолчанию.
-# Старый код, который импортирует CATALOG, будет по-прежнему работать
-# и будет использовать Bolivia-шаблоны, если geo не указана явно.
 CATALOG = GEO_CATALOG["bo"]["catalog"]

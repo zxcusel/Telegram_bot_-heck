@@ -750,7 +750,13 @@ def render_video(item_key: str, field_values: dict[str, str], geo: str = "bo") -
     asset_path = _resolve_geo_asset_path(item["asset"], geo)
     asset_path = os.path.normpath(os.path.join(BASE_DIR, asset_path))
     out_path = os.path.join(tempfile.gettempdir(), f"render_{uuid.uuid4().hex}.mp4")
-    ffmpeg_path = os.path.join(BASE_DIR, "ffmpeg.exe")
+    import shutil
+    ffmpeg_path = shutil.which("ffmpeg")
+    if not ffmpeg_path:
+        # Fallback to local files if not in PATH
+        local_exe = os.path.join(BASE_DIR, "ffmpeg.exe")
+        local_bin = os.path.join(BASE_DIR, "ffmpeg")
+        ffmpeg_path = local_exe if os.path.exists(local_exe) else local_bin
 
     drawtexts = []
     overlay_images = []
@@ -1278,7 +1284,7 @@ def render_video(item_key: str, field_values: dict[str, str], geo: str = "bo") -
             cmd.extend(["-vf", vf])
 
         cmd.extend([
-            "-c:v", "libopenh264",
+            "-c:v", "libx264",
             "-preset", "fast",
             "-c:a", "copy",
             out_path

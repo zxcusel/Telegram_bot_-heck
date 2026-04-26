@@ -1608,10 +1608,10 @@ GEO_CATALOG: dict = {
                 "label": "🧾 Peru Чек",
                 "sections": {
                     "check_main": {
-                        "label": "Выберите шаблон чека",
+                        "label": "Peru Чек",
                         "items": {
                             "check_pe": {
-                                "label": "Peru Чек 1 (Yape)",
+                                "label": "Peru Чек 1",
                                 "asset": "assets/Peru/Чек/Check1.jpg",
                                 "fields": [
                                     {
@@ -1666,7 +1666,7 @@ GEO_CATALOG: dict = {
                                 ],
                             },
                             "check2_pe": {
-                                "label": "Peru Чек 2 (BCP)",
+                                "label": "Peru Чек 2",
                                 "asset": "assets/Peru/Чек/Check2.jpg",
                                 "fields": [
                                     {
@@ -1768,20 +1768,20 @@ GEO_CATALOG: dict = {
                 "label": "📷 Peru QR Code",
                 "sections": {
                     "qr_main": {
-                        "label": "Peru QR Code",
+                        "label": "Peru QR",
                         "items": {
                             "qr_pe": {
                                 "label": "Peru QR",
-                                "asset": "assets/Peru/QRCode/QR_code.png",
+                                "asset": "assets/Peru/QRCode/QR_code1.jpg",
                                 "fields": [
                                     {
-                                        "key": "timer",
+                                        "key": "expiry_time",
                                         "prompt": "⏱ Введите таймер в формате MM:SS (пример: 59:48)",
                                         "text_config": {
                                             "font": "montserrat_bold",
                                             "size": 80,
                                             "color": (39, 39, 39),
-                                            "area": (0, 723, 1284, 870),
+                                            "area": (0, 645, 1284, 792),
                                             "align": "center",
                                         },
                                     },
@@ -1790,19 +1790,47 @@ GEO_CATALOG: dict = {
                                         "prompt": "🖼 Отправьте QR-изображение (квадрат 1:1)",
                                         "text_config": {
                                             "image_paste": True,
-                                            "area": (202, 956, 1090, 1844),
+                                            "area": (318, 815, 972, 1469),
                                         },
                                     },
                                     {
-                                        "key": "name",
-                                        "prompt": "✏️ Введите ФИО пользователя",
+                                        "key": "bank",
+                                        "prompt": "🏦 Введите название банка",
                                         "text_config": {
                                             "font": "montserrat_medium",
                                             "size": 70,
                                             "color": (42, 46, 48),
-                                            "area": (137, 1934, 1166, 2105),
-                                            "align": "center",
-                                            "valign": "center",
+                                            "pos": (313, 1586),
+                                        },
+                                    },
+                                    {
+                                        "key": "fullname",
+                                        "prompt": "👤 Введите ФИО пользователя",
+                                        "text_config": {
+                                            "font": "montserrat_medium",
+                                            "size": 70,
+                                            "color": (42, 46, 48),
+                                            "pos": (313, 1751),
+                                        },
+                                    },
+                                    {
+                                        "key": "account",
+                                        "prompt": "🔢 Введите номер счета",
+                                        "text_config": {
+                                            "font": "montserrat_medium",
+                                            "size": 70,
+                                            "color": (42, 46, 48),
+                                            "pos": (313, 1925),
+                                        },
+                                    },
+                                    {
+                                        "key": "phone",
+                                        "prompt": "📞 Введите номер телефона",
+                                        "text_config": {
+                                            "font": "montserrat_medium",
+                                            "size": 70,
+                                            "color": (42, 46, 48),
+                                            "pos": (313, 2106),
                                         },
                                     },
                                 ],

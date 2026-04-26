@@ -87,7 +87,7 @@ def _get_field_keyboard(field_key: str, s: dict, item_key: str = None) -> Inline
         buttons.append([InlineKeyboardButton(text=f"🏦 {s['pinned_bank']}", callback_data="render:pin_bank")])
         
     # 🕒 AM/PM
-    if "time" in field_key and item_key not in ("rd6", "rd7"):
+    if "time" in field_key and item_key not in ("rd6", "rd7", "qr_pe"):
         row = []
         am_label = "☀️ A.M."
         pm_label = "🌙 P.M."
@@ -414,7 +414,7 @@ async def collect_text_field(message: Message, state: FSMContext):
     
     val = message.text.strip()
     # Применяем суффикс времени если он выбран в state
-    if data.get("time_suffix") and "time" in askable[step]["key"]:
+    if data.get("time_suffix") and "time" in askable[step]["key"] and item_key != "qr_pe":
         if "M." not in val.upper(): # Если пользователь сам не написал AM/PM
             suff = data['time_suffix']
             if item_key in ("check_doc", "check_pe"):
@@ -587,7 +587,8 @@ async def cb_render_shortcuts(call: CallbackQuery, state: FSMContext):
         elif key == "number":
             val = "".join([str(random.randint(0, 9)) for _ in range(8)])
         elif key == "account":
-            val = "".join([str(random.randint(0, 9)) for _ in range(3)])
+            length = 20 if item_key != "check_pe" else 3
+            val = "".join([str(random.randint(0, 9)) for _ in range(length)])
         elif key == "transaction":
             digits = 8 if item_key == "check_pe" else 9
             val = "".join([str(random.randint(0, 9)) for _ in range(digits)])

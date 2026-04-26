@@ -9,12 +9,8 @@ temp/
 assets/
 *.exe
 *.json
-data/__pycache__/
 *.db
-handlers/__pycache__/
-keyboard/__pycache__/
-utils/__pycache__/
-middleware/__pycache__/
-handlers/__pycache__/__init__.cpython-314.pyc
-data/__pycache__/__init__.cpython-314.pyc
-*.pyc
+/data/__pycache__
+/data/__pycache__
+/data/__pycache__
+/data/__pycache__

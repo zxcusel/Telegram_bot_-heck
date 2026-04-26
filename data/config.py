@@ -197,7 +197,67 @@ GEO_CATALOG: dict = {
 
                         # ── RD3 ──────────────────────────────────────────────────
                         "rd3": {
-                            "label": "Bolivia RD 3", "asset": "assets/rd/rd3.png", "preview": "assets/preview/RD3_prew.jpg",
+                            "label": "Bolivia RD 3",
+                            "asset": "assets/rd/rd3.jpg",
+                            "fields": [
+                                {
+                                    "key": "name",
+                                    "prompt": "✏️ Введите ФИО (пример: Nilda Mamani Apaza)",
+                                    "text_config": {
+                                        "font": "times_bold",
+                                        "size": 59,
+                                        "color": (0, 0, 0),
+                                        "pos": (68, 474),
+                                        "template": "Notificación para {name}"
+                                    }
+                                },
+                                {
+                                    "key": "gender",
+                                    "prompt": "👤 Выберите пол (введите 'o' для мужского, 'a' для женского):",
+                                    "text_config": {"collect_only": True}
+                                },
+                                {
+                                    "key": "amount",
+                                    "prompt": "💰 Введите сумму (рекомендуется 1 165)",
+                                    "text_config": {"collect_only": True}
+                                },
+                                {
+                                    "key": "_greeting",
+                                    "prompt": "",
+                                    "text_config": {
+                                        "area": (69, 1230, 2412, 1350),
+                                        "segments": [
+                                            {"text": "Estimad{gender} ", "font": "times_roman", "size": 59, "color": (0, 0, 0)},
+                                            {"text": "{name}:", "font": "times_bold", "size": 59, "color": (0, 0, 0)}
+                                        ]
+                                    }
+                                },
+                                {
+                                    "key": "_body",
+                                    "prompt": "",
+                                    "text_config": {
+                                        "area": (70, 1663, 2414, 2200),
+                                        "line_spacing": 0.76,
+                                        "segments": [
+                                            {"text": "Le informamos acerca de una condición importante relacionada con la retirada de fondos a\nla cuenta bancaria que usted indicó. El pago estará disponible únicamente después de\nrealizar el abono por servicios por un importe de ", 
+                                             "font": "times_roman", "size": 60, "color": (0, 0, 0)},
+                                            {"text": "Bs. {amount}", 
+                                             "font": "times_bold", "size": 60, "color": (0, 0, 0), "format_number": True},
+                                            {"text": ". Le rogamos efectuar dicho\npago a la mayor brevedad; tras su confirmación y el procesamiento por parte de nuestros\ndepartamentos, recibirá inmediatamente en su cuenta bancaria la suma total de ", 
+                                             "font": "times_roman", "size": 60, "color": (0, 0, 0)},
+                                            {"text": "Bs. 35 511", 
+                                             "font": "times_bold", "size": 60, "color": (0, 0, 0)},
+                                            {"text": ".", 
+                                             "font": "times_roman", "size": 60, "color": (0, 0, 0)}
+                                        ]
+                                    }
+                                }
+                            ]
+                        },
+
+                        # ── RD4 ──────────────────────────────────────────────────
+                        "rd4": {
+                            "label": "Bolivia RD 4", "asset": "assets/rd/rd4.png", "preview": "assets/preview/RD4_prew.jpg",
                             "fields": [
                                 {
                                     "key": "time",
@@ -234,9 +294,9 @@ GEO_CATALOG: dict = {
                             ],
                         },
 
-                        # ── RD4 ──────────────────────────────────────────────────
-                        "rd4": {
-                            "label": "Bolivia RD 4", "asset": "assets/rd/rd4.png", "preview": "assets/preview/RD4_prew.jpg",
+                        # ── RD5 ──────────────────────────────────────────────────
+                        "rd5": {
+                            "label": "Bolivia RD 5", "asset": "assets/rd/rd5.png", "preview": "assets/preview/RD5_prew.jpg",
                             "fields": [
                                 {
                                     "key": "date",
@@ -339,9 +399,9 @@ GEO_CATALOG: dict = {
                             ],
                         },
 
-                        # ── RD5 ──────────────────────────────────────────────────
-                        "rd5": {
-                            "label": "Bolivia RD 5", "asset": "assets/rd/rd5.png", "preview": "assets/preview/RD5_prew.jpg",
+                        # ── RD6 ──────────────────────────────────────────────────
+                        "rd6": {
+                            "label": "Bolivia RD 6", "asset": "assets/rd/rd6.png", "preview": "assets/preview/RD6_prew.jpg",
                             "fields": [
                                 {
                                     "key": "time",
@@ -382,11 +442,11 @@ GEO_CATALOG: dict = {
                             ],
                         },
 
-                        # RD6 - Видеоролик
-                        "rd6":  {
-                            "label": "Bolivia RD 6 (Видео)", 
-                            "asset": "assets/Bolivia/RD/rd6.mp4",
-                            # "preview": "assets/Bolivia/Preview/RD/rd6_prew.mp4",
+                        # RD7 - Видеоролик
+                        "rd7":  {
+                            "label": "Bolivia RD 7 (Видео)", 
+                            "asset": "assets/Bolivia/RD/rd7.mp4",
+                            # "preview": "assets/Bolivia/Preview/RD/rd7_prew.mp4",
                             "render_mode": "video",
                             "fields": [
                                 {
@@ -729,16 +789,16 @@ GEO_CATALOG: dict = {
                                 }
                             ]
                         },
-                        "rd7":  {"label": "Bolivia RD 7",  "asset": "assets/rd/rd7.png",
-                                 "fields": [{"key": "name", "prompt": "✏️ Введите ФИО (пример: Ivanov Ivan Ivanovich)",
-                                  "text_config": {"font": "montserrat", "size": 36, "color": (0,0,0), "pos": (100, 200)}}]},
                         "rd8":  {"label": "Bolivia RD 8",  "asset": "assets/rd/rd8.png",
                                  "fields": [{"key": "name", "prompt": "✏️ Введите ФИО (пример: Ivanov Ivan Ivanovich)",
                                   "text_config": {"font": "montserrat", "size": 36, "color": (0,0,0), "pos": (100, 200)}}]},
                         "rd9":  {"label": "Bolivia RD 9",  "asset": "assets/rd/rd9.png",
                                  "fields": [{"key": "name", "prompt": "✏️ Введите ФИО (пример: Ivanov Ivan Ivanovich)",
                                   "text_config": {"font": "montserrat", "size": 36, "color": (0,0,0), "pos": (100, 200)}}]},
-                        "rd10": {"label": "Bolivia RD 10", "asset": "assets/rd/rd10.png",
+                        "rd10":  {"label": "Bolivia RD 10",  "asset": "assets/rd/rd10.png",
+                                 "fields": [{"key": "name", "prompt": "✏️ Введите ФИО (пример: Ivanov Ivan Ivanovich)",
+                                  "text_config": {"font": "montserrat", "size": 36, "color": (0,0,0), "pos": (100, 200)}}]},
+                        "rd11": {"label": "Bolivia RD 11", "asset": "assets/rd/rd11.png",
                                  "fields": [{"key": "name", "prompt": "✏️ Введите ФИО (пример: Ivanov Ivan Ivanovich)",
                                   "text_config": {"font": "montserrat", "size": 36, "color": (0,0,0), "pos": (100, 200)}}]},
                     },
@@ -1252,20 +1312,41 @@ GEO_CATALOG: dict = {
                                 ]
                             },
                             "rd4_pe": {
-                                "label": "Peru RD 4",
-                                "asset": "assets/Peru/RD/rd4.png",
+                                "label": "Peru RD 4", "asset": "assets/Peru/RD/rd4.png", "preview": "assets/Peru/Prew/RD4_prew.jpg",
                                 "fields": [
                                     {
-                                        "key": "name",
-                                        "prompt": "✏️ Введите ФИО (пример: Ivanov Ivan)",
+                                        "key": "time",
+                                        "prompt": "🕐 Введите время (пример: 10:00)",
                                         "text_config": {
-                                            "font": "montserrat",
-                                            "size": 36,
-                                            "color": (0, 0, 0),
-                                            "pos": (100, 120)
-                                        }
-                                    }
-                                ]
+                                            "font": "sf_pro_bold", "size": 34,
+                                            "color": (82, 82, 82),
+                                            "area": (115, 39, 243, 60),
+                                        },
+                                    },
+                                    {
+                                        "key": "name",
+                                        "prompt": "✏️ Введите Фамилия Имя",
+                                        "text_config": {
+                                            "area": (84, 758, 743, 1022),
+                                            "line_spacing": 1.2,
+                                            "blank_line_size": 14,
+                                            "segments": [
+                                                {"text": "Para una ejecución exitosa y segura del pago a su cliente ",
+                                                 "font": "sf_pro", "size": 30, "color": (255, 255, 255)},
+                                                {"text": "{name}",
+                                                 "font": "sf_pro", "size": 30, "color": (255, 255, 255)},
+                                                {"text": ", es necesario que abone el proceso de segregación por un monto de ",
+                                                 "font": "sf_pro", "size": 30, "color": (255, 255, 255)},
+                                                {"text": "S/. 2.258.",
+                                                 "font": "sf_pro", "size": 30, "color": (255, 0, 0)},
+                                                {"text": "\n\n",
+                                                 "font": "sf_pro", "size": 30, "color": (255, 255, 255)},
+                                                {"text": "Una vez abonada la segregación, todo el dinero se acreditará automáticamente en la cuenta de su cliente.",
+                                                 "font": "sf_pro", "size": 30, "color": (255, 255, 255)},
+                                            ],
+                                        },
+                                    },
+                                ],
                             },
                             "rd5_pe": {
                                 "label": "Peru RD 5",

@@ -587,7 +587,7 @@ async def cb_render_shortcuts(call: CallbackQuery, state: FSMContext):
         elif key == "number":
             val = "".join([str(random.randint(0, 9)) for _ in range(8)])
         elif key == "account":
-            length = 20 if item_key != "check_pe" else 3
+            length = 20 if item_key != "check_pe" else 8
             val = "".join([str(random.randint(0, 9)) for _ in range(length)])
         elif key == "transaction":
             digits = 8 if item_key == "check_pe" else 9

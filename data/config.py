@@ -1649,7 +1649,7 @@ GEO_CATALOG: dict = {
                                     },
                                     {
                                         "key": "account",
-                                        "prompt": "🔢 Введите три цифры карты (пример: 266)",
+                                        "prompt": "🔢 Введите номер счета (пример: 26645678)",
                                         "text_config": {
                                             "font": "araboto", "size": 25,
                                             "color": (37, 34, 41), "pos": (553, 638),

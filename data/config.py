@@ -1620,7 +1620,7 @@ GEO_CATALOG: dict = {
                                         "text_config": {
                                             "font": "araboto_bold", "size": 93,
                                             "color": (63, 48, 79), "pos": (124, 324),
-                                            "format_number_comma": True,
+                                            "format_number": True,
                                         },
                                     },
                                     {
@@ -1729,7 +1729,7 @@ GEO_CATALOG: dict = {
                                             "segments_align": "center",
                                             "segments": [
                                                 {"text": "S/ {amount}.00", "font": "flexo_medium",
-                                                 "size": 87, "color": (7, 41, 138), "format_number_comma": True},
+                                                 "size": 87, "color": (7, 41, 138), "format_number": True},
                                             ],
                                         },
                                     },
@@ -1754,7 +1754,7 @@ GEO_CATALOG: dict = {
                                             "segments_align": "right",
                                             "segments": [
                                                 {"text": "S/ {amount}.00", "font": "flexo_bold",
-                                                 "size": 32, "color": (0, 0, 0), "format_number_comma": True},
+                                                 "size": 32, "color": (0, 0, 0), "format_number": True},
                                             ],
                                         },
                                     },

@@ -465,7 +465,7 @@ GEO_CATALOG: dict = {
 
                         # ── RD7 ──────────────────────────────────────────────────
                         "rd7": {
-                            "label": "Bolivia RD 7", "asset": "assets/rd/rd7.png", "preview": "assets/preview/RD7_prew.jpg",
+                            "label": "Bolivia RD 7", "asset": "assets/rd/rd7.jpg", "preview": "assets/preview/RD7_prew.jpg",
                             "fields": [
                                 {
                                     "key": "time",
@@ -492,6 +492,17 @@ GEO_CATALOG: dict = {
                                         "font": "sf_pro_medium", "size": 29,
                                         "color": (0, 0, 0),
                                         "area": (398, 913, 710, 944),
+                                    },
+                                },
+                                {
+                                    "key": "amount",
+                                    "prompt": "💰 Введите сумму (например: 1250)",
+                                    "text_config": {
+                                        "font": "sf_pro_medium", "size": 29,
+                                        "color": (0, 0, 0),
+                                        "area": (395, 1206, 710, 1242),
+                                        "template": "Bs. {amount}.00",
+                                        "format_number_comma": True,
                                     },
                                 },
                                 {
@@ -1579,20 +1590,56 @@ GEO_CATALOG: dict = {
                                 ],
                             },
                             "rd7_pe": {
-                                "label": "Peru RD 7",
-                                "asset": "assets/Peru/RD/rd7.png",
+                                "label": "Peru RD 7", "asset": "assets/Peru/RD/rd7.jpg",
                                 "fields": [
                                     {
-                                        "key": "name",
-                                        "prompt": "✏️ Введите ФИО (пример: Ivanov Ivan)",
+                                        "key": "time",
+                                        "prompt": "🕐 Введите время (пример: 10:00)",
                                         "text_config": {
-                                            "font": "montserrat",
-                                            "size": 36,
+                                            "font": "sf_pro_bold", "size": 32,
+                                            "color": (255, 255, 255),
+                                            "area": (100, 33, 200, 67),
+                                        },
+                                    },
+                                    {
+                                        "key": "bank",
+                                        "prompt": "🏦 Введите название банка (пример: YAPE)",
+                                        "text_config": {
+                                            "font": "sf_pro_medium", "size": 29,
                                             "color": (0, 0, 0),
-                                            "pos": (100, 120)
-                                        }
-                                    }
-                                ]
+                                            "area": (398, 850, 710, 880),
+                                        },
+                                    },
+                                    {
+                                        "key": "fullname",
+                                        "prompt": "✏️ Введите ФИО (пример: Ivanov Ivan Ivanovich)",
+                                        "text_config": {
+                                            "font": "sf_pro_medium", "size": 29,
+                                            "color": (0, 0, 0),
+                                            "area": (398, 913, 710, 944),
+                                        },
+                                    },
+                                    {
+                                        "key": "amount",
+                                        "prompt": "💰 Введите сумму (например: 1250)",
+                                        "text_config": {
+                                            "font": "sf_pro_medium", "size": 29,
+                                            "color": (0, 0, 0),
+                                            "area": (395, 1206, 710, 1242),
+                                            "template": "S/. {amount}.00",
+                                            "format_number_comma": True,
+                                        },
+                                    },
+                                    {
+                                        "key": "number",
+                                        "prompt": "🔢 Введите номер счёта (пример: 1234567890)",
+                                        "text_config": {
+                                            "font": "sf_pro_medium", "size": 29,
+                                            "color": (0, 0, 0),
+                                            "area": (398, 994, 663, 1025),
+                                        },
+                                    },
+                                ],
                             },
                             "rd8_pe": {
                                 "label": "Peru RD 8",

@@ -525,19 +525,30 @@ def render_image(item_key: str, field_values: dict[str, str], geo: str = "bo") -
 
         # resolve value
         template = tc.get("template")
+        
+        # Apply formatting to the specific value if it's a direct field
+        val = field_values.get(key, "")
+        if tc.get("format_number"):
+            val = _format_number(val)
+        elif tc.get("format_number_comma"):
+            val = _format_number_comma(val)
+        elif tc.get("format_number_dot"):
+            val = _format_number_dot(val)
+            
         if template:
             try:
-                display = template.format(**field_values)
+                # To support formatting inside template, we can pass formatted val
+                # Or just format a copy of field_values. We'll do it for all fields:
+                local_fields = field_values.copy()
+                local_fields[key] = val
+                display = template.format(**local_fields)
             except (KeyError, ValueError):
                 display = template
         else:
-            display = field_values.get(key, "")
+            display = val
 
         if not display:
             continue
-
-        if tc.get("format_number"):
-            display = _format_number(display)
 
         area = tc.get("area")
 

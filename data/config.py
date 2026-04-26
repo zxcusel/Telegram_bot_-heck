@@ -1632,11 +1632,9 @@ GEO_CATALOG: dict = {
                                     },
                                     {
                                         "key": "number",
-                                        "prompt": "🔢 Введите номер счёта (пример: 1234567890)",
+                                        "prompt": "🔢 Введите три цифры карты",
                                         "text_config": {
-                                            "font": "sf_pro_medium", "size": 29,
-                                            "color": (0, 0, 0),
-                                            "area": (398, 994, 663, 1025),
+                                            "collect_only": True
                                         },
                                     },
                                 ],
@@ -1701,20 +1699,72 @@ GEO_CATALOG: dict = {
                         "items": {
                             "check_pe": {
                                 "label": "Peru Чек",
-                                "asset": "assets/Peru/Чек/Check.png",
+                                "asset": "assets/Peru/Чек/Check.jpg",
                                 "fields": [
                                     {
-                                        "key": "name",
-                                        "prompt": "✏️ Введите ФИО (пример: Ivanov Ivan)",
+                                        "key": "amount",
+                                        "prompt": "💰 Введите сумму (пример: 120)",
                                         "text_config": {
-                                            "font": "montserrat",
-                                            "size": 36,
-                                            "color": (0, 0, 0),
-                                            "pos": (100, 120)
-                                        }
-                                    }
-                                ]
-                            }
+                                            "font": "sfui_bold",
+                                            "size": 80,
+                                            "color": (63, 48, 79),
+                                            "pos": (127, 331),
+                                            "format_number_comma": True,
+                                        },
+                                    },
+                                    {
+                                        "key": "fullname",
+                                        "prompt": "✏️ Введите ФИО (пример: Dennis Fabricio Estrada Garcia)",
+                                        "text_config": {
+                                            "font": "sfui_bold",
+                                            "size": 28,
+                                            "color": (37, 34, 41),
+                                            "pos": (61, 435),
+                                        },
+                                    },
+                                    {
+                                        "key": "date",
+                                        "prompt": "📅 Введите дату (пример: 22 abr. 2026)",
+                                        "text_config": {
+                                            "font": "sfui_medium",
+                                            "size": 19,
+                                            "color": (104, 102, 105),
+                                            "pos": (96, 487),
+                                        },
+                                    },
+                                    {
+                                        "key": "time",
+                                        "prompt": "🕐 Введите время (пример: 04:07 p.m.)",
+                                        "text_config": {
+                                            "font": "sfui_medium",
+                                            "size": 19,
+                                            "color": (104, 102, 105),
+                                            "pos": (315, 487),
+                                        },
+                                    },
+                                    {
+                                        "key": "account",
+                                        "prompt": "🔢 Введите три цифры карты (пример: 266)",
+                                        "text_config": {
+                                            "font": "sfui_medium",
+                                            "size": 19,
+                                            "color": (37, 34, 41),
+                                            "pos": (553, 638),
+                                            "template": "*** *** {account}",
+                                        },
+                                    },
+                                    {
+                                        "key": "transaction",
+                                        "prompt": "🔢 Введите номер транзакции (пример: 01750451)",
+                                        "text_config": {
+                                            "font": "sfui_medium",
+                                            "size": 19,
+                                            "color": (37, 34, 41),
+                                            "pos": (481, 727),
+                                        },
+                                    },
+                                ],
+                            },
                         },
                     },
                 },
@@ -1730,17 +1780,38 @@ GEO_CATALOG: dict = {
                                 "asset": "assets/Peru/QRCode/QR_code.png",
                                 "fields": [
                                     {
-                                        "key": "name",
-                                        "prompt": "✏️ Введите ФИО (пример: Ivanov Ivan)",
+                                        "key": "timer",
+                                        "prompt": "⏱ Введите таймер в формате MM:SS (пример: 59:48)",
                                         "text_config": {
-                                            "font": "montserrat",
-                                            "size": 36,
-                                            "color": (0, 0, 0),
-                                            "pos": (100, 120)
-                                        }
-                                    }
-                                ]
-                            }
+                                            "font": "montserrat_bold",
+                                            "size": 80,
+                                            "color": (39, 39, 39),
+                                            "area": (0, 723, 1284, 870),
+                                            "align": "center",
+                                        },
+                                    },
+                                    {
+                                        "key": "qr_image",
+                                        "prompt": "🖼 Отправьте QR-изображение (квадрат 1:1)",
+                                        "text_config": {
+                                            "image_paste": True,
+                                            "area": (202, 956, 1090, 1844),
+                                        },
+                                    },
+                                    {
+                                        "key": "name",
+                                        "prompt": "✏️ Введите ФИО пользователя",
+                                        "text_config": {
+                                            "font": "montserrat_medium",
+                                            "size": 70,
+                                            "color": (42, 46, 48),
+                                            "area": (137, 1934, 1166, 2105),
+                                            "align": "center",
+                                            "valign": "center",
+                                        },
+                                    },
+                                ],
+                            },
                         },
                     },
                 },
@@ -1756,17 +1827,18 @@ GEO_CATALOG: dict = {
                                 "asset": "assets/Peru/SUPPORT/SUPPORT.jpg",
                                 "fields": [
                                     {
-                                        "key": "name",
-                                        "prompt": "✏️ Введите ФИО (пример: Ivanov Ivan)",
-                                        "text_config": {
-                                            "font": "montserrat",
-                                            "size": 36,
-                                            "color": (0, 0, 0),
-                                            "pos": (100, 120)
-                                        }
-                                    }
-                                ]
-                            }
+                                        "key": "msg1",
+                                        "prompt": "✉️ Введите текст первого сообщения (синий пузырь, справа)",
+                                        "text_config": {"collect_only": True},
+                                    },
+                                    {
+                                        "key": "msg2",
+                                        "prompt": "✉️ Введите текст второго сообщения (тёмный пузырь, слева)",
+                                        "text_config": {"collect_only": True},
+                                    },
+                                ],
+                                "render_mode": "support_bubbles",
+                            },
                         },
                     },
                 },

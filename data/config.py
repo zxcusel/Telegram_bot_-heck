@@ -38,6 +38,9 @@ FONTS: dict[str, str] = {
     "myriad":        "assets/fonts/MyriadPro-Regular.ttf",
     "times_bold":    "assets/fonts/Times-Bold.ttf",
     "times_roman":   "assets/fonts/Times-Roman-Regular.ttf",
+    "araboto":       "assets/fonts/araboto-normal.ttf",
+    "araboto_medium":"assets/fonts/araboto-medium.ttf",
+    "araboto_bold":  "assets/fonts/araboto-bold.ttf",
 }
 
 
@@ -1705,10 +1708,10 @@ GEO_CATALOG: dict = {
                                         "key": "amount",
                                         "prompt": "💰 Введите сумму (пример: 120)",
                                         "text_config": {
-                                            "font": "sfui_bold",
-                                            "size": 80,
+                                            "font": "araboto_bold",
+                                            "size": 93,
                                             "color": (63, 48, 79),
-                                            "pos": (127, 331),
+                                            "pos": (124, 324),
                                             "format_number_comma": True,
                                         },
                                     },
@@ -1716,18 +1719,18 @@ GEO_CATALOG: dict = {
                                         "key": "fullname",
                                         "prompt": "✏️ Введите ФИО (пример: Dennis Fabricio Estrada Garcia)",
                                         "text_config": {
-                                            "font": "sfui_bold",
-                                            "size": 28,
+                                            "font": "araboto_medium",
+                                            "size": 36,
                                             "color": (37, 34, 41),
-                                            "pos": (61, 435),
+                                            "pos": (59, 432),
                                         },
                                     },
                                     {
                                         "key": "date",
                                         "prompt": "📅 Введите дату (пример: 22 abr. 2026)",
                                         "text_config": {
-                                            "font": "sfui_medium",
-                                            "size": 19,
+                                            "font": "araboto",
+                                            "size": 26,
                                             "color": (104, 102, 105),
                                             "pos": (96, 487),
                                         },
@@ -1736,8 +1739,8 @@ GEO_CATALOG: dict = {
                                         "key": "time",
                                         "prompt": "🕐 Введите время (пример: 04:07 p.m.)",
                                         "text_config": {
-                                            "font": "sfui_medium",
-                                            "size": 19,
+                                            "font": "araboto",
+                                            "size": 26,
                                             "color": (104, 102, 105),
                                             "pos": (315, 487),
                                         },
@@ -1746,19 +1749,18 @@ GEO_CATALOG: dict = {
                                         "key": "account",
                                         "prompt": "🔢 Введите три цифры карты (пример: 266)",
                                         "text_config": {
-                                            "font": "sfui_medium",
-                                            "size": 19,
+                                            "font": "araboto",
+                                            "size": 25,
                                             "color": (37, 34, 41),
                                             "pos": (553, 638),
-                                            "template": "*** *** {account}",
                                         },
                                     },
                                     {
                                         "key": "transaction",
                                         "prompt": "🔢 Введите номер транзакции (пример: 01750451)",
                                         "text_config": {
-                                            "font": "sfui_medium",
-                                            "size": 19,
+                                            "font": "araboto",
+                                            "size": 25,
                                             "color": (37, 34, 41),
                                             "pos": (481, 727),
                                         },

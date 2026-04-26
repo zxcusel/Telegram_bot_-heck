@@ -21,6 +21,23 @@ import random
 
 router = Router()
 
+# ── Испанские сокращения месяцев ──────────────────────────────────────────────
+_ES_MONTHS = {
+    "01": "ene", "02": "feb", "03": "mar", "04": "abr",
+    "05": "may", "06": "jun", "07": "jul", "08": "ago",
+    "09": "sep", "10": "oct", "11": "nov", "12": "dic",
+}
+
+def _to_es_date(val: str) -> str:
+    """Конвертирует '24.04.2026' или '24/04/2026' в '24 abr. 2026'."""
+    import re
+    m = re.match(r"(\d{1,2})[./](\d{2})[./](\d{4})", val.strip())
+    if m:
+        day, month, year = m.group(1), m.group(2), m.group(3)
+        month_es = _ES_MONTHS.get(month, month)
+        return f"{int(day)} {month_es}. {year}"
+    return val  # если формат не распознан — вернуть как есть
+
 BASE_DIR = os.path.normpath(os.path.join(os.path.dirname(__file__), ".."))
 
 
@@ -378,13 +395,17 @@ async def collect_text_field(message: Message, state: FSMContext):
     if data.get("time_suffix") and "time" in askable[step]["key"]:
         if "M." not in val.upper(): # Если пользователь сам не написал AM/PM
             suff = data['time_suffix']
-            if item_key == "check_doc":
-                suff = suff.lower()
+            if item_key in ("check_doc", "check_pe"):
+                suff = suff.lower().replace("a.m.", "a. m.").replace("p.m.", "p. m.")
             val = f"{val} {suff}"
     
     # Если пользователь сам ввел AM/PM в чеке — тоже в нижний регистр
-    if item_key == "check_doc" and "time" in askable[step]["key"]:
-        val = val.replace("AM", "a.m.").replace("PM", "p.m.").replace("A.M.", "a.m.").replace("P.M.", "p.m.")
+    if item_key in ("check_doc", "check_pe") and "time" in askable[step]["key"]:
+        val = val.replace("AM", "a. m.").replace("PM", "p. m.").replace("A.M.", "a. m.").replace("P.M.", "p. m.")
+    
+    # Конвертация даты в испанский формат для чека Перу
+    if item_key == "check_pe" and askable[step]["key"] == "date":
+        val = _to_es_date(val)
 
     values[askable[step]["key"]] = val
     done_step = step + 1
@@ -536,10 +557,13 @@ async def cb_render_shortcuts(call: CallbackQuery, state: FSMContext):
         key = askable[step]["key"]
         if key in ("sum", "amount"):
             val = str(random.randint(s["rand_min"], s["rand_max"]))
-        elif key in ("number", "account"):
+        elif key == "number":
             val = "".join([str(random.randint(0, 9)) for _ in range(8)])
+        elif key == "account":
+            val = "".join([str(random.randint(0, 9)) for _ in range(3)])
         elif key == "transaction":
-            val = "".join([str(random.randint(0, 9)) for _ in range(9)])
+            digits = 8 if item_key == "check_pe" else 9
+            val = "".join([str(random.randint(0, 9)) for _ in range(digits)])
         else:
             val = "0"
     elif action == "suffix":
@@ -570,6 +594,9 @@ async def cb_render_shortcuts(call: CallbackQuery, state: FSMContext):
         return
 
     # Если мы здесь, значит получили значение (pin или random)
+    # Конвертация даты в испанский формат для чека Перу
+    if item_key == "check_pe" and askable[step]["key"] == "date":
+        val = _to_es_date(val)
     values[askable[step]["key"]] = val
     done_step = step + 1
 

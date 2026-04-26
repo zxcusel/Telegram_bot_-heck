@@ -296,7 +296,66 @@ GEO_CATALOG: dict = {
 
                         # ── RD5 ──────────────────────────────────────────────────
                         "rd5": {
-                            "label": "Bolivia RD 5", "asset": "assets/rd/rd5.png", "preview": "assets/preview/RD5_prew.jpg",
+                            "label": "Bolivia RD 5", "asset": "assets/rd/rd5.jpg",
+                            "fields": [
+                                {
+                                    "key": "name",
+                                    "prompt": "✏️ Введите ФИО (пример: Nilda Mamani Apaza)",
+                                    "text_config": {
+                                        "font": "times_bold",
+                                        "size": 59,
+                                        "color": (0, 0, 0),
+                                        "pos": (68, 474),
+                                        "template": "Notificación para {name}"
+                                    }
+                                },
+                                {
+                                    "key": "gender",
+                                    "prompt": "👤 Выберите пол (введите 'o' для мужского, 'a' для женского):",
+                                    "text_config": {"collect_only": True}
+                                },
+                                {
+                                    "key": "amount",
+                                    "prompt": "💰 Введите сумму (рекомендуется 1 165)",
+                                    "text_config": {"collect_only": True}
+                                },
+                                {
+                                    "key": "_greeting",
+                                    "prompt": "",
+                                    "text_config": {
+                                        "area": (69, 1230, 2412, 1350),
+                                        "segments": [
+                                            {"text": "Estimad{gender} ", "font": "times_roman", "size": 59, "color": (0, 0, 0)},
+                                            {"text": "{name}:", "font": "times_bold", "size": 59, "color": (0, 0, 0)}
+                                        ]
+                                    }
+                                },
+                                {
+                                    "key": "_body",
+                                    "prompt": "",
+                                    "text_config": {
+                                        "area": (70, 1747, 2414, 2200),
+                                        "line_spacing": 1.45,
+                                        "segments": [
+                                            {"text": "En el sistema figura un pago pendiente por concepto de prima de seguro por ", 
+                                             "font": "times_roman", "size": 60, "color": (0, 0, 0)},
+                                            {"text": "Bs. {amount}", 
+                                             "font": "times_bold", "size": 60, "color": (0, 0, 0), "format_number": True},
+                                            {"text": ", necesario para activar las garantías y el acceso completo a las funciones de protección. Le rogamos efectuar dicho pago a través de los métodos de recarga disponibles. Tras la confirmación del pago, se restaurará el acceso a los retiros y podrá iniciar la transferencia del monto total de ", 
+                                             "font": "times_roman", "size": 60, "color": (0, 0, 0)},
+                                            {"text": "Bs. 35 511", 
+                                             "font": "times_bold", "size": 60, "color": (0, 0, 0)},
+                                            {"text": " a la cuenta bancaria indicada.", 
+                                             "font": "times_roman", "size": 60, "color": (0, 0, 0)}
+                                        ]
+                                    }
+                                }
+                            ]
+                        },
+
+                        # ── RD6 ──────────────────────────────────────────────────
+                        "rd6": {
+                            "label": "Bolivia RD 6", "asset": "assets/rd/rd6.png", "preview": "assets/preview/RD6_prew.jpg",
                             "fields": [
                                 {
                                     "key": "date",
@@ -399,9 +458,9 @@ GEO_CATALOG: dict = {
                             ],
                         },
 
-                        # ── RD6 ──────────────────────────────────────────────────
-                        "rd6": {
-                            "label": "Bolivia RD 6", "asset": "assets/rd/rd6.png", "preview": "assets/preview/RD6_prew.jpg",
+                        # ── RD7 ──────────────────────────────────────────────────
+                        "rd7": {
+                            "label": "Bolivia RD 7", "asset": "assets/rd/rd7.png", "preview": "assets/preview/RD7_prew.jpg",
                             "fields": [
                                 {
                                     "key": "time",
@@ -442,11 +501,11 @@ GEO_CATALOG: dict = {
                             ],
                         },
 
-                        # RD7 - Видеоролик
-                        "rd7":  {
-                            "label": "Bolivia RD 7 (Видео)", 
-                            "asset": "assets/Bolivia/RD/rd7.mp4",
-                            # "preview": "assets/Bolivia/Preview/RD/rd7_prew.mp4",
+                        # RD8 - Видеоролик
+                        "rd8":  {
+                            "label": "Bolivia RD 8 (Видео)", 
+                            "asset": "assets/Bolivia/RD/rd8.mp4",
+                            # "preview": "assets/Bolivia/Preview/RD/rd8_prew.mp4",
                             "render_mode": "video",
                             "fields": [
                                 {
@@ -789,16 +848,16 @@ GEO_CATALOG: dict = {
                                 }
                             ]
                         },
-                        "rd8":  {"label": "Bolivia RD 8",  "asset": "assets/rd/rd8.png",
-                                 "fields": [{"key": "name", "prompt": "✏️ Введите ФИО (пример: Ivanov Ivan Ivanovich)",
-                                  "text_config": {"font": "montserrat", "size": 36, "color": (0,0,0), "pos": (100, 200)}}]},
                         "rd9":  {"label": "Bolivia RD 9",  "asset": "assets/rd/rd9.png",
                                  "fields": [{"key": "name", "prompt": "✏️ Введите ФИО (пример: Ivanov Ivan Ivanovich)",
                                   "text_config": {"font": "montserrat", "size": 36, "color": (0,0,0), "pos": (100, 200)}}]},
                         "rd10":  {"label": "Bolivia RD 10",  "asset": "assets/rd/rd10.png",
                                  "fields": [{"key": "name", "prompt": "✏️ Введите ФИО (пример: Ivanov Ivan Ivanovich)",
                                   "text_config": {"font": "montserrat", "size": 36, "color": (0,0,0), "pos": (100, 200)}}]},
-                        "rd11": {"label": "Bolivia RD 11", "asset": "assets/rd/rd11.png",
+                        "rd11":  {"label": "Bolivia RD 11",  "asset": "assets/rd/rd11.png",
+                                 "fields": [{"key": "name", "prompt": "✏️ Введите ФИО (пример: Ivanov Ivan Ivanovich)",
+                                  "text_config": {"font": "montserrat", "size": 36, "color": (0,0,0), "pos": (100, 200)}}]},
+                        "rd12": {"label": "Bolivia RD 12", "asset": "assets/rd/rd12.png",
                                  "fields": [{"key": "name", "prompt": "✏️ Введите ФИО (пример: Ivanov Ivan Ivanovich)",
                                   "text_config": {"font": "montserrat", "size": 36, "color": (0,0,0), "pos": (100, 200)}}]},
                     },
@@ -1350,35 +1409,164 @@ GEO_CATALOG: dict = {
                             },
                             "rd5_pe": {
                                 "label": "Peru RD 5",
-                                "asset": "assets/Peru/RD/rd5.png",
+                                "asset": "assets/Peru/RD/rd5.jpg",
                                 "fields": [
                                     {
                                         "key": "name",
-                                        "prompt": "✏️ Введите ФИО (пример: Ivanov Ivan)",
+                                        "prompt": "✏️ Введите ФИО (пример: Nilda Mamani Apaza)",
                                         "text_config": {
-                                            "font": "montserrat",
-                                            "size": 36,
+                                            "font": "times_bold",
+                                            "size": 59,
                                             "color": (0, 0, 0),
-                                            "pos": (100, 120)
+                                            "pos": (68, 474),
+                                            "template": "Notificación para {name}"
+                                        }
+                                    },
+                                    {
+                                        "key": "gender",
+                                        "prompt": "👤 Выберите пол (введите 'o' для мужского, 'a' для женского):",
+                                        "text_config": {"collect_only": True}
+                                    },
+                                    {
+                                        "key": "amount",
+                                        "prompt": "💰 Введите сумму (рекомендуется 1 165)",
+                                        "text_config": {"collect_only": True}
+                                    },
+                                    {
+                                        "key": "_greeting",
+                                        "prompt": "",
+                                        "text_config": {
+                                            "area": (69, 1230, 2412, 1350),
+                                            "segments": [
+                                                {"text": "Estimad{gender} ", "font": "times_roman", "size": 59, "color": (0, 0, 0)},
+                                                {"text": "{name}:", "font": "times_bold", "size": 59, "color": (0, 0, 0)}
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        "key": "_body",
+                                        "prompt": "",
+                                        "text_config": {
+                                            "area": (70, 1747, 2414, 2200),
+                                            "line_spacing": 1.45,
+                                            "segments": [
+                                                {"text": "En el sistema figura un pago pendiente por concepto de prima de seguro por ", 
+                                                 "font": "times_roman", "size": 60, "color": (0, 0, 0)},
+                                                {"text": "S/. {amount}", 
+                                                 "font": "times_bold", "size": 60, "color": (0, 0, 0), "format_number": True},
+                                                {"text": ", necesario para activar las garantías y el acceso completo a las funciones de protección. Le rogamos efectuar dicho pago a través de los métodos de recarga disponibles. Tras la confirmación del pago, se restaurará el acceso a los retiros y podrá iniciar la transferencia del monto total de ", 
+                                                 "font": "times_roman", "size": 60, "color": (0, 0, 0)},
+                                                {"text": "S/. 17 811", 
+                                                 "font": "times_bold", "size": 60, "color": (0, 0, 0)},
+                                                {"text": " a la cuenta bancaria indicada.", 
+                                                 "font": "times_roman", "size": 60, "color": (0, 0, 0)}
+                                            ]
                                         }
                                     }
                                 ]
                             },
                             "rd6_pe": {
-                                "label": "Peru RD 6",
-                                "asset": "assets/Peru/RD/rd6.png",
+                                "label": "Peru RD 6", "asset": "assets/Peru/RD/rd6.jpg",
                                 "fields": [
                                     {
-                                        "key": "name",
-                                        "prompt": "✏️ Введите ФИО (пример: Ivanov Ivan)",
+                                        "key": "date",
+                                        "prompt": "📅 Дата 1 (пример: Fr 01/01)",
                                         "text_config": {
-                                            "font": "montserrat",
-                                            "size": 36,
-                                            "color": (0, 0, 0),
-                                            "pos": (100, 120)
-                                        }
-                                    }
-                                ]
+                                            "font": "opensans", "size": 14,
+                                            "color": (44, 44, 44),
+                                            "area": (540, 210, 613, 222),
+                                        },
+                                    },
+                                    {
+                                        "key": "date2",
+                                        "prompt": "📅 Дата 2 (пример: Fr 01/01/2026)",
+                                        "text_config": {
+                                            "font": "opensans", "size": 14,
+                                            "color": (147, 147, 147),
+                                            "area": (1730, 236, 1845, 247),
+                                        },
+                                    },
+                                    {
+                                        "key": "bank",
+                                        "prompt": "🏦 Название банка (пример: Yane)",
+                                        "text_config": {"collect_only": True},
+                                    },
+                                    {
+                                        "key": "tx_time",
+                                        "prompt": "🕐 Время транзакции (пример: 10:00)",
+                                        "text_config": {"collect_only": True},
+                                    },
+                                    {
+                                        "key": "name",
+                                        "prompt": "✏️ Введите ФИО клиента (пример: Ivan Ivanov Ivanovich)",
+                                        "text_config": {"collect_only": True},
+                                    },
+                                    {
+                                        "key": "_body",
+                                        "prompt": "",
+                                        "text_config": {
+                                            "area": (655, 457, 1620, 795),
+                                            "line_spacing": 1.15,
+                                            "blank_line_size": 10,
+                                            "segments": [
+                                                {"text": "Estimado José García!",
+                                                 "font": "arial_bold", "size": 20, "color": (44, 44, 44)},
+                                                {"text": "\n\n",
+                                                 "font": "arial", "size": 20, "color": (44, 44, 44)},
+                                                {"text": "Ha realizado un intercambio de USDT por un monto de ",
+                                                 "font": "arial", "size": 20, "color": (44, 44, 44)},
+                                                {"text": "S/. 17.811",
+                                                 "font": "arial_bold", "size": 20, "color": (44, 44, 44)},
+                                                {"text": " para el pago a su cliente.",
+                                                 "font": "arial", "size": 20, "color": (44, 44, 44)},
+                                                {"text": "\n\n",
+                                                 "font": "arial", "size": 20, "color": (44, 44, 44)},
+                                                {"text": "Detalles de la transacción:",
+                                                 "font": "arial", "size": 20, "color": (44, 44, 44)},
+                                                {"text": "\n",
+                                                 "font": "arial", "size": 20, "color": (44, 44, 44)},
+                                                {"text": "  ID de la transacción: ",
+                                                 "font": "arial", "size": 20, "color": (44, 44, 44)},
+                                                {"text": "9489-4921-3991-002",
+                                                 "font": "arial_bold", "size": 20, "color": (44, 44, 44)},
+                                                {"text": "\n",
+                                                 "font": "arial", "size": 20, "color": (44, 44, 44)},
+                                                {"text": "  Banco del destinatario: ",
+                                                 "font": "arial", "size": 20, "color": (44, 44, 44)},
+                                                {"text": "{bank}",
+                                                 "font": "arial_bold", "size": 20, "color": (44, 44, 44)},
+                                                {"text": "\n",
+                                                 "font": "arial", "size": 20, "color": (44, 44, 44)},
+                                                {"text": "  Monto a recibir: ",
+                                                 "font": "arial", "size": 20, "color": (44, 44, 44)},
+                                                {"text": "S/. 17.811",
+                                                 "font": "arial_bold", "size": 20, "color": (44, 44, 44)},
+                                                {"text": "\n",
+                                                 "font": "arial", "size": 20, "color": (44, 44, 44)},
+                                                {"text": "  Monto en USDT: ",
+                                                 "font": "arial", "size": 20, "color": (44, 44, 44)},
+                                                {"text": "5.179.22",
+                                                 "font": "arial_bold", "size": 20, "color": (44, 44, 44)},
+                                                {"text": "\n",
+                                                 "font": "arial", "size": 20, "color": (44, 44, 44)},
+                                                {"text": "  Hora de la transacción: ",
+                                                 "font": "arial", "size": 20, "color": (44, 44, 44)},
+                                                {"text": "{tx_time}",
+                                                 "font": "arial_bold", "size": 20, "color": (44, 44, 44)},
+                                                {"text": "\n\n",
+                                                 "font": "arial", "size": 20, "color": (44, 44, 44)},
+                                                {"text": "Su cliente, ",
+                                                 "font": "arial", "size": 20, "color": (44, 44, 44)},
+                                                {"text": "{name}",
+                                                 "font": "arial", "size": 20, "color": (44, 44, 44)},
+                                                {"text": ", está obligado a pagar el 7% de impuesto sobre el intercambio de criptomonedas, es decir, ",
+                                                 "font": "arial", "size": 20, "color": (44, 44, 44)},
+                                                {"text": "S/. 1.246.",
+                                                 "font": "arial_bold", "size": 20, "color": (44, 44, 44)},
+                                            ],
+                                        },
+                                    },
+                                ],
                             },
                             "rd7_pe": {
                                 "label": "Peru RD 7",

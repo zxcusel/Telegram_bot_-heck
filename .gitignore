@@ -1,5 +1,6 @@
 venv/
 pycache/
+**/__pycache__/
 *.pyc
 .env
 .idea/
@@ -10,7 +11,4 @@ assets/
 *.exe
 *.json
 *.db
-/data/__pycache__
-/data/__pycache__
-/data/__pycache__
 /data/__pycache__

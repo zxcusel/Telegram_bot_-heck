@@ -48,7 +48,7 @@ def _get_field_keyboard(field_key: str, s: dict, item_key: str = None) -> Inline
         buttons.append([InlineKeyboardButton(text=f"🏦 {s['pinned_bank']}", callback_data="render:pin_bank")])
         
     # 🕒 AM/PM
-    if "time" in field_key and item_key != "rd6":
+    if "time" in field_key and item_key not in ("rd6", "rd7"):
         row = []
         am_label = "☀️ A.M."
         pm_label = "🌙 P.M."

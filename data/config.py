@@ -895,7 +895,7 @@ GEO_CATALOG: dict = {
 
                         # ── PROOF №1 ─────────────────────────────────────────────
                         "rd_proof1": {
-                            "label": "Bolivia PROOF 1", "asset": "assets/rd/proofs/psd1.png", "preview": "assets/preview/RDPROOF_prew.jpg",
+                            "label": "Bolivia PROOF 1", "asset": "assets/rd/proofs/proof1.jpg", "preview": "assets/preview/RDPROOF_prew.jpg",
                             "fields": [
                                 {
                                     "key": "time",

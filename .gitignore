@@ -8,6 +8,7 @@ assets/
 *.exe
 *.json
 *.db
+bot.db
 
 # Python bytecode
 __pycache__/

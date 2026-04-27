@@ -40,3 +40,5 @@ utils/__pycache__/__init__.cpython-314.pyc
 utils/__pycache__/logger.cpython-314.pyc
 utils/__pycache__/renderer.cpython-314.pyc
 bot.db
+**__pycache__**
+**/__pycache__

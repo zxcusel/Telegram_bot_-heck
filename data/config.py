@@ -228,7 +228,7 @@ GEO_CATALOG: dict = {
                                 },
                                 {
                                     "key": "amount",
-                                    "prompt": "💰 Введите сумму (рекомендуется 1 165)",
+                                    "prompt": "💰 Введите сумму (рекомендуется 2 343)",
                                     "text_config": {"collect_only": True}
                                 },
                                 {
@@ -326,7 +326,7 @@ GEO_CATALOG: dict = {
                                 },
                                 {
                                     "key": "amount",
-                                    "prompt": "💰 Введите сумму (рекомендуется 1 165)",
+                                    "prompt": "💰 Введите сумму (рекомендуется 2 100)",
                                     "text_config": {"collect_only": True}
                                 },
                                 {
@@ -506,7 +506,7 @@ GEO_CATALOG: dict = {
                                 },
                                 {
                                     "key": "amount",
-                                    "prompt": "💰 Введите сумму (например: 1250)",
+                                    "prompt": "💰 Введите сумму (рекомендуется 1 745)",
                                     "text_config": {
                                         "font": "sf_pro_medium", "size": 29,
                                         "color": (0, 0, 0),
@@ -1455,7 +1455,7 @@ GEO_CATALOG: dict = {
                                     },
                                     {
                                         "key": "amount",
-                                        "prompt": "💰 Введите сумму (рекомендуется 1 165)",
+                                        "prompt": "💰 Введите сумму (рекомендуется 739)",
                                         "text_config": {"collect_only": True}
                                     },
                                     {

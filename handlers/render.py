@@ -126,11 +126,32 @@ def _get_field_keyboard(field_key: str, s: dict, item_key: str = None) -> Inline
             InlineKeyboardButton(text="👩 Женщина", callback_data="render:set:a")
         ])
         
-    # 💰 Рекомендация суммы (RD3 PE)
-    if field_key == "amount" and item_key == "rd3_pe":
-        buttons.append([InlineKeyboardButton(text="Рекомендация S/. 1 165", callback_data="render:set:1 165")])
-    elif field_key == "amount" and item_key == "rd2_pe":
-        buttons.append([InlineKeyboardButton(text="Рекомендация S/. 809", callback_data="render:set:809")])
+    # 💰 Рекомендуемые суммы — Peru RD
+    _PE_RD_AMOUNTS = {
+        # item_key: (field_key, label, value)
+        "rd2_pe":  ("amount",     "S/. 809",   "809"),
+        "rd3_pe":  ("amount",     "S/. 1 165", "1 165"),
+        "rd5_pe":  ("amount",     "S/. 739",   "739"),
+        "rd7_pe":  ("amount",     "S/. 633",   "633"),
+        "rd6_pe":  ("commission", "S/. 1 246", "1 246"),
+    }
+    # 💰 Рекомендуемые суммы — Bolivia RD
+    _BO_RD_AMOUNTS = {
+        "rd2":  ("amount",     "Bs. 2 102", "2 102"),
+        "rd3":  ("amount",     "Bs. 2 343", "2 343"),
+        "rd5":  ("amount",     "Bs. 2 100", "2 100"),
+        "rd7":  ("amount",     "Bs. 1 745", "1 745"),
+        "rd8":  ("amount",     "Bs. 3 500", "3 500"),
+        "rd6":  ("commission", "Bs. 1 920", "1 920"),
+    }
+    _ALL_RD_AMOUNTS = {**_PE_RD_AMOUNTS, **_BO_RD_AMOUNTS}
+    if item_key in _ALL_RD_AMOUNTS:
+        _fkey, _label, _val = _ALL_RD_AMOUNTS[item_key]
+        if field_key == _fkey:
+            buttons.append([InlineKeyboardButton(
+                text=f"💡 Рекомендация {_label}",
+                callback_data=f"render:set:{_val}"
+            )])
     
     buttons.append([InlineKeyboardButton(text="❌ Отмена", callback_data="cancel")])
     return InlineKeyboardMarkup(inline_keyboard=buttons)

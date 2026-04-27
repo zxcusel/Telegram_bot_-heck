@@ -81,7 +81,7 @@ def _get_field_keyboard(field_key: str, s: dict, item_key: str = None) -> Inline
     buttons = []
     
     # 🎲 Рандомайзер
-    if s["rand_enabled"] and field_key in ("sum", "amount", "number", "account", "transaction", "operation", "card_recipient", "card_sender"):
+    if s["rand_enabled"] and field_key in ("sum", "amount", "commission", "number", "account", "transaction", "operation", "card_recipient", "card_sender"):
         buttons.append([InlineKeyboardButton(text="🎲 Сгенерировать", callback_data="render:random")])
         
     # 📅 Закрепленная дата
@@ -139,6 +139,7 @@ def _get_field_keyboard(field_key: str, s: dict, item_key: str = None) -> Inline
     _BO_RD_AMOUNTS = {
         "rd2":  ("amount",     "Bs. 2 102", "2 102"),
         "rd3":  ("amount",     "Bs. 2 343", "2 343"),
+        "rd4":  ("amount",     "Bs. 2 258", "2 258"),
         "rd5":  ("amount",     "Bs. 2 100", "2 100"),
         "rd7":  ("amount",     "Bs. 1 745", "1 745"),
         "rd8":  ("amount",     "Bs. 3 500", "3 500"),
@@ -620,7 +621,7 @@ async def cb_render_shortcuts(call: CallbackQuery, state: FSMContext):
     elif action == "random":
         s = get_settings(call.from_user.id)
         key = askable[step]["key"]
-        if key in ("sum", "amount"):
+        if key in ("sum", "amount", "commission"):
             val = str(random.randint(s["rand_min"], s["rand_max"]))
         elif key == "number":
             val = "".join([str(random.randint(0, 9)) for _ in range(8)])

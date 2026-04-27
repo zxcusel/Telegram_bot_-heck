@@ -281,6 +281,16 @@ GEO_CATALOG: dict = {
                                 {
                                     "key": "name",
                                     "prompt": "✏️ Введите Фамилия Имя",
+                                    "text_config": {"collect_only": True},
+                                },
+                                {
+                                    "key": "amount",
+                                    "prompt": "💰 Введите сумму (рекомендуется 2 258)",
+                                    "text_config": {"collect_only": True},
+                                },
+                                {
+                                    "key": "_body",
+                                    "prompt": "",
                                     "text_config": {
                                         "area": (84, 758, 743, 1022),
                                         "line_spacing": 1.2,
@@ -292,8 +302,8 @@ GEO_CATALOG: dict = {
                                              "font": "sf_pro", "size": 30, "color": (255, 255, 255)},
                                             {"text": ", es necesario que abone el proceso de segregación por un monto de ",
                                              "font": "sf_pro", "size": 30, "color": (255, 255, 255)},
-                                            {"text": "Bs. 2.258.",
-                                             "font": "sf_pro", "size": 30, "color": (255, 0, 0)},
+                                            {"text": "Bs. {amount}.",
+                                             "font": "sf_pro", "size": 30, "color": (255, 0, 0), "format_number_dot": True},
                                             {"text": "\n\n",
                                              "font": "sf_pro", "size": 30, "color": (255, 255, 255)},
                                             {"text": "Una vez abonada la segregación, todo el dinero se acreditará automáticamente en la cuenta de su cliente.",
@@ -402,7 +412,7 @@ GEO_CATALOG: dict = {
                                 },
                                 {
                                     "key": "commission",
-                                    "prompt": "💰 Сумма налога (пример: 1.246)",
+                                    "prompt": "💰 Введите сумму налога (рекомендуется 1.920)",
                                     "text_config": {"collect_only": True},
                                 },
                                 {
@@ -1001,12 +1011,63 @@ GEO_CATALOG: dict = {
 
                         # PROOF №2–3 (заготовки)
                         "rd_proof2": {
-                            "label": "Bolivia PROOF 2", "asset": "assets/rd/proofs/psd2.png",
+                            "label": "Bolivia PROOF 2", "asset": "assets/rd/proofs/proof2.jpg",
                             "fields": [
-                                {"key": "name",   "prompt": "✏️ Введите ФИО (пример: Ivanov Ivan Ivanovich)",
-                                 "text_config": {"font": "opensans_semi", "size": 32, "color": (0,0,0), "pos": (100, 200)}},
-                                {"key": "amount", "prompt": "💰 Введите сумму",
-                                 "text_config": {"font": "opensans_semi", "size": 32, "color": (0,0,0), "pos": (100, 260)}},
+                                {
+                                    "key": "time",
+                                    "prompt": "🕐 Введите время устройства (пример: 10:45)",
+                                    "text_config": {
+                                        "font": "sf_pro_semibold", "size": 25, "color": (0, 0, 0), "pos": (75, 26)
+                                    },
+                                },
+                                {
+                                    "key": "interval",
+                                    "prompt": "⏳ Введите промежуток (пример: 04.23 - 04.23)",
+                                    "text_config": {
+                                        "font": "sf_pro_semibold", "size": 17, "color": (165, 166, 168), "pos": (23, 272),
+                                        "template": "2026.{interval}"
+                                    },
+                                },
+                                {
+                                    "key": "date1",
+                                    "prompt": "📅 Дата 1 (пример: 04-23)",
+                                    "text_config": {
+                                        "font": "sf_pro_semibold", "size": 17.5, "color": (165, 166, 168), "pos": (23, 518),
+                                        "template": "2026-{date1} 09:01:04"
+                                    },
+                                },
+                                {
+                                    "key": "date2",
+                                    "prompt": "📅 Дата 2 (пример: 04-23)",
+                                    "text_config": {
+                                        "font": "sf_pro_semibold", "size": 17.5, "color": (165, 166, 168), "pos": (23, 644),
+                                        "template": "2026-{date2} 09:01:04"
+                                    },
+                                },
+                                {
+                                    "key": "date3",
+                                    "prompt": "📅 Дата 3 (пример: 04-23)",
+                                    "text_config": {
+                                        "font": "sf_pro_semibold", "size": 17.5, "color": (165, 166, 168), "pos": (23, 800),
+                                        "template": "2026-{date3} 09:01:04"
+                                    },
+                                },
+                                {
+                                    "key": "date4",
+                                    "prompt": "📅 Дата 4 (пример: 04-23)",
+                                    "text_config": {
+                                        "font": "sf_pro_semibold", "size": 17.5, "color": (165, 166, 168), "pos": (23, 955),
+                                        "template": "2026-{date4} 09:01:04"
+                                    },
+                                },
+                                {
+                                    "key": "date5",
+                                    "prompt": "📅 Дата 5 (пример: 04-23)",
+                                    "text_config": {
+                                        "font": "sf_pro_semibold", "size": 17.5, "color": (165, 166, 168), "pos": (23, 1085),
+                                        "template": "2026-{date5} 09:01:04"
+                                    },
+                                },
                             ],
                         },
                         "rd_proof3": {

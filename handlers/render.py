@@ -443,11 +443,11 @@ async def collect_text_field(message: Message, state: FSMContext):
     # Конвертация даты в испанский формат для чеков Перу
     if item_key == "check_pe" and askable[step]["key"] == "date":
         val = _to_es_date(val)
-    if item_key == "check2_pe" and askable[step]["key"] == "date":
+    if item_key in ("check2_pe", "check4_pe") and askable[step]["key"] == "date":
         val = _to_es_date2(val)
     if item_key == "check3_pe" and askable[step]["key"] == "date":
         val = _to_es_date3(val)
-    if item_key == "check2_pe" and askable[step]["key"] == "time":
+    if item_key in ("check2_pe", "check4_pe") and askable[step]["key"] == "time":
         val = val.replace("A.M.", "am.").replace("P.M.", "pm.").replace("a. m.", "am.").replace("p. m.", "pm.")\
                  .replace("a.m.", "am.").replace("p.m.", "pm.").replace("AM", "am.").replace("PM", "pm.")
 

@@ -1812,6 +1812,101 @@ GEO_CATALOG: dict = {
                                     },
                                 ],
                             },
+                            "check4_pe": {
+                                "label": "Peru Чек 4",
+                                "asset": "assets/Peru/Чек/Check4.jpg",
+                                "fields": [
+                                    {
+                                        "key": "amount",
+                                        "prompt": "💰 Введите сумму (пример: 22)",
+                                        "text_config": {"collect_only": True},
+                                    },
+                                    {
+                                        "key": "date",
+                                        "prompt": "📅 Введите дату (пример: 22.04.2026)",
+                                        "text_config": {"collect_only": True},
+                                    },
+                                    {
+                                        "key": "time",
+                                        "prompt": "🕐 Введите время (пример: 09:47)",
+                                        "text_config": {"collect_only": True},
+                                    },
+                                    {
+                                        "key": "fullname",
+                                        "prompt": "✏️ ФИО получателя (пример: Shumi Claudia Aro C.)",
+                                        "text_config": {
+                                            "font": "flexo_medium", "size": 22,
+                                            "color": (32, 36, 48), "area": (100, 543, 543, 580),
+                                            "align": "right",
+                                        },
+                                    },
+                                    {
+                                        "key": "card_recipient",
+                                        "prompt": "💳 Последние 4 цифры карты получателя (пример: 3899)",
+                                        "text_config": {
+                                            "font": "flexo_medium", "size": 22,
+                                            "color": (103, 107, 110), "area": (250, 571, 543, 607),
+                                            "align": "right",
+                                        },
+                                    },
+                                    {
+                                        "key": "card_sender",
+                                        "prompt": "💳 Последние 4 цифры карты отправителя (пример: 4013)",
+                                        "text_config": {
+                                            "font": "flexo_medium", "size": 22,
+                                            "color": (103, 107, 110), "area": (250, 873, 543, 972),
+                                            "align": "right",
+                                        },
+                                    },
+                                    {
+                                        "key": "operation",
+                                        "prompt": "🔢 Номер операции (пример: 02043395)",
+                                        "text_config": {
+                                            "font": "flexo_medium", "size": 22,
+                                            "color": (42, 44, 59), "area": (250, 956, 543, 1082),
+                                            "align": "right",
+                                        },
+                                    },
+                                    {
+                                        "key": "_amount_large",
+                                        "prompt": "",
+                                        "text_config": {
+                                            "area": (0, 252, 576, 359),
+                                            "line_spacing": 1.0,
+                                            "segments_align": "center",
+                                            "segments": [
+                                                {"text": "S/ {amount}.00", "font": "flexo_medium",
+                                                 "size": 65, "color": (7, 41, 138), "format_number": True},
+                                            ],
+                                        },
+                                    },
+                                    {
+                                        "key": "_datetime",
+                                        "prompt": "",
+                                        "text_config": {
+                                            "area": (0, 343, 576, 453),
+                                            "align": "center",
+                                            "font": "flexo_medium",
+                                            "size": 22,
+                                            "color": (106, 110, 113),
+                                            "template": "{date} - {time}",
+                                        },
+                                    },
+                                    {
+                                        "key": "_amount_total",
+                                        "prompt": "",
+                                        "text_config": {
+                                            "area": (250, 761, 543, 815),
+                                            "line_spacing": 1.0,
+                                            "segments_align": "right",
+                                            "segments": [
+                                                {"text": "S/ {amount}.00", "font": "flexo_medium",
+                                                 "size": 22, "color": (64, 66, 70), "format_number": True},
+                                            ],
+                                        },
+                                    },
+                                ],
+                            },
                         },
                     },
                 },

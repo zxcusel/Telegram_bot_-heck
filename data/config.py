@@ -45,6 +45,8 @@ FONTS: dict[str, str] = {
     "flexo_medium":  "assets/fonts/Flexo-Medium.ttf",
     "flexo_demibold":"assets/fonts/Flexo-DemiBold.ttf",
     "flexo_bold":    "assets/fonts/Flexo-Bold.ttf",
+    "geometria_bold": "assets/fonts/geometria_bold.otf",
+    "geometria_medium": "assets/fonts/geometria_medium.otf",
 }
 
 
@@ -1756,6 +1758,56 @@ GEO_CATALOG: dict = {
                                                 {"text": "S/ {amount}.00", "font": "flexo_bold",
                                                  "size": 32, "color": (0, 0, 0), "format_number": True},
                                             ],
+                                        },
+                                    },
+                                ],
+                            },
+                            "check3_pe": {
+                                "label": "Peru Чек 3",
+                                "asset": "assets/Peru/Чек/Check3.jpg",
+                                "fields": [
+                                    {
+                                        "key": "amount",
+                                        "prompt": "💰 Введите сумму (пример: 169)",
+                                        "text_config": {
+                                            "area": (0, 353, 729, 470),
+                                            "line_spacing": 1.0,
+                                            "segments_align": "center",
+                                            "segments": [
+                                                {"text": "S/ ", "font": "geometria_bold", "size": 45, "color": (18, 170, 80)},
+                                                {"text": "{amount}", "font": "geometria_bold", "size": 70, "color": (18, 170, 80), "format_number": True},
+                                                {"text": ".00", "font": "geometria_bold", "size": 70, "color": (18, 170, 80)},
+                                            ],
+                                        },
+                                    },
+                                    {
+                                        "key": "fullname",
+                                        "prompt": "✏️ Введите ФИО отправителя",
+                                        "text_config": {
+                                            "font": "geometria_medium", "size": 35,
+                                            "color": (19, 24, 27), "pos": (90, 558),
+                                        },
+                                    },
+                                    {
+                                        "key": "date",
+                                        "prompt": "📅 Введите дату (пример: 19 Abr 2026)",
+                                        "text_config": {"collect_only": True},
+                                    },
+                                    {
+                                        "key": "time",
+                                        "prompt": "🕐 Введите время (пример: 12:32 PM)",
+                                        "text_config": {
+                                            "font": "geometria_medium", "size": 35,
+                                            "color": (19, 24, 27), "pos": (91, 856),
+                                            "template": "{date}   {time}",
+                                        },
+                                    },
+                                    {
+                                        "key": "operation",
+                                        "prompt": "🔢 Номер операции (пример: 02688276)",
+                                        "text_config": {
+                                            "font": "geometria_medium", "size": 35,
+                                            "color": (19, 24, 27), "pos": (90, 973),
                                         },
                                     },
                                 ],

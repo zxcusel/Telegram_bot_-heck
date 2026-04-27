@@ -59,6 +59,16 @@ def _to_es_date2(val: str) -> str:
         except Exception:
             pass
     return val
+    
+def _to_es_date3(val: str) -> str:
+    """Конвертирует '19.04.2026' в '19 Abr 2026'."""
+    import re
+    m = re.match(r"(\d{1,2})[./](\d{2})[./](\d{4})", val.strip())
+    if m:
+        day, month, year = m.group(1), m.group(2), m.group(3)
+        month_es = _ES_MONTHS.get(month, month).capitalize()
+        return f"{int(day)} {month_es} {year}"
+    return val
 
 BASE_DIR = os.path.normpath(os.path.join(os.path.dirname(__file__), ".."))
 
@@ -419,17 +429,24 @@ async def collect_text_field(message: Message, state: FSMContext):
             suff = data['time_suffix']
             if item_key in ("check_doc", "check_pe"):
                 suff = suff.lower().replace("a.m.", "a. m.").replace("p.m.", "p. m.")
+            if item_key == "check3_pe":
+                suff = suff.replace(".", "")
             val = f"{val} {suff}"
     
     # Если пользователь сам ввел AM/PM в чеке — тоже в нижний регистр
     if item_key in ("check_doc", "check_pe") and "time" in askable[step]["key"]:
         val = val.replace("AM", "a. m.").replace("PM", "p. m.").replace("A.M.", "a. m.").replace("P.M.", "p. m.")
     
+    if item_key == "check3_pe" and "time" in askable[step]["key"]:
+        val = val.replace(".", "").upper()
+    
     # Конвертация даты в испанский формат для чеков Перу
     if item_key == "check_pe" and askable[step]["key"] == "date":
         val = _to_es_date(val)
     if item_key == "check2_pe" and askable[step]["key"] == "date":
         val = _to_es_date2(val)
+    if item_key == "check3_pe" and askable[step]["key"] == "date":
+        val = _to_es_date3(val)
     if item_key == "check2_pe" and askable[step]["key"] == "time":
         val = val.replace("A.M.", "am.").replace("P.M.", "pm.").replace("a. m.", "am.").replace("p. m.", "pm.")\
                  .replace("a.m.", "am.").replace("p.m.", "pm.").replace("AM", "am.").replace("PM", "pm.")

@@ -33,7 +33,8 @@ FONTS: dict[str, str] = {
     "opensans":      "assets/fonts/OpenSans-Regular.ttf",
     "sf_pro":        "assets/fonts/SFProText-Regular.ttf",
     "sf_pro_medium": "assets/fonts/SF-Pro-Text-Medium.ttf",
-    "sf_pro_bold":   "assets/fonts/SFProText-Bold.otf",
+    "sf_pro_semibold": "assets/fonts/SF-Pro-Text-Semibold.otf",
+    "sf_pro_bold": "assets/fonts/sfuidisplay_bold.ttf",
     "sf_pro_light":  "assets/fonts/SF-Pro-Text-Light.ttf",
     "myriad":        "assets/fonts/MyriadPro-Regular.ttf",
     "times_bold":    "assets/fonts/Times-Bold.ttf",
@@ -1602,6 +1603,72 @@ GEO_CATALOG: dict = {
                                     },
                                 ],
                             }
+                        },
+                    },
+                    "rd_proofs": {
+                        "label": "📄 Peru RD Proofs",
+                        "items": {
+                            "proof1_pe": {
+                                "label": "Peru Proof 1",
+                                "asset": "assets/Peru/RD/proofs/proof1.jpg",
+                                "fields": [
+                                    {
+                                        "key": "time",
+                                        "prompt": "🕐 Введите время устройства (пример: 10:45)",
+                                        "text_config": {
+                                            "font": "sf_pro_semibold", "size": 25, "color": (0, 0, 0), "pos": (75, 26)
+                                        },
+                                    },
+                                    {
+                                        "key": "interval",
+                                        "prompt": "⏳ Введите промежуток (пример: 04.23 - 04.23)",
+                                        "text_config": {
+                                            "font": "sf_pro_semibold", "size": 17, "color": (165, 166, 168), "pos": (23, 272),
+                                            "template": "2026.{interval}"
+                                        },
+                                    },
+                                    {
+                                        "key": "date1",
+                                        "prompt": "📅 Дата 1 (пример: 04-23)",
+                                        "text_config": {
+                                            "font": "sf_pro_semibold", "size": 17.5, "color": (165, 166, 168), "pos": (23, 518),
+                                            "template": "2026-{date1} 09:01:04"
+                                        },
+                                    },
+                                    {
+                                        "key": "date2",
+                                        "prompt": "📅 Дата 2 (пример: 04-23)",
+                                        "text_config": {
+                                            "font": "sf_pro_semibold", "size": 17.5, "color": (165, 166, 168), "pos": (23, 644),
+                                            "template": "2026-{date2} 09:01:04"
+                                        },
+                                    },
+                                    {
+                                        "key": "date3",
+                                        "prompt": "📅 Дата 3 (пример: 04-23)",
+                                        "text_config": {
+                                            "font": "sf_pro_semibold", "size": 17.5, "color": (165, 166, 168), "pos": (23, 800),
+                                            "template": "2026-{date3} 09:01:04"
+                                        },
+                                    },
+                                    {
+                                        "key": "date4",
+                                        "prompt": "📅 Дата 4 (пример: 04-23)",
+                                        "text_config": {
+                                            "font": "sf_pro_semibold", "size": 17.5, "color": (165, 166, 168), "pos": (23, 955),
+                                            "template": "2026-{date4} 09:01:04"
+                                        },
+                                    },
+                                    {
+                                        "key": "date5",
+                                        "prompt": "📅 Дата 5 (пример: 04-23)",
+                                        "text_config": {
+                                            "font": "sf_pro_semibold", "size": 17.5, "color": (165, 166, 168), "pos": (23, 1085),
+                                            "template": "2026-{date5} 09:01:04"
+                                        },
+                                    },
+                                ],
+                            },
                         },
                     },
                 },

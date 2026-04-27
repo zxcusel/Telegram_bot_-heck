@@ -15,7 +15,7 @@ from aiogram.exceptions import TelegramBadRequest
 
 from data.config import CATALOG, GEO_CATALOG
 from data.db import get_role, get_settings
-from keyboards.inline import cancel_kb, after_render_kb, main_menu, sections_menu, items_menu, geo_menu
+from keyboards.inline import cancel_kb, after_render_kb, main_menu, sections_menu, items_menu, geo_menu, geo_menu_for
 from utils.logger import log
 import random
 
@@ -542,7 +542,7 @@ async def cb_cancel(call: CallbackQuery, state: FSMContext):
     if geo:
         await call.message.answer("📂 Выберите категорию:", reply_markup=main_menu(role, geo))
     else:
-        await call.message.answer("🌍 Выберите регион:", reply_markup=_geo_menu_for(call.from_user.id, role))
+        await call.message.answer("🌍 Выберите регион:", reply_markup=geo_menu_for(call.from_user.id, role))
     await call.answer()
 
 
@@ -558,7 +558,7 @@ async def cb_back_main_from_render(call: CallbackQuery, state: FSMContext):
     if geo:
         await call.message.answer("📂 Выберите категорию:", reply_markup=main_menu(role, geo))
     else:
-        await call.message.answer("🌍 Выберите регион:", reply_markup=_geo_menu_for(call.from_user.id, role))
+        await call.message.answer("🌍 Выберите регион:", reply_markup=geo_menu_for(call.from_user.id, role))
     await call.answer()
 
 

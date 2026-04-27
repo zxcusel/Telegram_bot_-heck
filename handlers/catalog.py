@@ -9,37 +9,23 @@ import asyncio
 from data.db import get_role, get_geos, is_admin
 from data.config import GEO_CATALOG, GEO_LABELS
 from handlers.admin import show_admin_panel
-from keyboards.inline import geo_menu, main_menu, sections_menu, items_menu
+from keyboards.inline import geo_menu, main_menu, sections_menu, items_menu, geo_menu_for
 from utils.logger import log
 
 router = Router()
 
 
 def _start_kb(user_id: int) -> InlineKeyboardMarkup:
-    buttons = [[InlineKeyboardButton(text="▶️ Начать", callback_data="start:begin")]]
+    buttons = [
+        [InlineKeyboardButton(text="▶️ Начать", callback_data="start:begin")],
+        [InlineKeyboardButton(text="⚙️ Настройки", callback_data="start:settings")],
+    ]
     if is_admin(user_id):
         buttons.append([InlineKeyboardButton(text="👨‍💼 Админ-панель", callback_data="start:admin")])
     buttons.append([InlineKeyboardButton(text="🗑 Очистить чат", callback_data="start:clear")])
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 
-def _geo_menu_for(user_id: int, role: str | None) -> InlineKeyboardMarkup:
-    """Меню гео — только те регионы к которым у пользователя есть доступ."""
-    if is_admin(user_id):
-        allowed_geos = list(GEO_CATALOG.keys())
-    else:
-        allowed_geos = get_geos(user_id)
-    buttons = [
-        [InlineKeyboardButton(
-            text=GEO_CATALOG[gk]["label"],
-            callback_data=f"geo:{gk}"
-        )]
-        for gk in allowed_geos if gk in GEO_CATALOG
-    ]
-    if not buttons:
-        buttons.append([InlineKeyboardButton(text="⛔ Нет доступа к регионам", callback_data="noop")])
-    buttons.append([InlineKeyboardButton(text="🔙 Назад", callback_data="back:welcome")])
-    return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 
 # ── /start ───────────────────────────────────────────────────────────────────
@@ -79,7 +65,7 @@ async def cb_start_clear(call: CallbackQuery, state: FSMContext):
 @router.callback_query(F.data == "start:begin")
 async def cb_start_begin(call: CallbackQuery, state: FSMContext):
     role = get_role(call.from_user.id)
-    kb   = _geo_menu_for(call.from_user.id, role)
+    kb   = geo_menu_for(call.from_user.id, role)
     await _safe_edit(call, "🌍 Выберите регион:", kb)
     await call.answer()
 
@@ -148,7 +134,7 @@ async def cb_back(call: CallbackQuery, state: FSMContext):
     elif dest == "geo":
         # Назад к выбору гео
         role = get_role(call.from_user.id)
-        await _safe_edit(call, "🌍 Выберите регион:", _geo_menu_for(call.from_user.id, role))
+        await _safe_edit(call, "🌍 Выберите регион:", geo_menu_for(call.from_user.id, role))
 
     elif dest == "geo_menu":
         # Назад в меню категорий конкретного гео
@@ -176,7 +162,7 @@ async def cb_back(call: CallbackQuery, state: FSMContext):
         else:
             role = get_role(call.from_user.id)
             await call.message.answer(
-                "🌍 Выберите регион:", reply_markup=_geo_menu_for(call.from_user.id, role)
+                "🌍 Выберите регион:", reply_markup=geo_menu_for(call.from_user.id, role)
             )
 
     await call.answer()

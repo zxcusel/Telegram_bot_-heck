@@ -1,5 +1,6 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from data.config import GEO_CATALOG, GEO_LABELS
+from data.db import get_geos, is_admin
 
 
 def geo_menu() -> InlineKeyboardMarkup:
@@ -8,6 +9,25 @@ def geo_menu() -> InlineKeyboardMarkup:
         [InlineKeyboardButton(text=info["label"], callback_data=f"geo:{gk}")]
         for gk, info in GEO_CATALOG.items()
     ]
+    buttons.append([InlineKeyboardButton(text="🔙 Назад", callback_data="back:welcome")])
+    return InlineKeyboardMarkup(inline_keyboard=buttons)
+
+
+def geo_menu_for(user_id: int, role: str | None) -> InlineKeyboardMarkup:
+    """Меню гео — только те регионы к которым у пользователя есть доступ."""
+    if is_admin(user_id):
+        allowed_geos = list(GEO_CATALOG.keys())
+    else:
+        allowed_geos = get_geos(user_id)
+    buttons = [
+        [InlineKeyboardButton(
+            text=GEO_CATALOG[gk]["label"],
+            callback_data=f"geo:{gk}"
+        )]
+        for gk in allowed_geos if gk in GEO_CATALOG
+    ]
+    if not buttons:
+        buttons.append([InlineKeyboardButton(text="⛔ Нет доступа к регионам", callback_data="noop")])
     buttons.append([InlineKeyboardButton(text="🔙 Назад", callback_data="back:welcome")])
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
@@ -99,3 +119,23 @@ def _allowed_lines(role: str | None) -> list[str]:
     if "fd" in roles or "rd" in roles:
         result += ["qr", "support"]
     return result
+
+
+def geo_menu_for(user_id: int, role: str | None) -> InlineKeyboardMarkup:
+    """Меню гео — только те регионы к которым у пользователя есть доступ."""
+    from data.db import is_admin, get_geos
+    if is_admin(user_id):
+        allowed_geos = list(GEO_CATALOG.keys())
+    else:
+        allowed_geos = get_geos(user_id)
+    buttons = [
+        [InlineKeyboardButton(
+            text=GEO_CATALOG[gk]["label"],
+            callback_data=f"geo:{gk}"
+        )]
+        for gk in allowed_geos if gk in GEO_CATALOG
+    ]
+    if not buttons:
+        buttons.append([InlineKeyboardButton(text="⛔ Нет доступа к регионам", callback_data="noop")])
+    buttons.append([InlineKeyboardButton(text="🔙 Назад", callback_data="back:welcome")])
+    return InlineKeyboardMarkup(inline_keyboard=buttons)

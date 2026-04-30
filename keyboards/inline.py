@@ -115,9 +115,13 @@ def _allowed_lines(role: str | None) -> list[str]:
     result = []
     if "fd" in roles: result.append("fd")
     if "rd" in roles: result.append("rd")
-    if "cr" in roles: result.append("check")
+    if "cr" in roles:
+        result.append("check")
+        result.append("qr")
     if "fd" in roles or "rd" in roles:
-        result += ["qr", "support"]
+        if "qr" not in result:
+            result.append("qr")
+        result.append("support")
     return result
 
 

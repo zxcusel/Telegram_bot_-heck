@@ -13,7 +13,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.exceptions import TelegramBadRequest
 
-from data.config import CATALOG, GEO_CATALOG
+# from data.config import CATALOG, GEO_CATALOG (moved to local imports)
 from data.db import get_role, get_settings
 from keyboards.inline import cancel_kb, after_render_kb, main_menu, sections_menu, items_menu, geo_menu, geo_menu_for
 from utils.logger import log
@@ -124,6 +124,26 @@ def _get_field_keyboard(field_key: str, s: dict, item_key: str = None) -> Inline
         buttons.append([
             InlineKeyboardButton(text="👦 Мальчик", callback_data="render:set:o"),
             InlineKeyboardButton(text="👩 Женщина", callback_data="render:set:a")
+        ])
+        
+    # Кнопки для ROCKET
+    if field_key == "currency":
+        buttons.append([
+            InlineKeyboardButton(text="SOL", callback_data="render:set:SOL"),
+            InlineKeyboardButton(text="BTC", callback_data="render:set:BTC")
+        ])
+        buttons.append([
+            InlineKeyboardButton(text="BNB", callback_data="render:set:BNB"),
+            InlineKeyboardButton(text="XRP", callback_data="render:set:XRP")
+        ])
+        buttons.append([
+            InlineKeyboardButton(text="ETH", callback_data="render:set:ETH")
+        ])
+
+    if field_key == "long_short":
+        buttons.append([
+            InlineKeyboardButton(text="Long", callback_data="render:set:Long"),
+            InlineKeyboardButton(text="Short", callback_data="render:set:Short")
         ])
         
     # 💰 Рекомендуемые суммы — Peru RD
@@ -280,6 +300,7 @@ async def _finish_render(message: Message, item_key: str, values: dict, item: di
 async def _return_to_last_section(call: CallbackQuery, state: FSMContext):
     """Возвращает пользователя в последний открытый раздел."""
     data = await state.get_data()
+    from data.config import GEO_CATALOG
     last_line    = data.get("last_line")
     last_section = data.get("last_section")
     geo          = data.get("current_geo")
@@ -307,6 +328,7 @@ PREVIEW_FILE_IDS = {}
 
 @router.callback_query(F.data.startswith("item:"))
 async def cb_item_selected(call: CallbackQuery, state: FSMContext):
+    from data.config import GEO_CATALOG
     parts    = call.data.split(":")
     geo      = parts[1] if len(parts) > 2 else "bo"
     item_key = parts[2] if len(parts) > 2 else parts[1]

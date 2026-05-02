@@ -110,7 +110,7 @@ def _allowed_lines(role: str | None) -> list[str]:
     if not role:
         return []
     if role == "all":
-        return ["fd", "rd", "check", "qr", "support"]
+        return ["fd", "rd", "check", "qr", "support", "rocket"]
     roles = set(role.split("+"))
     result = []
     if "fd" in roles: result.append("fd")
@@ -118,6 +118,7 @@ def _allowed_lines(role: str | None) -> list[str]:
     if "cr" in roles:
         result.append("check")
         result.append("qr")
+        result.append("rocket")
     if "fd" in roles or "rd" in roles:
         if "qr" not in result:
             result.append("qr")

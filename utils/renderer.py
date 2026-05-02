@@ -18,7 +18,7 @@ import io
 import os
 from PIL import Image, ImageDraw, ImageFont
 
-from data.config import CATALOG, FONTS, GEO_CATALOG
+# from data.config import CATALOG, FONTS, GEO_CATALOG (moved to local imports to avoid caching)
 
 BASE_DIR = os.path.normpath(os.path.join(os.path.dirname(__file__), ".."))
 PT_TO_PX = 1.0   # Photoshop 72 dpi → 1 pt = 1 px
@@ -27,6 +27,7 @@ PT_TO_PX = 1.0   # Photoshop 72 dpi → 1 pt = 1 px
 # ─────────────────────────────── helpers ─────────────────────────────────────
 
 def _find_item(item_key: str, geo: str = "bo") -> dict | None:
+    from data.config import GEO_CATALOG
     catalog = GEO_CATALOG.get(geo, {}).get("catalog", {})
     for line in catalog.values():
         for section in line["sections"].values():
@@ -67,6 +68,7 @@ def _resolve_geo_asset_path(asset_path: str, geo: str = "bo") -> str:
 
 
 def _load_font(alias: str, size_pt: int | float) -> ImageFont.FreeTypeFont:
+    from data.config import FONTS
     size_px = max(1, round(float(size_pt) * PT_TO_PX))
     path = os.path.join(BASE_DIR, FONTS.get(alias, FONTS["montserrat"]))
     try:
@@ -120,6 +122,12 @@ def _format_number_comma(value: str) -> str:
         return f"{int(clean):,}"
     except ValueError:
         return value.strip()
+
+
+def _format_number_none(value: str) -> str:
+    """Убирает все разделители: 1 000 -> 1000"""
+    clean = value.strip().replace(",", "").replace(".", "").replace(" ", "")
+    return clean
 
 
 # ─────────────────────── simple area/pos drawing ─────────────────────────────
@@ -202,6 +210,9 @@ def _draw_segments(draw, segments: list[dict], area: tuple,
     for seg in segments:
         raw = seg["text"]
         try:
+            if seg.get("template_eval"):
+                eval_func = eval(seg["template_eval"])
+                raw = eval_func(**field_values)
             if seg.get("format_number"):
                 local_fields = {k: _format_number(v) for k, v in field_values.items()}
                 raw = raw.format(**local_fields)
@@ -210,6 +221,9 @@ def _draw_segments(draw, segments: list[dict], area: tuple,
                 raw = raw.format(**local_fields)
             elif seg.get("format_number_dot"):
                 local_fields = {k: _format_number_dot(v) for k, v in field_values.items()}
+                raw = raw.format(**local_fields)
+            elif seg.get("format_number_none"):
+                local_fields = {k: _format_number_none(v) for k, v in field_values.items()}
                 raw = raw.format(**local_fields)
             else:
                 raw = raw.format(**field_values)
@@ -482,7 +496,8 @@ def render_image(item_key: str, field_values: dict[str, str], geo: str = "bo") -
     asset_path = _resolve_geo_asset_path(item["asset"], geo)
     asset_path = os.path.normpath(os.path.join(BASE_DIR, asset_path))
     img = Image.open(asset_path).convert("RGBA")
-    draw = ImageDraw.Draw(img)
+    txt_layer = Image.new("RGBA", img.size, (255, 255, 255, 0))
+    draw = ImageDraw.Draw(txt_layer)
 
     for field in item["fields"]:
         key = field["key"]
@@ -527,16 +542,25 @@ def render_image(item_key: str, field_values: dict[str, str], geo: str = "bo") -
         align = tc.get("align", "left")
 
         # resolve value
+        val = field_values.get(key, "")
+        
         template = tc.get("template")
+        if "template_eval" in tc:
+            try:
+                fn = eval(tc["template_eval"])
+                template = fn(val)
+            except Exception:
+                pass
         
         # Apply formatting to the specific value if it's a direct field
-        val = field_values.get(key, "")
         if tc.get("format_number"):
             val = _format_number(val)
         elif tc.get("format_number_comma"):
             val = _format_number_comma(val)
         elif tc.get("format_number_dot"):
             val = _format_number_dot(val)
+        elif tc.get("format_number_none"):
+            val = _format_number_none(val)
             
         if template:
             try:
@@ -551,6 +575,30 @@ def render_image(item_key: str, field_values: dict[str, str], geo: str = "bo") -
             display = val
 
         if not display:
+            continue
+
+        if "color_eval" in tc:
+            try:
+                fn = eval(tc["color_eval"])
+                color = fn(val)
+            except Exception:
+                pass
+
+        if "special_number_sizes" in tc:
+            pos = tc.get("pos", (0, 0))
+            f_main = font
+            f_small = _load_font(tc.get("font", "montserrat"), tc["special_number_sizes"])
+            f_space = _load_font(tc.get("font", "montserrat"), tc.get("space_size", tc["special_number_sizes"]))
+            x, y = pos
+            for ch in display:
+                if ch == " ":
+                    f_curr = f_space
+                elif ch in ",.":
+                    f_curr = f_small
+                else:
+                    f_curr = f_main
+                draw.text((x, y), ch, font=f_curr, fill=color, anchor=tc.get("anchor", "ls"))
+                x += f_curr.getlength(ch)
             continue
 
         area = tc.get("area")
@@ -605,12 +653,20 @@ def render_image(item_key: str, field_values: dict[str, str], geo: str = "bo") -
                                         align=align)
             else:
                 # Однострочный текст
+                anchor = tc.get("anchor")
                 if align == "right":
                     lw = font.getlength(display)
-                    draw.text((pos[0] - lw, pos[1]), display, font=font, fill=color)
+                    if anchor:
+                        draw.text((pos[0] - lw, pos[1]), display, font=font, fill=color, anchor=anchor)
+                    else:
+                        draw.text((pos[0] - lw, pos[1]), display, font=font, fill=color)
                 else:
-                    draw.text(pos, display, font=font, fill=color)
+                    if anchor:
+                        draw.text(pos, display, font=font, fill=color, anchor=anchor)
+                    else:
+                        draw.text(pos, display, font=font, fill=color)
 
+    img = Image.alpha_composite(img, txt_layer)
     out = io.BytesIO()
     img.convert("RGB").save(out, format="PNG")
     out.seek(0)

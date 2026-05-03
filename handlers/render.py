@@ -84,6 +84,10 @@ def _get_field_keyboard(field_key: str, s: dict, item_key: str = None) -> Inline
     if s["rand_enabled"] and field_key in ("sum", "amount", "commission", "number", "account", "transaction", "operation", "card_recipient", "card_sender"):
         buttons.append([InlineKeyboardButton(text="🎲 Сгенерировать", callback_data="render:random")])
         
+    # 🎲 Рандомайзер процентов
+    if s.get("rand_percent_enabled") and field_key == "percentage":
+        buttons.append([InlineKeyboardButton(text="🎲 Сгенерировать", callback_data="render:random")])
+        
     # 📅 Закрепленная дата
     if s["pinned_date"] and "date" in field_key:
         buttons.append([InlineKeyboardButton(text=f"📅 {s['pinned_date']}", callback_data="render:pin_date")])
@@ -643,6 +647,11 @@ async def cb_render_shortcuts(call: CallbackQuery, state: FSMContext):
         key = askable[step]["key"]
         if key in ("sum", "amount", "commission"):
             val = str(random.randint(s["rand_min"], s["rand_max"]))
+        elif key == "percentage":
+            val_float = random.uniform(s.get("rand_percent_min", 1.0), s.get("rand_percent_max", 100.0))
+            sign = "+" if val_float >= 0 else "-"
+            formatted = f"{abs(val_float):,.2f}"
+            val = f"{sign}{formatted}"
         elif key == "number":
             val = "".join([str(random.randint(0, 9)) for _ in range(8)])
         elif key == "account":

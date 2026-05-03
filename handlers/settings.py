@@ -15,6 +15,8 @@ router = Router()
 class SettingStates(StatesGroup):
     wait_min = State()
     wait_max = State()
+    wait_percent_min = State()
+    wait_percent_max = State()
     wait_pinned_date = State()
     wait_pinned_name = State()
     wait_pinned_bank = State()
@@ -23,7 +25,8 @@ def settings_kb(user_id: int) -> InlineKeyboardMarkup:
     s = get_settings(user_id)
     
     # Текст для кнопок в зависимости от состояния
-    rand_text = "✅ Рандомайзер: ВКЛ" if s["rand_enabled"] else "❌ Рандомайзер: ВЫКЛ"
+    rand_text = "✅ Рандомайзер сумм: ВКЛ" if s["rand_enabled"] else "❌ Рандомайзер сумм: ВЫКЛ"
+    rand_percent_text = "✅ Рандомайзер процентов: ВКЛ" if s.get("rand_percent_enabled") else "❌ Рандомайзер процентов: ВЫКЛ"
     
     # AM/PM
     suffix = s["time_suffix"] or "Нет"
@@ -46,6 +49,11 @@ def settings_kb(user_id: int) -> InlineKeyboardMarkup:
         [
             InlineKeyboardButton(text=f"Min: {s['rand_min']}", callback_data="set:min"),
             InlineKeyboardButton(text=f"Max: {s['rand_max']}", callback_data="set:max")
+        ],
+        [InlineKeyboardButton(text=rand_percent_text, callback_data="set:toggle_rand_percent")],
+        [
+            InlineKeyboardButton(text=f"Min: {s.get('rand_percent_min', 1.0)}", callback_data="set:percent_min"),
+            InlineKeyboardButton(text=f"Max: {s.get('rand_percent_max', 100.0)}", callback_data="set:percent_max")
         ],
         [InlineKeyboardButton(text=suffix_text, callback_data="set:toggle_suffix")],
         [InlineKeyboardButton(text=date_text, callback_data="set:pinned_date")],
@@ -72,7 +80,17 @@ async def cb_toggle_rand(call: CallbackQuery):
     update_setting(call.from_user.id, "rand_enabled", new_val)
     log.setting_changed(call.from_user.id, "rand_enabled", new_val, call.from_user.username)
     await call.message.edit_reply_markup(reply_markup=settings_kb(call.from_user.id))
-    await call.answer("Рандомайзер изменен")
+    await call.answer("Рандомайзер сумм изменен")
+
+
+@router.callback_query(F.data == "set:toggle_rand_percent")
+async def cb_toggle_rand_percent(call: CallbackQuery):
+    s = get_settings(call.from_user.id)
+    new_val = 0 if s.get("rand_percent_enabled") else 1
+    update_setting(call.from_user.id, "rand_percent_enabled", new_val)
+    log.setting_changed(call.from_user.id, "rand_percent_enabled", new_val, call.from_user.username)
+    await call.message.edit_reply_markup(reply_markup=settings_kb(call.from_user.id))
+    await call.answer("Рандомайзер процентов изменен")
 
 
 @router.callback_query(F.data == "set:toggle_suffix")
@@ -102,6 +120,20 @@ async def cb_set_max(call: CallbackQuery, state: FSMContext):
     await state.set_state(SettingStates.wait_max)
     await state.update_data(settings_msg_id=call.message.message_id)
     await call.message.edit_text("⌨️ Введите максимальную сумму для рандомайзера:", reply_markup=cancel_kb("set:cancel"))
+    await call.answer()
+
+@router.callback_query(F.data == "set:percent_min")
+async def cb_set_percent_min(call: CallbackQuery, state: FSMContext):
+    await state.set_state(SettingStates.wait_percent_min)
+    await state.update_data(settings_msg_id=call.message.message_id)
+    await call.message.edit_text("⌨️ Введите минимальный процент для рандомайзера (например, 1.0):", reply_markup=cancel_kb("set:cancel"))
+    await call.answer()
+
+@router.callback_query(F.data == "set:percent_max")
+async def cb_set_percent_max(call: CallbackQuery, state: FSMContext):
+    await state.set_state(SettingStates.wait_percent_max)
+    await state.update_data(settings_msg_id=call.message.message_id)
+    await call.message.edit_text("⌨️ Введите максимальный процент для рандомайзера (например, 100.0):", reply_markup=cancel_kb("set:cancel"))
     await call.answer()
 
 @router.callback_query(F.data == "set:pinned_date")
@@ -219,6 +251,44 @@ async def process_max(message: Message, state: FSMContext):
         await state.clear()
     except Exception:
         await message.answer("❌ Введите целое число.")
+
+@router.message(SettingStates.wait_percent_min, F.text)
+async def process_percent_min(message: Message, state: FSMContext):
+    data = await state.get_data()
+    msg_id = data.get("settings_msg_id")
+    try:
+        val = float(message.text.strip().replace(" ", "").replace(",", "."))
+        update_setting(message.from_user.id, "rand_percent_min", val)
+        log.setting_changed(message.from_user.id, "rand_percent_min", val, message.from_user.username)
+        await message.delete()
+        if msg_id:
+            await message.bot.edit_message_text(
+                chat_id=message.chat.id, message_id=msg_id,
+                text=f"✅ Минимальный процент установлен: {val}\n\n⚙️ <b>Настройки пользователя</b>",
+                reply_markup=settings_kb(message.from_user.id), parse_mode="HTML"
+            )
+        await state.clear()
+    except Exception:
+        await message.answer("❌ Введите число (например, 1.5).")
+
+@router.message(SettingStates.wait_percent_max, F.text)
+async def process_percent_max(message: Message, state: FSMContext):
+    data = await state.get_data()
+    msg_id = data.get("settings_msg_id")
+    try:
+        val = float(message.text.strip().replace(" ", "").replace(",", "."))
+        update_setting(message.from_user.id, "rand_percent_max", val)
+        log.setting_changed(message.from_user.id, "rand_percent_max", val, message.from_user.username)
+        await message.delete()
+        if msg_id:
+            await message.bot.edit_message_text(
+                chat_id=message.chat.id, message_id=msg_id,
+                text=f"✅ Максимальный процент установлен: {val}\n\n⚙️ <b>Настройки пользователя</b>",
+                reply_markup=settings_kb(message.from_user.id), parse_mode="HTML"
+            )
+        await state.clear()
+    except Exception:
+        await message.answer("❌ Введите число (например, 100.0).")
 
 @router.message(SettingStates.wait_pinned_date, F.text)
 async def process_pinned_date(message: Message, state: FSMContext):

@@ -1283,7 +1283,8 @@ GEO_CATALOG: dict = {
                                         "size": 60,
                                         "color": (118, 119, 123),
                                         "pos": (600, 883),
-                                        "anchor": "ls"
+                                        "anchor": "ls",
+                                        "template_eval": "lambda v: str(v).upper().rstrip('X').strip() + 'X'"
                                     }
                                 },
                                 {
@@ -1309,7 +1310,7 @@ GEO_CATALOG: dict = {
                                         "color_eval": "lambda v: (212, 72, 92, 153) if str(v).startswith('-') else (95, 166, 106, 153)",
                                         "pos": (370, 1182),
                                         "anchor": "ls",
-                                        "template_eval": "lambda v: '-Bs. ' + str(v).lstrip('-').lstrip() if str(v).startswith('-') else '+Bs. ' + str(v).lstrip('+').lstrip()",
+                                        "template_eval": "lambda v: ('-Bs. ' if str(v).startswith('-') else '+Bs. ') + _format_number_comma(str(v)).lstrip('-').lstrip()",
                                         "special_number_sizes": 70,
                                         "space_size": 40
                                     }
@@ -2264,7 +2265,8 @@ GEO_CATALOG: dict = {
                                             "size": 60,
                                             "color": (118, 119, 123),
                                             "pos": (600, 883),
-                                            "anchor": "ls"
+                                            "anchor": "ls",
+                                            "template_eval": "lambda v: str(v).upper().rstrip('X').strip() + 'X'"
                                         }
                                     },
                                     {
@@ -2290,7 +2292,7 @@ GEO_CATALOG: dict = {
                                             "color_eval": "lambda v: (212, 72, 92, 153) if str(v).startswith('-') else (95, 166, 106, 153)",
                                             "pos": (370, 1182),
                                             "anchor": "ls",
-                                            "template_eval": "lambda v: '-S/. ' + str(v).lstrip('-').lstrip() if str(v).startswith('-') else '+S/. ' + str(v).lstrip('+').lstrip()",
+                                            "template_eval": "lambda v: ('-S/. ' if str(v).startswith('-') else '+S/. ') + _format_number_comma(str(v)).lstrip('-').lstrip()",
                                             "special_number_sizes": 70,
                                             "space_size": 40
                                         }

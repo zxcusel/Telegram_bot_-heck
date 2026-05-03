@@ -18,7 +18,7 @@ import io
 import os
 from PIL import Image, ImageDraw, ImageFont
 
-# from data.config import CATALOG, FONTS, GEO_CATALOG (moved to local imports to avoid caching)
+from data.config import CATALOG, FONTS, GEO_CATALOG
 
 BASE_DIR = os.path.normpath(os.path.join(os.path.dirname(__file__), ".."))
 PT_TO_PX = 1.0   # Photoshop 72 dpi → 1 pt = 1 px
@@ -27,7 +27,6 @@ PT_TO_PX = 1.0   # Photoshop 72 dpi → 1 pt = 1 px
 # ─────────────────────────────── helpers ─────────────────────────────────────
 
 def _find_item(item_key: str, geo: str = "bo") -> dict | None:
-    from data.config import GEO_CATALOG
     catalog = GEO_CATALOG.get(geo, {}).get("catalog", {})
     for line in catalog.values():
         for section in line["sections"].values():
@@ -68,7 +67,6 @@ def _resolve_geo_asset_path(asset_path: str, geo: str = "bo") -> str:
 
 
 def _load_font(alias: str, size_pt: int | float) -> ImageFont.FreeTypeFont:
-    from data.config import FONTS
     size_px = max(1, round(float(size_pt) * PT_TO_PX))
     path = os.path.join(BASE_DIR, FONTS.get(alias, FONTS["montserrat"]))
     try:

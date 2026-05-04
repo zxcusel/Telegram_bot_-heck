@@ -81,7 +81,7 @@ def _get_field_keyboard(field_key: str, s: dict, item_key: str = None) -> Inline
     buttons = []
     
     # 🎲 Рандомайзер
-    if s["rand_enabled"] and field_key in ("sum", "amount", "commission", "number", "account", "transaction", "operation", "card_recipient", "card_sender"):
+    if s["rand_enabled"] and field_key in ("sum", "amount", "commission", "number", "account", "transaction", "operation", "card_recipient", "card_sender", "phone"):
         buttons.append([InlineKeyboardButton(text="🎲 Сгенерировать", callback_data="render:random")])
         
     # 🎲 Рандомайзер процентов
@@ -148,6 +148,13 @@ def _get_field_keyboard(field_key: str, s: dict, item_key: str = None) -> Inline
         buttons.append([
             InlineKeyboardButton(text="Long", callback_data="render:set:Long"),
             InlineKeyboardButton(text="Short", callback_data="render:set:Short")
+        ])
+
+    if field_key == "percentage":
+        sign = s.get("perc_sign", "+")
+        buttons.append([
+            InlineKeyboardButton(text="🟢 [+]" if sign == "+" else "⚫️ [+]", callback_data="render:perc_sign:+"),
+            InlineKeyboardButton(text="🔴 [-]" if sign == "-" else "⚫️ [-]", callback_data="render:perc_sign:-")
         ])
         
     # 💰 Рекомендуемые суммы — Peru RD
@@ -383,7 +390,9 @@ async def cb_item_selected(call: CallbackQuery, state: FSMContext):
 
     from keyboards.inline import cancel_kb
     s = get_settings(call.from_user.id)
-    kb = _get_field_keyboard(askable[0]["key"], s, item_key)
+    s_temp = s.copy()
+    s_temp["perc_sign"] = "+"
+    kb = _get_field_keyboard(askable[0]["key"], s_temp, item_key)
 
     if has_photo:
         file_id = PREVIEW_FILE_IDS.get(item_key)
@@ -445,6 +454,7 @@ async def cb_item_selected(call: CallbackQuery, state: FSMContext):
         last_line=prev_data.get("last_line"),
         last_section=prev_data.get("last_section"),
         time_suffix=s["time_suffix"], # Копируем из настроек в state на время сессии
+        perc_sign="+",
     )
     await call.answer()
 
@@ -497,15 +507,21 @@ async def collect_text_field(message: Message, state: FSMContext):
         val = val.replace("A.M.", "am.").replace("P.M.", "pm.").replace("a. m.", "am.").replace("p. m.", "pm.")\
                  .replace("a.m.", "am.").replace("p.m.", "pm.").replace("AM", "am.").replace("PM", "pm.")
 
+    if askable[step]["key"] == "percentage":
+        if not val.startswith("+") and not val.startswith("-"):
+            val = data.get("perc_sign", "+") + val
+
     values[askable[step]["key"]] = val
     done_step = step + 1
 
     if done_step < len(askable):
         s = get_settings(message.from_user.id)
+        s_temp = s.copy()
+        s_temp["perc_sign"] = data.get("perc_sign", "+")
         checklist = _build_checklist(item["label"], askable, done_step=done_step, values=values)
         await _update_checklist(message.bot, message.chat.id, msg_id, has_photo,
                                 checklist + f"\n\n{askable[done_step]['prompt']}",
-                                reply_markup=_get_field_keyboard(askable[done_step]["key"], s, item_key))
+                                reply_markup=_get_field_keyboard(askable[done_step]["key"], s_temp, item_key))
         # Сбрасываем временный суффикс на дефолт из настроек для следующего поля
         await state.update_data(step=done_step, values=values, time_suffix=s["time_suffix"])
     else:
@@ -649,7 +665,7 @@ async def cb_render_shortcuts(call: CallbackQuery, state: FSMContext):
             val = str(random.randint(s["rand_min"], s["rand_max"]))
         elif key == "percentage":
             val_float = random.uniform(s.get("rand_percent_min", 1.0), s.get("rand_percent_max", 100.0))
-            sign = "+" if val_float >= 0 else "-"
+            sign = data.get("perc_sign", "+")
             formatted = f"{abs(val_float):,.2f}"
             val = f"{sign}{formatted}"
         elif key == "number":
@@ -669,8 +685,26 @@ async def cb_render_shortcuts(call: CallbackQuery, state: FSMContext):
             val = "".join([str(random.randint(0, 9)) for _ in range(8)])
         elif key in ("card_recipient", "card_sender"):
             val = "".join([str(random.randint(0, 9)) for _ in range(4)])
+        elif key == "phone":
+            # Генерация перуанского номера: +51 9XX XXX XXX
+            if item_key.endswith("_pe") or "pe" in item_key:
+                val = f"+51 9{''.join([str(random.randint(0, 9)) for _ in range(8)])}"
+            else:
+                val = f"+{''.join([str(random.randint(0, 9)) for _ in range(11)])}"
         else:
             val = "0"
+    elif action == "perc_sign":
+        new_sign = parts[2]
+        await state.update_data(perc_sign=new_sign)
+        s = get_settings(call.from_user.id)
+        s_temp = s.copy()
+        s_temp["perc_sign"] = new_sign
+        try:
+            await call.message.edit_reply_markup(reply_markup=_get_field_keyboard(askable[step]["key"], s_temp, item_key))
+        except Exception:
+            pass
+        await call.answer(f"Знак изменен на {new_sign}")
+        return
     elif action == "suffix":
         suffix_type = parts[2]
         new_suffix = None
@@ -709,10 +743,12 @@ async def cb_render_shortcuts(call: CallbackQuery, state: FSMContext):
 
     if done_step < len(askable):
         s = get_settings(call.from_user.id)
+        s_temp = s.copy()
+        s_temp["perc_sign"] = data.get("perc_sign", "+")
         checklist = _build_checklist(item["label"], askable, done_step=done_step, values=values)
         await _update_checklist(call.bot, call.message.chat.id, msg_id, has_photo,
                                 checklist + f"\n\n{askable[done_step]['prompt']}",
-                                reply_markup=_get_field_keyboard(askable[done_step]["key"], s, item_key))
+                                reply_markup=_get_field_keyboard(askable[done_step]["key"], s_temp, item_key))
         await state.update_data(step=done_step, values=values, time_suffix=s["time_suffix"])
     else:
         await state.clear()

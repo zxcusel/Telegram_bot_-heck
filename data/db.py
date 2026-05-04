@@ -48,6 +48,8 @@ def init_db():
                 rand_enabled INTEGER DEFAULT 0,
                 rand_min     INTEGER DEFAULT 17500,
                 rand_max     INTEGER DEFAULT 21999,
+                rand_perc_min REAL DEFAULT 10.0,
+                rand_perc_max REAL DEFAULT 1500.0,
                 rand_percent_enabled INTEGER DEFAULT 0,
                 rand_percent_min     REAL DEFAULT 1.0,
                 rand_percent_max     REAL DEFAULT 100.0
@@ -59,6 +61,7 @@ def init_db():
             ("name_pin_enabled","INTEGER DEFAULT 0"),("pinned_bank","TEXT DEFAULT NULL"),
             ("time_suffix","TEXT DEFAULT NULL"),("rand_enabled","INTEGER DEFAULT 0"),
             ("rand_min","INTEGER DEFAULT 17500"),("rand_max","INTEGER DEFAULT 21999"),
+            ("rand_perc_min","REAL DEFAULT 10.0"),("rand_perc_max","REAL DEFAULT 1500.0"),
             ("rand_percent_enabled","INTEGER DEFAULT 0"),("rand_percent_min","REAL DEFAULT 1.0"),
             ("rand_percent_max","REAL DEFAULT 100.0"),
         ]:
@@ -257,6 +260,7 @@ def get_settings(user_id: int) -> dict:
         row = con.execute("""
             SELECT pinned_date, pinned_name, name_pin_enabled, pinned_bank,
                    time_suffix, rand_enabled, rand_min, rand_max,
+                   rand_perc_min, rand_perc_max,
                    rand_percent_enabled, rand_percent_min, rand_percent_max
             FROM users WHERE user_id = ?
         """, (user_id,)).fetchone()
@@ -264,12 +268,14 @@ def get_settings(user_id: int) -> dict:
         return {"pinned_date": None, "pinned_name": None, "name_pin_enabled": 0,
                 "pinned_bank": None, "time_suffix": None,
                 "rand_enabled": 0, "rand_min": 17500, "rand_max": 21999,
+                "rand_perc_min": 10.0, "rand_perc_max": 1500.0,
                 "rand_percent_enabled": 0, "rand_percent_min": 1.0, "rand_percent_max": 100.0}
     return dict(row)
 
 def update_setting(user_id: int, key: str, value):
     valid_keys = ("pinned_date","pinned_name","name_pin_enabled","pinned_bank",
                   "time_suffix","rand_enabled","rand_min","rand_max",
+                  "rand_perc_min", "rand_perc_max",
                   "rand_percent_enabled", "rand_percent_min", "rand_percent_max")
     if key not in valid_keys: return
     with _conn() as con:

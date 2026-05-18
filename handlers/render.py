@@ -685,7 +685,7 @@ async def cb_render_shortcuts(call: CallbackQuery, state: FSMContext):
             if item_key == "check_pe":
                 length = 3
             elif item_key == "qr_pe":
-                length = 20
+                length = 9
             else:
                 length = 8
             val = "".join([str(random.randint(0, 9)) for _ in range(length)])

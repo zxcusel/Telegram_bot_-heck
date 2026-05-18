@@ -673,8 +673,12 @@ async def cb_render_shortcuts(call: CallbackQuery, state: FSMContext):
             formatted = f"{abs(val_float):,.2f}"
             val = f"{sign}{formatted}"
         elif key == "bank":
-            pe_banks = ["Banco de Crédito del Perú", "BBVA", "Scotiabank", "Interbank", "Banco de la Nación", "Banco Falabella Perú"]
-            val = random.choice(pe_banks)
+            if item_key.endswith("_pe"):
+                pe_banks = ["Banco de Crédito del Perú", "BBVA", "Scotiabank", "Interbank", "Banco de la Nación", "Banco Falabella Perú"]
+                val = random.choice(pe_banks)
+            else:
+                bo_banks = ["Banco Mercantil Santa Cruz", "Banco Fie", "Banco Bisa", "Banco Union", "Banco Económico", "Banco Nacional de Bolivia"]
+                val = random.choice(bo_banks)
         elif key == "number":
             val = "".join([str(random.randint(0, 9)) for _ in range(8)])
         elif key == "account":

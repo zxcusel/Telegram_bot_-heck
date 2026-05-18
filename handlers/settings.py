@@ -24,9 +24,9 @@ class SettingStates(StatesGroup):
 def settings_kb(user_id: int) -> InlineKeyboardMarkup:
     s = get_settings(user_id)
     
-    # Текст для кнопок в зависимости от состояния
     rand_text = "✅ Рандомайзер сумм: ВКЛ" if s["rand_enabled"] else "❌ Рандомайзер сумм: ВЫКЛ"
     rand_percent_text = "✅ Рандомайзер процентов: ВКЛ" if s.get("rand_percent_enabled") else "❌ Рандомайзер процентов: ВЫКЛ"
+    rand_bank_text = "✅ Рандомайзер банков: ВКЛ" if s.get("rand_bank_enabled") else "❌ Рандомайзер банков: ВЫКЛ"
     
     # AM/PM
     suffix = s["time_suffix"] or "Нет"
@@ -55,6 +55,7 @@ def settings_kb(user_id: int) -> InlineKeyboardMarkup:
             InlineKeyboardButton(text=f"Min: {s.get('rand_percent_min', 1.0)}", callback_data="set:percent_min"),
             InlineKeyboardButton(text=f"Max: {s.get('rand_percent_max', 100.0)}", callback_data="set:percent_max")
         ],
+        [InlineKeyboardButton(text=rand_bank_text, callback_data="set:toggle_rand_bank")],
         [InlineKeyboardButton(text=suffix_text, callback_data="set:toggle_suffix")],
         [InlineKeyboardButton(text=date_text, callback_data="set:pinned_date")],
         [InlineKeyboardButton(text=name_text, callback_data="set:pinned_name")],
@@ -91,6 +92,16 @@ async def cb_toggle_rand_percent(call: CallbackQuery):
     log.setting_changed(call.from_user.id, "rand_percent_enabled", new_val, call.from_user.username)
     await call.message.edit_reply_markup(reply_markup=settings_kb(call.from_user.id))
     await call.answer("Рандомайзер процентов изменен")
+
+
+@router.callback_query(F.data == "set:toggle_rand_bank")
+async def cb_toggle_rand_bank(call: CallbackQuery):
+    s = get_settings(call.from_user.id)
+    new_val = 0 if s.get("rand_bank_enabled") else 1
+    update_setting(call.from_user.id, "rand_bank_enabled", new_val)
+    log.setting_changed(call.from_user.id, "rand_bank_enabled", new_val, call.from_user.username)
+    await call.message.edit_reply_markup(reply_markup=settings_kb(call.from_user.id))
+    await call.answer("Рандомайзер банков изменен")
 
 
 @router.callback_query(F.data == "set:toggle_suffix")

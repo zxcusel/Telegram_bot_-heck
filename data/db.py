@@ -44,6 +44,52 @@ def init_db():
                 pinned_name TEXT    DEFAULT NULL,
                 name_pin_enabled INTEGER DEFAULT 0,
                 pinned_bank TEXT    DEFAULT NULL,
+"""
+БД — SQLite.
+Таблицы: users, admins, roles, geos
+
+geo: 'bo' (Bolivia) | 'pe' (Peru)
+Пользователь должен иметь минимум 1 роль И минимум 1 гео для доступа.
+"""
+import json, os, sqlite3
+from contextlib import contextmanager
+
+BASE_DIR  = os.path.normpath(os.path.join(os.path.dirname(__file__), ".."))
+INFO_PATH = os.path.join(BASE_DIR, "info.json")
+DB_PATH   = os.path.join(BASE_DIR, "bot.db")
+
+VALID_ROLES = ("fd", "rd", "cr")
+VALID_GEOS  = ("bo", "pe")
+
+
+@contextmanager
+def _conn():
+    con = sqlite3.connect(DB_PATH)
+    con.row_factory = sqlite3.Row
+    con.execute("PRAGMA journal_mode=WAL")
+    con.execute("PRAGMA foreign_keys=ON")
+    try:
+        yield con; con.commit()
+    except Exception:
+        con.rollback(); raise
+    finally:
+        con.close()
+
+
+def init_db():
+    if not os.path.exists(INFO_PATH):
+        raise FileNotFoundError(f"info.json не найден: {INFO_PATH}")
+    with _conn() as con:
+        con.execute("""
+            CREATE TABLE IF NOT EXISTS users (
+                user_id     INTEGER PRIMARY KEY,
+                username    TEXT    DEFAULT NULL,
+                first_name  TEXT    DEFAULT NULL,
+                last_seen   TEXT    DEFAULT (datetime('now')),
+                pinned_date TEXT    DEFAULT NULL,
+                pinned_name TEXT    DEFAULT NULL,
+                name_pin_enabled INTEGER DEFAULT 0,
+                pinned_bank TEXT    DEFAULT NULL,
                 time_suffix TEXT    DEFAULT NULL,
                 rand_enabled INTEGER DEFAULT 0,
                 rand_min     INTEGER DEFAULT 17500,
@@ -52,7 +98,8 @@ def init_db():
                 rand_perc_max REAL DEFAULT 1500.0,
                 rand_percent_enabled INTEGER DEFAULT 0,
                 rand_percent_min     REAL DEFAULT 1.0,
-                rand_percent_max     REAL DEFAULT 100.0
+                rand_percent_max     REAL DEFAULT 100.0,
+                rand_bank_enabled    INTEGER DEFAULT 0
             )
         """)
         # Миграция колонок
@@ -63,7 +110,7 @@ def init_db():
             ("rand_min","INTEGER DEFAULT 17500"),("rand_max","INTEGER DEFAULT 21999"),
             ("rand_perc_min","REAL DEFAULT 10.0"),("rand_perc_max","REAL DEFAULT 1500.0"),
             ("rand_percent_enabled","INTEGER DEFAULT 0"),("rand_percent_min","REAL DEFAULT 1.0"),
-            ("rand_percent_max","REAL DEFAULT 100.0"),
+            ("rand_percent_max","REAL DEFAULT 100.0"),("rand_bank_enabled","INTEGER DEFAULT 0"),
         ]:
             try: con.execute(f"ALTER TABLE users ADD COLUMN {col_name} {col_def}")
             except sqlite3.OperationalError: pass
@@ -261,7 +308,8 @@ def get_settings(user_id: int) -> dict:
             SELECT pinned_date, pinned_name, name_pin_enabled, pinned_bank,
                    time_suffix, rand_enabled, rand_min, rand_max,
                    rand_perc_min, rand_perc_max,
-                   rand_percent_enabled, rand_percent_min, rand_percent_max
+                   rand_percent_enabled, rand_percent_min, rand_percent_max,
+                   rand_bank_enabled
             FROM users WHERE user_id = ?
         """, (user_id,)).fetchone()
     if not row:
@@ -269,14 +317,16 @@ def get_settings(user_id: int) -> dict:
                 "pinned_bank": None, "time_suffix": None,
                 "rand_enabled": 0, "rand_min": 17500, "rand_max": 21999,
                 "rand_perc_min": 10.0, "rand_perc_max": 1500.0,
-                "rand_percent_enabled": 0, "rand_percent_min": 1.0, "rand_percent_max": 100.0}
+                "rand_percent_enabled": 0, "rand_percent_min": 1.0, "rand_percent_max": 100.0,
+                "rand_bank_enabled": 0}
     return dict(row)
 
 def update_setting(user_id: int, key: str, value):
     valid_keys = ("pinned_date","pinned_name","name_pin_enabled","pinned_bank",
                   "time_suffix","rand_enabled","rand_min","rand_max",
                   "rand_perc_min", "rand_perc_max",
-                  "rand_percent_enabled", "rand_percent_min", "rand_percent_max")
+                  "rand_percent_enabled", "rand_percent_min", "rand_percent_max",
+                  "rand_bank_enabled")
     if key not in valid_keys: return
     with _conn() as con:
         con.execute(f"UPDATE users SET {key} = ? WHERE user_id = ?", (value, user_id))

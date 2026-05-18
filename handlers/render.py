@@ -88,6 +88,10 @@ def _get_field_keyboard(field_key: str, s: dict, item_key: str = None) -> Inline
     if s.get("rand_percent_enabled") and field_key == "percentage":
         buttons.append([InlineKeyboardButton(text="🎲 Сгенерировать", callback_data="render:random")])
         
+    # 🎲 Рандомайзер банков
+    if s.get("rand_bank_enabled") and field_key == "bank":
+        buttons.append([InlineKeyboardButton(text="🎲 Сгенерировать", callback_data="render:random")])
+        
     # 📅 Закрепленная дата
     if s["pinned_date"] and "date" in field_key:
         buttons.append([InlineKeyboardButton(text=f"📅 {s['pinned_date']}", callback_data="render:pin_date")])
@@ -668,6 +672,9 @@ async def cb_render_shortcuts(call: CallbackQuery, state: FSMContext):
             sign = data.get("perc_sign", "+")
             formatted = f"{abs(val_float):,.2f}"
             val = f"{sign}{formatted}"
+        elif key == "bank":
+            pe_banks = ["Banco de Crédito del Perú", "BBVA", "Scotiabank", "Interbank", "Banco de la Nación", "Banco Falabella Perú"]
+            val = random.choice(pe_banks)
         elif key == "number":
             val = "".join([str(random.randint(0, 9)) for _ in range(8)])
         elif key == "account":

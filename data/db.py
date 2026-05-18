@@ -44,52 +44,6 @@ def init_db():
                 pinned_name TEXT    DEFAULT NULL,
                 name_pin_enabled INTEGER DEFAULT 0,
                 pinned_bank TEXT    DEFAULT NULL,
-"""
-БД — SQLite.
-Таблицы: users, admins, roles, geos
-
-geo: 'bo' (Bolivia) | 'pe' (Peru)
-Пользователь должен иметь минимум 1 роль И минимум 1 гео для доступа.
-"""
-import json, os, sqlite3
-from contextlib import contextmanager
-
-BASE_DIR  = os.path.normpath(os.path.join(os.path.dirname(__file__), ".."))
-INFO_PATH = os.path.join(BASE_DIR, "info.json")
-DB_PATH   = os.path.join(BASE_DIR, "bot.db")
-
-VALID_ROLES = ("fd", "rd", "cr")
-VALID_GEOS  = ("bo", "pe")
-
-
-@contextmanager
-def _conn():
-    con = sqlite3.connect(DB_PATH)
-    con.row_factory = sqlite3.Row
-    con.execute("PRAGMA journal_mode=WAL")
-    con.execute("PRAGMA foreign_keys=ON")
-    try:
-        yield con; con.commit()
-    except Exception:
-        con.rollback(); raise
-    finally:
-        con.close()
-
-
-def init_db():
-    if not os.path.exists(INFO_PATH):
-        raise FileNotFoundError(f"info.json не найден: {INFO_PATH}")
-    with _conn() as con:
-        con.execute("""
-            CREATE TABLE IF NOT EXISTS users (
-                user_id     INTEGER PRIMARY KEY,
-                username    TEXT    DEFAULT NULL,
-                first_name  TEXT    DEFAULT NULL,
-                last_seen   TEXT    DEFAULT (datetime('now')),
-                pinned_date TEXT    DEFAULT NULL,
-                pinned_name TEXT    DEFAULT NULL,
-                name_pin_enabled INTEGER DEFAULT 0,
-                pinned_bank TEXT    DEFAULT NULL,
                 time_suffix TEXT    DEFAULT NULL,
                 rand_enabled INTEGER DEFAULT 0,
                 rand_min     INTEGER DEFAULT 17500,

@@ -19,6 +19,9 @@ class AdminStates(StatesGroup):
     wait_target_id = State()
     managing_roles = State()
     wait_new_admin = State()
+    wait_broadcast_text_all = State()
+    wait_broadcast_id_indiv = State()
+    wait_broadcast_text_indiv = State()
 
 
 # ── keyboards ─────────────────────────────────────────────────────────────────
@@ -27,7 +30,15 @@ def _admin_main_kb() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="🎭 Выдать роль пользователю", callback_data="admin:set_role")],
         [InlineKeyboardButton(text="📋 Список пользователей",      callback_data="admin:user_list")],
+        [InlineKeyboardButton(text="📢 Отправить сообщение",      callback_data="admin:broadcast_menu")],
         [InlineKeyboardButton(text="🔙 Назад",                     callback_data="admin:exit")],
+    ])
+
+def _broadcast_menu_kb() -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="📢 Всем пользователям", callback_data="admin:broadcast_all")],
+        [InlineKeyboardButton(text="👤 Индивидуально (по ID)", callback_data="admin:broadcast_indiv")],
+        [InlineKeyboardButton(text="🔙 Назад", callback_data="admin:back_main")]
     ])
 
 
@@ -303,3 +314,91 @@ async def cb_user_list(call: CallbackQuery, state: FSMContext):
 
     await _safe_edit(call.message, text, _back_to_main_kb())
     await call.answer()
+
+
+# ── Рассылка сообщений ────────────────────────────────────────────────────────
+
+@router.callback_query(F.data == "admin:broadcast_menu")
+async def cb_broadcast_menu(call: CallbackQuery, state: FSMContext):
+    if not is_admin(call.from_user.id): return
+    await _safe_edit(call.message, "📢 Выберите тип рассылки:", _broadcast_menu_kb())
+    await call.answer()
+
+@router.callback_query(F.data == "admin:broadcast_all")
+async def cb_broadcast_all(call: CallbackQuery, state: FSMContext):
+    if not is_admin(call.from_user.id): return
+    await _safe_edit(call.message, "⌨️ Введите сообщение для рассылки ВСЕМ пользователям:\n\n(или нажмите Назад)", _back_to_main_kb())
+    await state.set_state(AdminStates.wait_broadcast_text_all)
+    await state.update_data(prompt_msg_id=call.message.message_id)
+    await call.answer()
+
+@router.message(AdminStates.wait_broadcast_text_all)
+async def process_broadcast_all(message: Message, state: FSMContext):
+    if not is_admin(message.from_user.id): return
+    data = await state.get_data()
+    await _try_delete(message)
+    users = get_all_users_all()
+    success = 0
+    for uid in users:
+        try:
+            await message.bot.send_message(uid, message.text, parse_mode=None)
+            success += 1
+        except Exception:
+            pass
+    log.broadcast(message.from_user.id, message.text, f"all, sent: {success}", message.from_user.username)
+    text = f"✅ Сообщение отправлено {success} пользователям.\n\n👨‍💼 <b>Админ-панель</b>"
+    
+    try:
+        await message.bot.edit_message_text(chat_id=message.chat.id, message_id=data.get("prompt_msg_id"), text=text, parse_mode="HTML", reply_markup=_admin_main_kb())
+    except Exception:
+        await message.answer(text, parse_mode="HTML", reply_markup=_admin_main_kb())
+    await state.clear()
+
+
+@router.callback_query(F.data == "admin:broadcast_indiv")
+async def cb_broadcast_indiv(call: CallbackQuery, state: FSMContext):
+    if not is_admin(call.from_user.id): return
+    await _safe_edit(call.message, "🆔 Введите Telegram ID пользователя для отправки сообщения:", _back_to_main_kb())
+    await state.set_state(AdminStates.wait_broadcast_id_indiv)
+    await state.update_data(prompt_msg_id=call.message.message_id)
+    await call.answer()
+
+@router.message(AdminStates.wait_broadcast_id_indiv)
+async def process_broadcast_id_indiv(message: Message, state: FSMContext):
+    if not is_admin(message.from_user.id): return
+    data = await state.get_data()
+    await _try_delete(message)
+    if not message.text or not message.text.strip().lstrip("-").isdigit():
+        try:
+            await message.bot.edit_message_text(chat_id=message.chat.id, message_id=data.get("prompt_msg_id"), text="❌ Некорректный ID. Введите числовой Telegram ID:", reply_markup=_back_to_main_kb())
+        except Exception:
+            pass
+        return
+    
+    target_id = int(message.text.strip())
+    await state.update_data(target_id=target_id)
+    try:
+        await message.bot.edit_message_text(chat_id=message.chat.id, message_id=data.get("prompt_msg_id"), text=f"⌨️ Введите сообщение для пользователя {target_id}:", reply_markup=_back_to_main_kb())
+    except Exception:
+        pass
+    await state.set_state(AdminStates.wait_broadcast_text_indiv)
+
+
+@router.message(AdminStates.wait_broadcast_text_indiv)
+async def process_broadcast_text_indiv(message: Message, state: FSMContext):
+    if not is_admin(message.from_user.id): return
+    data = await state.get_data()
+    await _try_delete(message)
+    target_id = data.get("target_id")
+    try:
+        await message.bot.send_message(target_id, message.text, parse_mode=None)
+        text = f"✅ Сообщение отправлено пользователю {target_id}.\n\n👨‍💼 <b>Админ-панель</b>"
+        log.broadcast(message.from_user.id, message.text, f"indiv: {target_id}", message.from_user.username)
+    except Exception as e:
+        text = f"❌ Ошибка отправки пользователю {target_id}: {e}\n\n👨‍💼 <b>Админ-панель</b>"
+        
+    try:
+        await message.bot.edit_message_text(chat_id=message.chat.id, message_id=data.get("prompt_msg_id"), text=text, parse_mode="HTML", reply_markup=_admin_main_kb())
+    except Exception:
+        await message.answer(text, parse_mode="HTML", reply_markup=_admin_main_kb())
+    await state.clear()

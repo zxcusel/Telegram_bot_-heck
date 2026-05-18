@@ -24,6 +24,12 @@ async def main():
     dp.include_router(catalog.router)
     dp.include_router(render.router)
 
+    from aiogram.types import Message
+    from aiogram import F
+    @dp.message(F.text)
+    async def fallback_text_handler(message: Message):
+        log.unhandled_text(message.from_user.id, message.text, message.from_user.username)
+
     log.startup()
     await dp.start_polling(bot, allowed_updates=dp.resolve_used_update_types())
 

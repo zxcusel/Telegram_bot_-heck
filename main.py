@@ -26,7 +26,8 @@ async def main():
 
     from aiogram.types import Message
     from aiogram import F
-    @dp.message(F.text)
+    from aiogram.filters import StateFilter
+    @dp.message(StateFilter(None), F.text)
     async def fallback_text_handler(message: Message):
         log.unhandled_text(message.from_user.id, message.text, message.from_user.username)
 

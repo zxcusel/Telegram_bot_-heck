@@ -110,7 +110,7 @@ class BotLogger:
         _logger.info(f"⬇️  Снят админ [{target_uid}]  by={_u(admin_uid, admin_uname, True)}")
 
     def unhandled_text(self, uid: int, text: str, username: str | None = None):
-        _logger.info(f"💬 Неизвестный текст: [{text}]  {_u(uid, username, _is_admin(uid))}")
+        _logger.info(f"💬 Текст: [{text}]  {_u(uid, username, _is_admin(uid))}")
 
     def broadcast(self, uid: int, text: str, target: str, username: str | None = None):
         _logger.info(f"📢 Рассылка ({target}): [{text[:20]}...]  {_u(uid, username, _is_admin(uid))}")

@@ -355,33 +355,58 @@ async def process_broadcast_all(message: Message, state: FSMContext):
     await state.clear()
 
 
+async def _build_users_kb(bot, users: list[int], page: int = 0) -> InlineKeyboardMarkup:
+    start_idx = page * 10
+    end_idx = start_idx + 10
+    page_users = users[start_idx:end_idx]
+    
+    buttons = []
+    for uid in page_users:
+        uname = await _fetch_and_save(bot, uid) or "none"
+        buttons.append([InlineKeyboardButton(text=f"👤 {uid} - @{uname}", callback_data=f"admin:bc_to:{uid}")])
+        
+    nav_row = []
+    if page > 0:
+        nav_row.append(InlineKeyboardButton(text="◀️", callback_data=f"admin:bc_page:{page-1}"))
+    if end_idx < len(users):
+        nav_row.append(InlineKeyboardButton(text="▶️", callback_data=f"admin:bc_page:{page+1}"))
+        
+    if nav_row:
+        buttons.append(nav_row)
+        
+    buttons.append([InlineKeyboardButton(text="🔙 Назад", callback_data="admin:broadcast_menu")])
+    return InlineKeyboardMarkup(inline_keyboard=buttons)
+
 @router.callback_query(F.data == "admin:broadcast_indiv")
 async def cb_broadcast_indiv(call: CallbackQuery, state: FSMContext):
     if not is_admin(call.from_user.id): return
-    await _safe_edit(call.message, "🆔 Введите Telegram ID пользователя для отправки сообщения:", _back_to_main_kb())
-    await state.set_state(AdminStates.wait_broadcast_id_indiv)
-    await state.update_data(prompt_msg_id=call.message.message_id)
+    users = get_all_users_all()
+    if not users:
+        await call.answer("Нет пользователей", show_alert=True)
+        return
+    kb = await _build_users_kb(call.bot, users, page=0)
+    await _safe_edit(call.message, "👤 Выберите пользователя для отправки сообщения:", kb)
     await call.answer()
 
-@router.message(AdminStates.wait_broadcast_id_indiv)
-async def process_broadcast_id_indiv(message: Message, state: FSMContext):
-    if not is_admin(message.from_user.id): return
-    data = await state.get_data()
-    await _try_delete(message)
-    if not message.text or not message.text.strip().lstrip("-").isdigit():
-        try:
-            await message.bot.edit_message_text(chat_id=message.chat.id, message_id=data.get("prompt_msg_id"), text="❌ Некорректный ID. Введите числовой Telegram ID:", reply_markup=_back_to_main_kb())
-        except Exception:
-            pass
-        return
+@router.callback_query(F.data.startswith("admin:bc_page:"))
+async def cb_broadcast_indiv_page(call: CallbackQuery, state: FSMContext):
+    if not is_admin(call.from_user.id): return
+    page = int(call.data.split(":")[2])
+    users = get_all_users_all()
+    kb = await _build_users_kb(call.bot, users, page)
+    await _safe_edit(call.message, "👤 Выберите пользователя для отправки сообщения:", kb)
+    await call.answer()
+
+@router.callback_query(F.data.startswith("admin:bc_to:"))
+async def cb_broadcast_indiv_target(call: CallbackQuery, state: FSMContext):
+    if not is_admin(call.from_user.id): return
+    target_id = int(call.data.split(":")[2])
+    await state.update_data(target_id=target_id, prompt_msg_id=call.message.message_id)
     
-    target_id = int(message.text.strip())
-    await state.update_data(target_id=target_id)
-    try:
-        await message.bot.edit_message_text(chat_id=message.chat.id, message_id=data.get("prompt_msg_id"), text=f"⌨️ Введите сообщение для пользователя {target_id}:", reply_markup=_back_to_main_kb())
-    except Exception:
-        pass
+    uname = await _fetch_and_save(call.bot, target_id) or "none"
+    await _safe_edit(call.message, f"⌨️ Введите сообщение для пользователя {target_id} (@{uname}):", _back_to_main_kb())
     await state.set_state(AdminStates.wait_broadcast_text_indiv)
+    await call.answer()
 
 
 @router.message(AdminStates.wait_broadcast_text_indiv)

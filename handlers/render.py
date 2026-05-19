@@ -317,7 +317,8 @@ async def _finish_render(message: Message, item_key: str, values: dict, item: di
                 reply_markup=after_render_kb(geo, item_key)
             )
     except Exception as e:
-        log.render_error(message.from_user.id, item.get("label", item_key), str(e), message.from_user.username)
+        lbl = item.get("label", item_key) if item else item_key
+        log.render_error(message.from_user.id, lbl, str(e), message.from_user.username)
         await message.answer(f"❌ Ошибка рендеринга: {e}")
 
 
@@ -499,137 +500,153 @@ async def cmd_start_in_render(message: Message, state: FSMContext):
 
 @router.message(RenderStates.collecting, F.text, ~Command(commands=["start"]))
 async def collect_text_field(message: Message, state: FSMContext):
-    data       = await state.get_data()
-    askable:   list = data["askable"]
-    step:      int  = data["step"]
-    values:    dict = data["values"]
-    item_key:  str  = data["item_key"]
-    msg_id:    int  = data["checklist_msg_id"]
-    has_photo: bool = data["has_photo"]
-    geo: str = data.get("current_geo", "bo")
-    item = _find_item(item_key, geo)
-
-    if _is_image_field(askable[step]):
-        await _try_delete(message.bot, message.chat.id, message.message_id)
-        await message.answer("⚠️ Это поле ожидает <b>фото</b>. Отправьте изображение.", parse_mode="HTML")
-        return
-
-    await _try_delete(message.bot, message.chat.id, message.message_id)
-    
-    val = message.text.strip()
-    # Применяем суффикс времени если он выбран в state
-    if data.get("time_suffix") and "time" in askable[step]["key"] and item_key != "qr_pe":
-        if "M." not in val.upper(): # Если пользователь сам не написал AM/PM
-            suff = data['time_suffix']
-            if item_key in ("check_doc", "check_pe"):
-                suff = suff.lower().replace("a.m.", "a. m.").replace("p.m.", "p. m.")
-            if item_key == "check3_pe":
-                suff = suff.replace(".", "")
-            val = f"{val} {suff}"
-    
-    # Если пользователь сам ввел AM/PM в чеке — тоже в нижний регистр
-    if item_key in ("check_doc", "check_pe") and "time" in askable[step]["key"]:
-        val = val.replace("AM", "a. m.").replace("PM", "p. m.").replace("A.M.", "a. m.").replace("P.M.", "p. m.")
-    
-    if item_key == "check3_pe" and "time" in askable[step]["key"]:
-        val = val.replace(".", "").upper()
-    
-    # Конвертация даты в испанский формат для чеков Перу
-    if item_key == "check_pe" and askable[step]["key"] == "date":
-        val = _to_es_date(val)
-    if item_key in ("check2_pe", "check4_pe") and askable[step]["key"] == "date":
-        val = _to_es_date2(val)
-    if item_key == "check3_pe" and askable[step]["key"] == "date":
-        val = _to_es_date3(val)
-    if item_key in ("check2_pe", "check4_pe") and askable[step]["key"] == "time":
-        val = val.replace("A.M.", "am.").replace("P.M.", "pm.").replace("a. m.", "am.").replace("p. m.", "pm.")\
-                 .replace("a.m.", "am.").replace("p.m.", "pm.").replace("AM", "am.").replace("PM", "pm.")
-
-    if askable[step]["key"] == "percentage":
-        if not val.startswith("+") and not val.startswith("-"):
-            val = data.get("perc_sign", "+") + val
-
-    values[askable[step]["key"]] = val
-    done_step = step + 1
-
-    if done_step < len(askable):
-        s = get_settings(message.from_user.id)
-        s_temp = s.copy()
-        s_temp["perc_sign"] = data.get("perc_sign", "+")
-
-        # Авто-рандом банков на промежуточных шагах
-        while done_step < len(askable) and askable[done_step]["key"] == "bank" and s.get("rand_bank_enabled"):
-            values["bank"] = _get_random_bank(item_key)
-            done_step += 1
-
-        if done_step < len(askable):
-            checklist = _build_checklist(item["label"], askable, done_step=done_step, values=values)
-            await _update_checklist(message.bot, message.chat.id, msg_id, has_photo,
-                                    checklist + f"\n\n{askable[done_step]['prompt']}",
-                                    reply_markup=_get_field_keyboard(askable[done_step]["key"], s_temp, item_key))
-            await state.update_data(step=done_step, values=values, time_suffix=s["time_suffix"])
-        else:
-            await state.clear()
+    try:
+            data       = await state.get_data()
+            askable:   list = data["askable"]
+            step:      int  = data["step"]
+            values:    dict = data["values"]
+            item_key:  str  = data["item_key"]
+            msg_id:    int  = data["checklist_msg_id"]
+            has_photo: bool = data["has_photo"]
             geo: str = data.get("current_geo", "bo")
-            await _finish_render(message, item_key, values, item,
-                                 checklist_msg_id=msg_id, has_photo=has_photo,
-                                 geo=geo)
+            item = _find_item(item_key, geo)
+
+            if _is_image_field(askable[step]):
+                await _try_delete(message.bot, message.chat.id, message.message_id)
+                await message.answer("⚠️ Это поле ожидает <b>фото</b>. Отправьте изображение.", parse_mode="HTML")
+                return
+
+            await _try_delete(message.bot, message.chat.id, message.message_id)
+    
+            val = message.text.strip()
+            # Применяем суффикс времени если он выбран в state
+            if data.get("time_suffix") and "time" in askable[step]["key"] and item_key != "qr_pe":
+                if "M." not in val.upper(): # Если пользователь сам не написал AM/PM
+                    suff = data['time_suffix']
+                    if item_key in ("check_doc", "check_pe"):
+                        suff = suff.lower().replace("a.m.", "a. m.").replace("p.m.", "p. m.")
+                    if item_key == "check3_pe":
+                        suff = suff.replace(".", "")
+                    val = f"{val} {suff}"
+    
+            # Если пользователь сам ввел AM/PM в чеке — тоже в нижний регистр
+            if item_key in ("check_doc", "check_pe") and "time" in askable[step]["key"]:
+                val = val.replace("AM", "a. m.").replace("PM", "p. m.").replace("A.M.", "a. m.").replace("P.M.", "p. m.")
+    
+            if item_key == "check3_pe" and "time" in askable[step]["key"]:
+                val = val.replace(".", "").upper()
+    
+            # Конвертация даты в испанский формат для чеков Перу
+            if item_key == "check_pe" and askable[step]["key"] == "date":
+                val = _to_es_date(val)
+            if item_key in ("check2_pe", "check4_pe") and askable[step]["key"] == "date":
+                val = _to_es_date2(val)
+            if item_key == "check3_pe" and askable[step]["key"] == "date":
+                val = _to_es_date3(val)
+            if item_key in ("check2_pe", "check4_pe") and askable[step]["key"] == "time":
+                val = val.replace("A.M.", "am.").replace("P.M.", "pm.").replace("a. m.", "am.").replace("p. m.", "pm.")\
+                         .replace("a.m.", "am.").replace("p.m.", "pm.").replace("AM", "am.").replace("PM", "pm.")
+
+            if askable[step]["key"] == "percentage":
+                if not val.startswith("+") and not val.startswith("-"):
+                    val = data.get("perc_sign", "+") + val
+
+            values[askable[step]["key"]] = val
+            done_step = step + 1
+
+            if done_step < len(askable):
+                s = get_settings(message.from_user.id)
+                s_temp = s.copy()
+                s_temp["perc_sign"] = data.get("perc_sign", "+")
+
+                # Авто-рандом банков на промежуточных шагах
+                while done_step < len(askable) and askable[done_step]["key"] == "bank" and s.get("rand_bank_enabled"):
+                    values["bank"] = _get_random_bank(item_key)
+                    done_step += 1
+
+                if done_step < len(askable):
+                    checklist = _build_checklist(item["label"], askable, done_step=done_step, values=values)
+                    await _update_checklist(message.bot, message.chat.id, msg_id, has_photo,
+                                            checklist + f"\n\n{askable[done_step]['prompt']}",
+                                            reply_markup=_get_field_keyboard(askable[done_step]["key"], s_temp, item_key))
+                    await state.update_data(step=done_step, values=values, time_suffix=s["time_suffix"])
+                else:
+                    await state.clear()
+                    geo: str = data.get("current_geo", "bo")
+                    await _finish_render(message, item_key, values, item,
+                                         checklist_msg_id=msg_id, has_photo=has_photo,
+                                         geo=geo)
+
+
+    except Exception as e:
+        import logging
+        logging.exception(f"Error in collect_text_field for user {message.from_user.id}: {e}")
+        await state.clear()
+        await message.answer(f"❌ Произошла ошибка при обработке данных: {e}\nСостояние сброшено. Попробуйте еще раз.")
 
 
 @router.message(RenderStates.collecting, F.photo | F.document)
 async def collect_photo_field(message: Message, state: FSMContext):
-    data       = await state.get_data()
-    askable:   list = data["askable"]
-    step:      int  = data["step"]
-    values:    dict = data["values"]
-    item_key:  str  = data["item_key"]
-    msg_id:    int  = data["checklist_msg_id"]
-    has_photo: bool = data["has_photo"]
-    geo: str = data.get("current_geo", "bo")
-    item = _find_item(item_key, geo)
-
-    if not _is_image_field(askable[step]):
-        await _try_delete(message.bot, message.chat.id, message.message_id)
-        await message.answer("⚠️ Это поле ожидает <b>текст</b>.", parse_mode="HTML")
-        return
-
-    await _try_delete(message.bot, message.chat.id, message.message_id)
-
-    if message.photo:
-        file_id = message.photo[-1].file_id
-    elif message.document:
-        if not message.document.mime_type or not message.document.mime_type.startswith("image/"):
-            await message.answer("⚠️ Пожалуйста, отправьте именно изображение (в виде фото или файла).", parse_mode="HTML")
-            return
-        file_id = message.document.file_id
-    else:
-        return
-
-    file = await message.bot.get_file(file_id)
-    file_bytes = await message.bot.download_file(file.file_path)
-    values[askable[step]["key"]] = file_bytes.read()
-    done_step = step + 1
-
-    if done_step < len(askable):
-        s = get_settings(message.from_user.id)
-
-        # Авто-рандом банков на промежуточных шагах
-        while done_step < len(askable) and askable[done_step]["key"] == "bank" and s.get("rand_bank_enabled"):
-            values["bank"] = _get_random_bank(item_key)
-            done_step += 1
-
-        if done_step < len(askable):
-            checklist = _build_checklist(item["label"], askable, done_step=done_step, values=values)
-            await _update_checklist(message.bot, message.chat.id, msg_id, has_photo,
-                                    checklist + f"\n\n{askable[done_step]['prompt']}",
-                                    reply_markup=_get_field_keyboard(askable[done_step]["key"], s, item_key))
-            await state.update_data(step=done_step, values=values, time_suffix=s["time_suffix"])
-        else:
-            await state.clear()
+    try:
+            data       = await state.get_data()
+            askable:   list = data["askable"]
+            step:      int  = data["step"]
+            values:    dict = data["values"]
+            item_key:  str  = data["item_key"]
+            msg_id:    int  = data["checklist_msg_id"]
+            has_photo: bool = data["has_photo"]
             geo: str = data.get("current_geo", "bo")
-            await _finish_render(message, item_key, values, item,
-                                 checklist_msg_id=msg_id, has_photo=has_photo,
-                                 geo=geo)
+            item = _find_item(item_key, geo)
+
+            if not _is_image_field(askable[step]):
+                await _try_delete(message.bot, message.chat.id, message.message_id)
+                await message.answer("⚠️ Это поле ожидает <b>текст</b>.", parse_mode="HTML")
+                return
+
+            await _try_delete(message.bot, message.chat.id, message.message_id)
+
+            if message.photo:
+                file_id = message.photo[-1].file_id
+            elif message.document:
+                if not message.document.mime_type or not message.document.mime_type.startswith("image/"):
+                    await message.answer("⚠️ Пожалуйста, отправьте именно изображение (в виде фото или файла).", parse_mode="HTML")
+                    return
+                file_id = message.document.file_id
+            else:
+                return
+
+            file = await message.bot.get_file(file_id)
+            file_bytes = await message.bot.download_file(file.file_path)
+            values[askable[step]["key"]] = file_bytes.read()
+            done_step = step + 1
+
+            if done_step < len(askable):
+                s = get_settings(message.from_user.id)
+
+                # Авто-рандом банков на промежуточных шагах
+                while done_step < len(askable) and askable[done_step]["key"] == "bank" and s.get("rand_bank_enabled"):
+                    values["bank"] = _get_random_bank(item_key)
+                    done_step += 1
+
+                if done_step < len(askable):
+                    checklist = _build_checklist(item["label"], askable, done_step=done_step, values=values)
+                    await _update_checklist(message.bot, message.chat.id, msg_id, has_photo,
+                                            checklist + f"\n\n{askable[done_step]['prompt']}",
+                                            reply_markup=_get_field_keyboard(askable[done_step]["key"], s, item_key))
+                    await state.update_data(step=done_step, values=values, time_suffix=s["time_suffix"])
+                else:
+                    await state.clear()
+                    geo: str = data.get("current_geo", "bo")
+                    await _finish_render(message, item_key, values, item,
+                                         checklist_msg_id=msg_id, has_photo=has_photo,
+                                         geo=geo)
+
+
+    except Exception as e:
+        import logging
+        logging.exception(f"Error in collect_photo_field for user {message.from_user.id}: {e}")
+        await state.clear()
+        await message.answer(f"❌ Произошла ошибка при обработке данных: {e}\nСостояние сброшено. Попробуйте еще раз.")
 
 
 # ── Отмена ────────────────────────────────────────────────────────────────────

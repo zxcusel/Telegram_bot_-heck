@@ -505,6 +505,13 @@ def render_image(item_key: str, field_values: dict[str, str], geo: str = "bo") -
         if tc.get("collect_only"):
             continue
 
+        # ── cover_area: закрашиваем область цветом перед рисованием ─────────────
+        if tc.get("cover_color") and tc.get("cover_area"):
+            color = tc["cover_color"]
+            if len(color) == 3:
+                color = color + (255,)
+            draw.rectangle(tc["cover_area"], fill=color)
+
         # ── image_paste: вставляем пользовательское изображение в area ───────────
         if tc.get("image_paste"):
             img_data = field_values.get(key)

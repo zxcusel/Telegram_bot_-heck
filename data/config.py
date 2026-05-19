@@ -1876,6 +1876,17 @@ GEO_CATALOG: dict = {
                                             "color": (37, 34, 41), "pos": (481, 727),
                                         },
                                     },
+                                    {
+                                        "key": "bank",
+                                        "prompt": "🏦 Введите название банка (пример: BCP)",
+                                        "text_config": {
+                                            "font": "araboto", "size": 25,
+                                            "color": (37, 34, 41), "pos": (595, 683),
+                                            "align": "right",
+                                            "cover_area": (530, 680, 610, 710),
+                                            "cover_color": (255, 255, 255),
+                                        },
+                                    },
                                 ],
                             },
                             "check2_pe": {

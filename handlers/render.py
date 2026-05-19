@@ -476,7 +476,10 @@ async def cb_item_selected(call: CallbackQuery, state: FSMContext):
         time_suffix=s["time_suffix"],
         perc_sign="+",
     )
-    await call.answer()
+    try:
+        await call.answer()
+    except Exception:
+        pass
 
 
 @router.message(RenderStates.collecting, CommandStart())
@@ -678,7 +681,10 @@ async def cb_back_main_from_render(call: CallbackQuery, state: FSMContext):
 async def cb_render_shortcuts(call: CallbackQuery, state: FSMContext):
     data = await state.get_data()
     if not data or "askable" not in data:
-        await call.answer()
+        try:
+            await call.answer()
+        except Exception:
+            pass
         return
 
     askable:   list = data["askable"]
@@ -758,7 +764,10 @@ async def cb_render_shortcuts(call: CallbackQuery, state: FSMContext):
             await call.message.edit_reply_markup(reply_markup=_get_field_keyboard(askable[step]["key"], s_temp, item_key))
         except Exception:
             pass
-        await call.answer(f"Знак изменен на {new_sign}")
+        try:
+            await call.answer(f"Знак изменен на {new_sign}")
+        except Exception:
+            pass
         return
     elif action == "suffix":
         suffix_type = parts[2]
@@ -779,12 +788,18 @@ async def cb_render_shortcuts(call: CallbackQuery, state: FSMContext):
             await call.message.edit_reply_markup(reply_markup=_get_field_keyboard(askable[step]["key"], s_temp, item_key))
         except Exception:
             pass
-        await call.answer(f"Выбрано: {new_suffix or 'Без суффикса'}")
+        try:
+            await call.answer(f"Выбрано: {new_suffix or 'Без суффикса'}")
+        except Exception:
+            pass
         return
     elif action == "set":
         val = parts[2]
     else:
-        await call.answer()
+        try:
+            await call.answer()
+        except Exception:
+            pass
         return
 
     # Если мы здесь, значит получили значение (pin или random)
@@ -805,9 +820,16 @@ async def cb_render_shortcuts(call: CallbackQuery, state: FSMContext):
                                 checklist + f"\n\n{askable[done_step]['prompt']}",
                                 reply_markup=_get_field_keyboard(askable[done_step]["key"], s_temp, item_key))
         await state.update_data(step=done_step, values=values, time_suffix=s["time_suffix"])
+        try:
+            await call.answer()
+        except Exception:
+            pass
     else:
         await state.clear()
+        try:
+            await call.answer()  # отвечаем ДО рендера, иначе истечёт таймаут
+        except Exception:
+            pass
         await _finish_render(call.message, item_key, values, item,
                              checklist_msg_id=msg_id, has_photo=has_photo,
                              geo=geo)
-    await call.answer()

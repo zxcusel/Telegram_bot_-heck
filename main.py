@@ -25,9 +25,8 @@ async def main():
     dp.include_router(render.router)
 
     from aiogram.types import Message
-    from aiogram import F
+    from aiogram import F, Router
     from aiogram.filters import StateFilter, Command
-    from aiogram.router import Router
     fallback_router = Router()
 
     @fallback_router.message(StateFilter(None), F.text, ~F.text.startswith("/"))

@@ -1880,10 +1880,10 @@ GEO_CATALOG: dict = {
                                         "key": "bank",
                                         "prompt": "🏦 Введите название банка (пример: BCP)",
                                         "text_config": {
-                                            "font": "araboto", "size": 25,
-                                            "color": (37, 34, 41), "pos": (595, 683),
+                                            "font": "araboto", "size": 26,
+                                            "color": (37, 34, 41), "pos": (596, 680),
                                             "align": "right",
-                                            "cover_area": (530, 680, 610, 710),
+                                            "cover_area": (530, 678, 610, 710),
                                             "cover_color": (255, 255, 255),
                                         },
                                     },

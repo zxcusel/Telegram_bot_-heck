@@ -395,9 +395,6 @@ async def cb_item_selected(call: CallbackQuery, state: FSMContext):
         await call.answer()
         return
 
-    checklist = _build_checklist(item["label"], askable, done_step=start_step, values=auto_values)
-    caption = checklist + f"\n\n{askable[start_step]['prompt']}"
-
     preview_path = _has_preview(item)
     has_photo = preview_path is not None
 
@@ -411,6 +408,9 @@ async def cb_item_selected(call: CallbackQuery, state: FSMContext):
     while start_step < len(askable) and askable[start_step]["key"] == "bank" and s.get("rand_bank_enabled"):
         auto_values["bank"] = _get_random_bank(item_key)
         start_step += 1
+
+    checklist = _build_checklist(item["label"], askable, done_step=start_step, values=auto_values)
+    caption = checklist + f"\n\n{askable[start_step]['prompt']}"
 
     kb = _get_field_keyboard(askable[start_step]["key"], s_temp, item_key)
 

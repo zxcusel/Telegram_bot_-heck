@@ -21,6 +21,14 @@ import random
 
 router = Router()
 
+
+def _get_random_bank(item_key: str) -> str:
+    """Возвращает рандомный банк в зависимости от шаблона."""
+    if item_key.endswith("_pe"):
+        return random.choice(["BCP", "BBVA", "Scotiabank", "Interbank", "Banco de la Nación", "Banco Falabella Perú"])
+    else:
+        return random.choice(["Banco Mercantil Santa Cruz", "Banco Fie", "Banco Bisa", "Banco Union", "Banco Económico", "Banco Nacional de Bolivia"])
+
 # ── Испанские сокращения месяцев ──────────────────────────────────────────────
 _ES_MONTHS = {
     "01": "ene", "02": "feb", "03": "mar", "04": "abr",
@@ -386,17 +394,24 @@ async def cb_item_selected(call: CallbackQuery, state: FSMContext):
         await call.answer()
         return
 
-    checklist = _build_checklist(item["label"], askable, done_step=0, values={})
-    caption = checklist + f"\n\n{askable[0]['prompt']}"
+    checklist = _build_checklist(item["label"], askable, done_step=start_step, values=auto_values)
+    caption = checklist + f"\n\n{askable[start_step]['prompt']}"
 
     preview_path = _has_preview(item)
     has_photo = preview_path is not None
 
-    from keyboards.inline import cancel_kb
     s = get_settings(call.from_user.id)
     s_temp = s.copy()
     s_temp["perc_sign"] = "+"
-    kb = _get_field_keyboard(askable[0]["key"], s_temp, item_key)
+
+    # Авто-рандом банков: если первое поле — bank и рандом включён, пропускаем его
+    start_step = 0
+    auto_values = {}
+    while start_step < len(askable) and askable[start_step]["key"] == "bank" and s.get("rand_bank_enabled"):
+        auto_values["bank"] = _get_random_bank(item_key)
+        start_step += 1
+
+    kb = _get_field_keyboard(askable[start_step]["key"], s_temp, item_key)
 
     if has_photo:
         file_id = PREVIEW_FILE_IDS.get(item_key)
@@ -451,13 +466,13 @@ async def cb_item_selected(call: CallbackQuery, state: FSMContext):
     await state.update_data(
         item_key=item_key,
         askable=askable,
-        step=0,
-        values={},
+        step=start_step,
+        values=auto_values,
         checklist_msg_id=sent.message_id,
         has_photo=has_photo,
         last_line=prev_data.get("last_line"),
         last_section=prev_data.get("last_section"),
-        time_suffix=s["time_suffix"], # Копируем из настроек в state на время сессии
+        time_suffix=s["time_suffix"],
         perc_sign="+",
     )
     await call.answer()
@@ -522,18 +537,24 @@ async def collect_text_field(message: Message, state: FSMContext):
         s = get_settings(message.from_user.id)
         s_temp = s.copy()
         s_temp["perc_sign"] = data.get("perc_sign", "+")
-        checklist = _build_checklist(item["label"], askable, done_step=done_step, values=values)
-        await _update_checklist(message.bot, message.chat.id, msg_id, has_photo,
-                                checklist + f"\n\n{askable[done_step]['prompt']}",
-                                reply_markup=_get_field_keyboard(askable[done_step]["key"], s_temp, item_key))
-        # Сбрасываем временный суффикс на дефолт из настроек для следующего поля
-        await state.update_data(step=done_step, values=values, time_suffix=s["time_suffix"])
-    else:
-        await state.clear()
-        geo: str = data.get("current_geo", "bo")
-        await _finish_render(message, item_key, values, item,
-                             checklist_msg_id=msg_id, has_photo=has_photo,
-                             geo=geo)
+
+        # Авто-рандом банков на промежуточных шагах
+        while done_step < len(askable) and askable[done_step]["key"] == "bank" and s.get("rand_bank_enabled"):
+            values["bank"] = _get_random_bank(item_key)
+            done_step += 1
+
+        if done_step < len(askable):
+            checklist = _build_checklist(item["label"], askable, done_step=done_step, values=values)
+            await _update_checklist(message.bot, message.chat.id, msg_id, has_photo,
+                                    checklist + f"\n\n{askable[done_step]['prompt']}",
+                                    reply_markup=_get_field_keyboard(askable[done_step]["key"], s_temp, item_key))
+            await state.update_data(step=done_step, values=values, time_suffix=s["time_suffix"])
+        else:
+            await state.clear()
+            geo: str = data.get("current_geo", "bo")
+            await _finish_render(message, item_key, values, item,
+                                 checklist_msg_id=msg_id, has_photo=has_photo,
+                                 geo=geo)
 
 
 @router.message(RenderStates.collecting, F.photo | F.document)
@@ -572,17 +593,24 @@ async def collect_photo_field(message: Message, state: FSMContext):
 
     if done_step < len(askable):
         s = get_settings(message.from_user.id)
-        checklist = _build_checklist(item["label"], askable, done_step=done_step, values=values)
-        await _update_checklist(message.bot, message.chat.id, msg_id, has_photo,
-                                checklist + f"\n\n{askable[done_step]['prompt']}",
-                                reply_markup=_get_field_keyboard(askable[done_step]["key"], s, item_key))
-        await state.update_data(step=done_step, values=values, time_suffix=s["time_suffix"])
-    else:
-        await state.clear()
-        geo: str = data.get("current_geo", "bo")
-        await _finish_render(message, item_key, values, item,
-                             checklist_msg_id=msg_id, has_photo=has_photo,
-                             geo=geo)
+
+        # Авто-рандом банков на промежуточных шагах
+        while done_step < len(askable) and askable[done_step]["key"] == "bank" and s.get("rand_bank_enabled"):
+            values["bank"] = _get_random_bank(item_key)
+            done_step += 1
+
+        if done_step < len(askable):
+            checklist = _build_checklist(item["label"], askable, done_step=done_step, values=values)
+            await _update_checklist(message.bot, message.chat.id, msg_id, has_photo,
+                                    checklist + f"\n\n{askable[done_step]['prompt']}",
+                                    reply_markup=_get_field_keyboard(askable[done_step]["key"], s, item_key))
+            await state.update_data(step=done_step, values=values, time_suffix=s["time_suffix"])
+        else:
+            await state.clear()
+            geo: str = data.get("current_geo", "bo")
+            await _finish_render(message, item_key, values, item,
+                                 checklist_msg_id=msg_id, has_photo=has_photo,
+                                 geo=geo)
 
 
 # ── Отмена ────────────────────────────────────────────────────────────────────

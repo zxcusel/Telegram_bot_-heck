@@ -12,6 +12,7 @@ from aiogram.types import CallbackQuery, Message, BufferedInputFile, FSInputFile
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.exceptions import TelegramBadRequest
+from aiogram.filters import CommandStart, Command
 
 from data.config import CATALOG, GEO_CATALOG
 from data.db import get_role, get_settings
@@ -478,7 +479,22 @@ async def cb_item_selected(call: CallbackQuery, state: FSMContext):
     await call.answer()
 
 
-@router.message(RenderStates.collecting, F.text)
+@router.message(RenderStates.collecting, CommandStart())
+async def cmd_start_in_render(message: Message, state: FSMContext):
+    """Обрабатывает /start в процессе рендера — сбрасывает и показывает главное меню."""
+    data = await state.get_data()
+    msg_id = data.get("checklist_msg_id")
+    if msg_id:
+        await _try_delete(message.bot, message.chat.id, msg_id)
+    await state.clear()
+    await _try_delete(message.bot, message.chat.id, message.message_id)
+    from data.db import is_admin as _is_admin_check
+    from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+    from handlers.catalog import _start_kb
+    await message.answer("👋 Добро пожаловать!", reply_markup=_start_kb(message.from_user.id))
+
+
+@router.message(RenderStates.collecting, F.text, ~Command(commands=["start"]))
 async def collect_text_field(message: Message, state: FSMContext):
     data       = await state.get_data()
     askable:   list = data["askable"]

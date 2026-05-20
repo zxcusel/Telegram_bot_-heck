@@ -850,6 +850,24 @@ GEO_CATALOG: dict = {
                                         ],
                                     },
                                 },
+                                {
+                                    "key": "_disclaimer_bottom",
+                                    "prompt": "",
+                                    "text_config": {
+                                        "font": "sf_pro",
+                                        "size": 20,
+                                        "color": (115, 115, 115),
+                                        "pos": (33, 909),
+                                        "align": "left",
+                                        "manual_multiline": True,
+                                        "line_step_px": 25,
+                                        "start_time": 25.20,
+                                        "end_time": 25.90,
+                                        "cover_color": (255, 255, 255),
+                                        "cover_area": (33, 909, 567, 1165),
+                                        "template": "Los datos que se validarán para procesar la\ntransferencia de fondos son el número de cuenta del\nbeneficiario y el nombre de la Entidad Financiera\nDestinataria, por lo que es resposabilidad del ordenante\nverificar dichos datos. Por tu seguridad esta operación\nse confirmará con una clave generada\nautomáticamente. La transferencia de fondos será\nabonada a la cuenta {account} de Yape del beneficiario\nque se registró. Una vez realizada, ésta no podrá ser\nrevertida.",
+                                    }
+                                },
                                 # {
                                 #     "key": "_commission_title",
                                 #     "prompt": "",

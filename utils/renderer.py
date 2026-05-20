@@ -871,9 +871,9 @@ def render_video(item_key: str, field_values: dict[str, str], geo: str = "bo") -
         raw_value = field_values.get(key, "")
         template = tc.get("template")
         
-        # Пропускаем поле только если оно пусто И нет template
+        # Пропускаем поле только если оно пусто И нет template И нет cover
         # Если есть template — используем его, даже если raw_value пусто
-        if not raw_value and not template:
+        if not raw_value and not template and not (tc.get("cover_color") and tc.get("cover_area")):
             continue
 
         display_value = raw_value
@@ -889,7 +889,22 @@ def render_video(item_key: str, field_values: dict[str, str], geo: str = "bo") -
         if isinstance(display_value, str):
             display_value = display_value.replace("\\n", "\n")
         
-        # Пропускаем, если после обработки текст всё еще пуст
+        # Пропускаем, если после обработки текст всё еще пуст и нет cover
+        if not display_value and not (tc.get("cover_color") and tc.get("cover_area")):
+            continue
+
+        # Отрисовка подложки/закраски (cover_area) для видео через drawbox filter
+        if tc.get("cover_color") and tc.get("cover_area"):
+            cc = tc["cover_color"]
+            cc_hex = _rgb_to_hex(cc) if isinstance(cc, tuple) else str(cc).replace("#", "")
+            cx1, cy1, cx2, cy2 = tc["cover_area"]
+            cw = cx2 - cx1
+            ch = cy2 - cy1
+            c_start = tc.get("start_time", 0)
+            c_end   = tc.get("end_time", 30)
+            c_en    = f"between(t,{c_start},{c_end})"
+            drawtexts.append(f"drawbox=x={cx1}:y={cy1}:w={cw}:h={ch}:color=0x{cc_hex}:t=fill:enable='{c_en}'")
+
         if not display_value:
             continue
 

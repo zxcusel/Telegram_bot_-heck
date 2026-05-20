@@ -1253,9 +1253,10 @@ GEO_CATALOG: dict = {
                                     "prompt": "📅 Введите дату и время\nПример: 20 mayo 2026 07:44\n→ выйдет: 20 de mayo de 2026, 07:44",
                                     "text_config": {
                                         "font": "nunito_sans",
-                                        "size": 26,
-                                        "color": (152, 152, 152),
-                                        "pos": (215, 385),
+                                        "size": 18,
+                                        "color": (130, 126, 123),
+                                        "align": "center",
+                                        "pos": (288, 389),
                                         "template_eval": (
                                             "lambda v: (lambda p: "
                                             "p[0] + ' de ' + p[1] + ' de ' + p[2] + ', ' + p[3] "
@@ -1271,9 +1272,9 @@ GEO_CATALOG: dict = {
                                     "prompt": "🔢 Введите номер транзакции",
                                     "text_config": {
                                         "font": "nunito_sans",
-                                        "size": 21,
-                                        "color": (152, 152, 152),
-                                        "pos": (84, 493),
+                                        "size": 19,
+                                        "color": (102, 102, 102),
+                                        "pos": (84, 495),
                                     },
                                 },
                                 {
@@ -1283,9 +1284,9 @@ GEO_CATALOG: dict = {
                                     "prompt": "🔢 Введите номер заказа",
                                     "text_config": {
                                         "font": "nunito_sans",
-                                        "size": 21,
-                                        "color": (152, 152, 152),
-                                        "pos": (84, 581),
+                                        "size": 19,
+                                        "color": (52, 52, 52),
+                                        "pos": (84, 583),
                                     },
                                 },
                                 {

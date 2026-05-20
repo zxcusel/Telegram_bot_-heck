@@ -1227,47 +1227,61 @@ GEO_CATALOG: dict = {
                             "preview": "assets/Bolivia/FIRE/BoCheckYasta.jpg",
                             "fields": [
                                 {
-                                    # Поле 1: Сумма. Пользователь вводит целое число.
-                                    # Форматируется как 1.234,00 (точка-тысяч, запятая-центы).
-                                    # Позиция откалибрована по пиксельному анализу: y=337
+                                    # Поле 1: Сумма. Поддерживает целое и дробное.
+                                    # Ввод: "236.55" или "236,55" или "236" → "236,55" / "236,00"
+                                    # Ввод: "1234.55" → "1.234,55"
+                                    # Рандомайзер: генерирует сумму из настроек бота
                                     "key": "amount",
-                                    "prompt": "💰 Введите сумму (пример: 1234 → выйдет 1.234,00)",
+                                    "prompt": "💰 Введите сумму\nПримеры: 236 → 236,00 | 236.55 → 236,55 | 1234.55 → 1.234,55",
                                     "text_config": {
                                         "font": "quicksand",
                                         "size": 44,
                                         "color": (60, 104, 106),
                                         "pos": (148, 326),
                                         "template_eval": (
-                                            "lambda v: "
-                                            "__import__('re').sub(r'(\\d)(?=(\\d{3})+$)', r'\\1.', "
-                                            "str(int(str(v).strip().replace(',','').replace('.','')))) + ',00'"
+                                            "lambda v: (lambda p: "
+                                            "__import__('re').sub(r'(\\\\d)(?=(\\\\d{3})+$)', r'\\\\1.', str(int(p[0]))) + ',' + "
+                                            "(p[1][:2] if len(p) > 1 else '00').ljust(2, '0')"
+                                            ")(str(v).strip().replace(',', '.').split('.', 1))"
                                         ),
                                     },
                                 },
                                 {
-                                    # Поле 2: Дата+время.
-                                    # Пример ввода: 20 mayo 2026 07:44
-                                    # Вывод: 20 de mayo de 2026, 07:44
-                                    # Цвет: серый (152,152,152) согласно оригиналу
-                                    "key": "datetime",
-                                    "prompt": "📅 Введите дату и время\nПример: 20 mayo 2026 07:44\n→ выйдет: 20 de mayo de 2026, 07:44",
+                                    # Поле 2: Дата — collect_only.
+                                    # Ввод: "20.05.2026" или "20/05/2026"
+                                    # Конвертируется в "20 de mayo de 2026" в handlers/render.py
+                                    "key": "date",
+                                    "prompt": "📅 Введите дату (пример: 20.05.2026)",
+                                    "text_config": {
+                                        "collect_only": True,
+                                    },
+                                },
+                                {
+                                    # Поле 3: Время — collect_only.
+                                    # Ввод: "07:44"
+                                    "key": "time",
+                                    "prompt": "🕐 Введите время (пример: 07:44)",
+                                    "text_config": {
+                                        "collect_only": True,
+                                    },
+                                },
+                                {
+                                    # Поле 4: Отображение даты+времени (не запрашивается у пользователя).
+                                    # Рендерится из значений date и time через template.
+                                    "key": "datetime_display",
+                                    "prompt": "",
                                     "text_config": {
                                         "font": "nunito_sans",
                                         "size": 18,
                                         "color": (130, 126, 123),
                                         "align": "center",
                                         "pos": (288, 389),
-                                        "template_eval": (
-                                            "lambda v: (lambda p: "
-                                            "p[0] + ' de ' + p[1] + ' de ' + p[2] + ', ' + p[3] "
-                                            "if len(p) == 4 else v"
-                                            ")(str(v).strip().split())"
-                                        ),
+                                        "template": "{date}, {time}",
                                     },
                                 },
                                 {
-                                    # Поле 3: Номер транзакции
-                                    # Цвет: серый (152,152,152) согласно оригиналу
+                                    # Поле 5: Номер транзакции
+                                    # Рандомайзер: 9 цифр (fire_check)
                                     "key": "transaction",
                                     "prompt": "🔢 Введите номер транзакции",
                                     "text_config": {
@@ -1278,8 +1292,8 @@ GEO_CATALOG: dict = {
                                     },
                                 },
                                 {
-                                    # Поле 4: Номер заказа
-                                    # Цвет: серый (152,152,152) согласно оригиналу
+                                    # Поле 6: Номер заказа
+                                    # Рандомайзер: 20 цифр (fire_check)
                                     "key": "order",
                                     "prompt": "🔢 Введите номер заказа",
                                     "text_config": {
@@ -1290,11 +1304,11 @@ GEO_CATALOG: dict = {
                                     },
                                 },
                                 {
-                                    # Поле 5: DESTINO (счёт получателя)
-                                    # Формат: номер_счёта | ИМЯ КАПСОМ В 4 СЛОВА
-                                    # Пример: 72781074 | DIEGO EDGAR ABASTO\nCACERES
+                                    # Поле 7: DESTINO (счёт получателя)
+                                    # Формат ввода: 72781074 DIEGO EDGAR ABASTO CACERES
+                                    # Рендер: "72781074 | DIEGO EDGAR ABASTO\nCACERES"
                                     "key": "destino",
-                                    "prompt": "👤 DESTINO (счёт + ФИО капсом в 4 слова)\nПример: 72781074 DIEGO EDGAR ABASTO CACERES",
+                                    "prompt": "👤 DESTINO — счёт + ФИО капсом (4 слова)\nПример: 72781074 DIEGO EDGAR ABASTO CACERES",
                                     "text_config": {
                                         "font": "nunito_sans",
                                         "size": 20,
@@ -1310,10 +1324,11 @@ GEO_CATALOG: dict = {
                                     },
                                 },
                                 {
-                                    # Поле 6: ORIGEN (счёт отправителя)
-                                    # Формат: номер_счёта | ИМЯ КАПСОМ В 4 СЛОВА
+                                    # Поле 8: ORIGEN (счёт отправителя)
+                                    # Формат ввода: 63395815 DIEGO EDGAR ABASTO CACERES
+                                    # Рендер: "63395815 | DIEGO EDGAR ABASTO\nCACERES"
                                     "key": "origen",
-                                    "prompt": "👤 ORIGEN (счёт + ФИО капсом в 4 слова)\nПример: 63395815 DIEGO EDGAR ABASTO CACERES",
+                                    "prompt": "👤 ORIGEN — счёт + ФИО капсом (4 слова)\nПример: 63395815 PEDRO JUAN GARCIA LOPEZ",
                                     "text_config": {
                                         "font": "nunito_sans",
                                         "size": 20,

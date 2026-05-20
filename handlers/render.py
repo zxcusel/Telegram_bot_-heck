@@ -79,6 +79,18 @@ def _to_es_date3(val: str) -> str:
         return f"{int(day)} {month_es} {year}"
     return val
 
+def _to_es_date_fire(val: str) -> str:
+    """Конвертирует '20.05.2026' в '20 de mayo de 2026' (формат Yasta)."""
+    import re
+    _MONTHS = ['enero','febrero','marzo','abril','mayo','junio',
+               'julio','agosto','septiembre','octubre','noviembre','diciembre']
+    m = re.match(r'(\d{1,2})[./](\d{1,2})[./](\d{4})', val.strip())
+    if m:
+        day, month, year = int(m.group(1)), int(m.group(2)), int(m.group(3))
+        if 1 <= month <= 12:
+            return f"{day} de {_MONTHS[month-1]} de {year}"
+    return val
+
 BASE_DIR = os.path.normpath(os.path.join(os.path.dirname(__file__), ".."))
 
 
@@ -90,7 +102,7 @@ def _get_field_keyboard(field_key: str, s: dict, item_key: str = None) -> Inline
     buttons = []
     
     # 🎲 Рандомайзер
-    if s["rand_enabled"] and field_key in ("sum", "amount", "commission", "number", "account", "transaction", "operation", "card_recipient", "card_sender", "phone"):
+    if s["rand_enabled"] and field_key in ("sum", "amount", "commission", "number", "account", "transaction", "operation", "card_recipient", "card_sender", "phone", "order"):
         buttons.append([InlineKeyboardButton(text="🎲 Сгенерировать", callback_data="render:random")])
         
     # 🎲 Рандомайзер процентов
@@ -567,6 +579,8 @@ async def collect_text_field(message: Message, state: FSMContext):
             val = _to_es_date2(val)
         if item_key == "check3_pe" and askable[step]["key"] == "date":
             val = _to_es_date3(val)
+        if item_key == "fire_check" and askable[step]["key"] == "date":
+            val = _to_es_date_fire(val)
         if item_key in ("check2_pe", "check4_pe") and askable[step]["key"] == "time":
             val = val.replace("A.M.", "am.").replace("P.M.", "pm.").replace("a. m.", "am.").replace("p. m.", "pm.")\
                      .replace("a.m.", "am.").replace("p.m.", "pm.").replace("AM", "am.").replace("PM", "pm.")
@@ -815,7 +829,16 @@ async def cb_render_shortcuts(call: CallbackQuery, state: FSMContext):
                 length = 8
             val = "".join([str(random.randint(0, 9)) for _ in range(length)])
         elif key == "transaction":
-            digits = 8 if item_key == "check_pe" else 9
+            if item_key == "fire_check":
+                digits = 9
+            elif item_key == "check_pe":
+                digits = 8
+            else:
+                digits = 9
+            val = "".join([str(random.randint(0, 9)) for _ in range(digits)])
+        elif key == "order":
+            # fire_check: 20-значный номер заказа Yasta
+            digits = 20 if item_key == "fire_check" else 12
             val = "".join([str(random.randint(0, 9)) for _ in range(digits)])
         elif key == "operation":
             val = "".join([str(random.randint(0, 9)) for _ in range(8)])

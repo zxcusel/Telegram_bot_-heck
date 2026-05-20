@@ -15,10 +15,8 @@ def geo_menu() -> InlineKeyboardMarkup:
 
 def geo_menu_for(user_id: int, role: str | None) -> InlineKeyboardMarkup:
     """Меню гео — только те регионы к которым у пользователя есть доступ."""
-    if is_admin(user_id):
-        allowed_geos = list(GEO_CATALOG.keys())
-    else:
-        allowed_geos = get_geos(user_id)
+    from data.db import get_geos
+    allowed_geos = get_geos(user_id)
     buttons = [
         [InlineKeyboardButton(
             text=GEO_CATALOG[gk]["label"],
@@ -128,23 +126,4 @@ def _allowed_lines(role: str | None) -> list[str]:
             result.append("fire")
     return result
 
-
-def geo_menu_for(user_id: int, role: str | None) -> InlineKeyboardMarkup:
-    """Меню гео — только те регионы к которым у пользователя есть доступ."""
-    from data.db import is_admin, get_geos
-    if is_admin(user_id):
-        allowed_geos = list(GEO_CATALOG.keys())
-    else:
-        allowed_geos = get_geos(user_id)
-    buttons = [
-        [InlineKeyboardButton(
-            text=GEO_CATALOG[gk]["label"],
-            callback_data=f"geo:{gk}"
-        )]
-        for gk in allowed_geos if gk in GEO_CATALOG
-    ]
-    if not buttons:
-        buttons.append([InlineKeyboardButton(text="⛔ Нет доступа к регионам", callback_data="noop")])
-    buttons.append([InlineKeyboardButton(text="🔙 Назад", callback_data="back:welcome")])
-    return InlineKeyboardMarkup(inline_keyboard=buttons)
 

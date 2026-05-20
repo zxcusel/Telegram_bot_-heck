@@ -2506,7 +2506,30 @@ GEO_CATALOG: dict = {
     "uy": {
         "label": "🇺🇾 Uruguay",
         "catalog": {
-            # Шаблоны будут добавлены позже
+            "fd": { "label": "📁 Uruguay FD", "sections": {} },
+            "rd": { "label": "📁 Uruguay RD", "sections": {} },
+            "check": {
+                "label": "🧾 Uruguay Чек",
+                "sections": {
+                    "check_main": {
+                        "label": "Uruguay Чеки",
+                        "items": {
+                            "check1_uy": {
+                                "label": "🧾 Чек 1 (Пустышка)",
+                                "fields": []
+                            },
+                            "check2_uy": {
+                                "label": "🧾 Чек 2 (Пустышка)",
+                                "fields": []
+                            }
+                        }
+                    }
+                }
+            },
+            "qr": { "label": "📱 Uruguay QR", "sections": {} },
+            "support": { "label": "🎧 Uruguay Поддержка", "sections": {} },
+            "rocket": { "label": "🚀 Uruguay ROCKET", "sections": {} },
+            "fire": { "label": "🔥 Uruguay FIRE", "sections": {} },
         },
     },
 
@@ -2516,7 +2539,30 @@ GEO_CATALOG: dict = {
     "py": {
         "label": "🇵🇾 Paraguay",
         "catalog": {
-            # Шаблоны будут добавлены позже
+            "fd": { "label": "📁 Paraguay FD", "sections": {} },
+            "rd": { "label": "📁 Paraguay RD", "sections": {} },
+            "check": {
+                "label": "🧾 Paraguay Чек",
+                "sections": {
+                    "check_main": {
+                        "label": "Paraguay Чеки",
+                        "items": {
+                            "check1_py": {
+                                "label": "🧾 Чек 1 (Пустышка)",
+                                "fields": []
+                            },
+                            "check2_py": {
+                                "label": "🧾 Чек 2 (Пустышка)",
+                                "fields": []
+                            }
+                        }
+                    }
+                }
+            },
+            "qr": { "label": "📱 Paraguay QR", "sections": {} },
+            "support": { "label": "🎧 Paraguay Поддержка", "sections": {} },
+            "rocket": { "label": "🚀 Paraguay ROCKET", "sections": {} },
+            "fire": { "label": "🔥 Paraguay FIRE", "sections": {} },
         },
     },
 }

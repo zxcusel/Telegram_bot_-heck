@@ -353,7 +353,7 @@ async def _return_to_last_section(call: CallbackQuery, state: FSMContext):
         kb   = main_menu(role, geo)
     else:
         text = "🌍 Выберите регион:"
-        kb   = geo_menu()
+        kb   = geo_menu_for(call.from_user.id, role)
 
     await call.message.answer(text, reply_markup=kb)
 

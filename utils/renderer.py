@@ -1345,8 +1345,8 @@ def render_video(item_key: str, field_values: dict[str, str], geo: str = "bo") -
             cmd.extend(["-vf", vf])
 
         cmd.extend([
-            "-c:v", "libx264",
-            "-preset", "fast",
+            "-c:v", "mpeg4",          # Универсальный кодек (работает везде)
+            "-q:v", "5",              # Качество (1-31, меньше = лучше)
             "-c:a", "copy",
             out_path
         ])

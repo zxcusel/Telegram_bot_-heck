@@ -1223,19 +1223,20 @@ GEO_CATALOG: dict = {
                     "items": {
                         "fire_check": {
                             "label": "Bolivia FIRE Чек",
-                            "asset": "assets/Bolivia/FIRE/Check.png",
-                            "preview": "assets/Bolivia/FIRE/Preview_prew.png",
+                            "asset": "assets/Bolivia/FIRE/BoCheckYasta.jpg",
+                            "preview": "assets/Bolivia/FIRE/BoCheckYasta.jpg",
                             "fields": [
                                 {
                                     # Поле 1: Сумма. Пользователь вводит целое число.
                                     # Форматируется как 1.234,00 (точка-тысяч, запятая-центы).
+                                    # Позиция откалибрована по пиксельному анализу: y=337
                                     "key": "amount",
                                     "prompt": "💰 Введите сумму (пример: 1234 → выйдет 1.234,00)",
                                     "text_config": {
                                         "font": "quicksand",
-                                        "size": 45,
+                                        "size": 44,
                                         "color": (60, 104, 106),
-                                        "pos": (148, 337),
+                                        "pos": (148, 326),
                                         "template_eval": (
                                             "lambda v: "
                                             "__import__('re').sub(r'(\\d)(?=(\\d{3})+$)', r'\\1.', "
@@ -1247,13 +1248,14 @@ GEO_CATALOG: dict = {
                                     # Поле 2: Дата+время.
                                     # Пример ввода: 20 mayo 2026 07:44
                                     # Вывод: 20 de mayo de 2026, 07:44
+                                    # Цвет: серый (152,152,152) согласно оригиналу
                                     "key": "datetime",
                                     "prompt": "📅 Введите дату и время\nПример: 20 mayo 2026 07:44\n→ выйдет: 20 de mayo de 2026, 07:44",
                                     "text_config": {
                                         "font": "nunito_sans",
-                                        "size": 22,
-                                        "color": (0, 0, 0),
-                                        "pos": (215, 394),
+                                        "size": 26,
+                                        "color": (152, 152, 152),
+                                        "pos": (215, 385),
                                         "template_eval": (
                                             "lambda v: (lambda p: "
                                             "p[0] + ' de ' + p[1] + ' de ' + p[2] + ', ' + p[3] "
@@ -1264,24 +1266,26 @@ GEO_CATALOG: dict = {
                                 },
                                 {
                                     # Поле 3: Номер транзакции
+                                    # Цвет: серый (152,152,152) согласно оригиналу
                                     "key": "transaction",
                                     "prompt": "🔢 Введите номер транзакции",
                                     "text_config": {
                                         "font": "nunito_sans",
-                                        "size": 22,
-                                        "color": (0, 0, 0),
-                                        "pos": (84, 501),
+                                        "size": 21,
+                                        "color": (152, 152, 152),
+                                        "pos": (84, 493),
                                     },
                                 },
                                 {
                                     # Поле 4: Номер заказа
+                                    # Цвет: серый (152,152,152) согласно оригиналу
                                     "key": "order",
                                     "prompt": "🔢 Введите номер заказа",
                                     "text_config": {
                                         "font": "nunito_sans",
-                                        "size": 22,
-                                        "color": (0, 0, 0),
-                                        "pos": (84, 589),
+                                        "size": 21,
+                                        "color": (152, 152, 152),
+                                        "pos": (84, 581),
                                     },
                                 },
                                 {
@@ -1292,9 +1296,9 @@ GEO_CATALOG: dict = {
                                     "prompt": "👤 DESTINO (счёт + ФИО капсом в 4 слова)\nПример: 72781074 DIEGO EDGAR ABASTO CACERES",
                                     "text_config": {
                                         "font": "nunito_sans",
-                                        "size": 22,
+                                        "size": 20,
                                         "color": (0, 0, 0),
-                                        "pos": (84, 679),
+                                        "pos": (84, 670),
                                         "line_spacing": 1.3,
                                         "template_eval": (
                                             "lambda v: (lambda p: "
@@ -1307,14 +1311,13 @@ GEO_CATALOG: dict = {
                                 {
                                     # Поле 6: ORIGEN (счёт отправителя)
                                     # Формат: номер_счёта | ИМЯ КАПСОМ В 4 СЛОВА
-                                    # Пример: 63395815 | PENIS ULTRA PENIS\nVAGINA
                                     "key": "origen",
                                     "prompt": "👤 ORIGEN (счёт + ФИО капсом в 4 слова)\nПример: 63395815 DIEGO EDGAR ABASTO CACERES",
                                     "text_config": {
                                         "font": "nunito_sans",
-                                        "size": 22,
+                                        "size": 20,
                                         "color": (0, 0, 0),
-                                        "pos": (84, 799),
+                                        "pos": (84, 790),
                                         "line_spacing": 1.3,
                                         "template_eval": (
                                             "lambda v: (lambda p: "

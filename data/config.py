@@ -52,6 +52,9 @@ FONTS: dict[str, str] = {
     "roboto_cond_reg": "assets/fonts/RobotoCondensed-Regular.ttf",
     "roboto_cond_extrabold": "assets/fonts/RobotoCondensed-ExtraBold.ttf",
     "roboto_cond_semibold": "assets/fonts/RobotoCondensed-SemiBold.ttf",
+    "nunito_sans":         "assets/fonts/NunitoSans-VariableFont_YTLC,opsz,wdth,wght.ttf",
+    "nunito_sans_italic":  "assets/fonts/NunitoSans-Italic-VariableFont_YTLC,opsz,wdth,wght.ttf",
+    "quicksand":           "assets/fonts/Quicksand-VariableFont_wght.ttf",
 }
 
 
@@ -60,6 +63,8 @@ FONTS: dict[str, str] = {
 GEO_LABELS: dict[str, str] = {
     "bo": "🇧🇴 Bolivia",
     "pe": "🇵🇪 Peru",
+    "uy": "🇺🇾 Uruguay",
+    "py": "🇵🇾 Paraguay",
 }
 
 # Каталог: верхний уровень — геолокация, затем категории.
@@ -1199,6 +1204,124 @@ GEO_CATALOG: dict = {
                                         "color": (35, 32, 41),
                                         "area": (388, 569, 525, 589),
                                         "align": "right",
+                                    },
+                                },
+                            ],
+                        },
+                    },
+                },
+            },
+        },
+        # ════════════════════════════════════════════════════════
+        # FIRE (Bolivia)
+        # ════════════════════════════════════════════════════════
+        "fire": {
+            "label": "🔥 Bolivia FIRE",
+            "sections": {
+                "fire_main": {
+                    "label": "Bolivia FIRE Чек",
+                    "items": {
+                        "fire_check": {
+                            "label": "Bolivia FIRE Чек",
+                            "asset": "assets/Bolivia/FIRE/Check.png",
+                            "preview": "assets/Bolivia/FIRE/Preview_prew.png",
+                            "fields": [
+                                {
+                                    # Поле 1: Сумма. Пользователь вводит целое число.
+                                    # Форматируется как 1.234,00 (точка-тысяч, запятая-центы).
+                                    "key": "amount",
+                                    "prompt": "💰 Введите сумму (пример: 1234 → выйдет 1.234,00)",
+                                    "text_config": {
+                                        "font": "quicksand",
+                                        "size": 45,
+                                        "color": (60, 104, 106),
+                                        "pos": (148, 337),
+                                        "template_eval": (
+                                            "lambda v: "
+                                            "__import__('re').sub(r'(\\d)(?=(\\d{3})+$)', r'\\1.', "
+                                            "str(int(str(v).strip().replace(',','').replace('.','')))) + ',00'"
+                                        ),
+                                    },
+                                },
+                                {
+                                    # Поле 2: Дата+время.
+                                    # Пример ввода: 20 mayo 2026 07:44
+                                    # Вывод: 20 de mayo de 2026, 07:44
+                                    "key": "datetime",
+                                    "prompt": "📅 Введите дату и время\nПример: 20 mayo 2026 07:44\n→ выйдет: 20 de mayo de 2026, 07:44",
+                                    "text_config": {
+                                        "font": "nunito_sans",
+                                        "size": 22,
+                                        "color": (0, 0, 0),
+                                        "pos": (215, 394),
+                                        "template_eval": (
+                                            "lambda v: (lambda p: "
+                                            "p[0] + ' de ' + p[1] + ' de ' + p[2] + ', ' + p[3] "
+                                            "if len(p) == 4 else v"
+                                            ")(str(v).strip().split())"
+                                        ),
+                                    },
+                                },
+                                {
+                                    # Поле 3: Номер транзакции
+                                    "key": "transaction",
+                                    "prompt": "🔢 Введите номер транзакции",
+                                    "text_config": {
+                                        "font": "nunito_sans",
+                                        "size": 22,
+                                        "color": (0, 0, 0),
+                                        "pos": (84, 501),
+                                    },
+                                },
+                                {
+                                    # Поле 4: Номер заказа
+                                    "key": "order",
+                                    "prompt": "🔢 Введите номер заказа",
+                                    "text_config": {
+                                        "font": "nunito_sans",
+                                        "size": 22,
+                                        "color": (0, 0, 0),
+                                        "pos": (84, 589),
+                                    },
+                                },
+                                {
+                                    # Поле 5: DESTINO (счёт получателя)
+                                    # Формат: номер_счёта | ИМЯ КАПСОМ В 4 СЛОВА
+                                    # Пример: 72781074 | DIEGO EDGAR ABASTO\nCACERES
+                                    "key": "destino",
+                                    "prompt": "👤 DESTINO (счёт + ФИО капсом в 4 слова)\nПример: 72781074 DIEGO EDGAR ABASTO CACERES",
+                                    "text_config": {
+                                        "font": "nunito_sans",
+                                        "size": 22,
+                                        "color": (0, 0, 0),
+                                        "pos": (84, 679),
+                                        "line_spacing": 1.3,
+                                        "template_eval": (
+                                            "lambda v: (lambda p: "
+                                            "p[0] + ' | ' + ' '.join(p[1:3]) + '\\n' + ' '.join(p[3:]) "
+                                            "if len(p) >= 5 else v.upper()"
+                                            ")(str(v).strip().upper().split())"
+                                        ),
+                                    },
+                                },
+                                {
+                                    # Поле 6: ORIGEN (счёт отправителя)
+                                    # Формат: номер_счёта | ИМЯ КАПСОМ В 4 СЛОВА
+                                    # Пример: 63395815 | PENIS ULTRA PENIS\nVAGINA
+                                    "key": "origen",
+                                    "prompt": "👤 ORIGEN (счёт + ФИО капсом в 4 слова)\nПример: 63395815 DIEGO EDGAR ABASTO CACERES",
+                                    "text_config": {
+                                        "font": "nunito_sans",
+                                        "size": 22,
+                                        "color": (0, 0, 0),
+                                        "pos": (84, 799),
+                                        "line_spacing": 1.3,
+                                        "template_eval": (
+                                            "lambda v: (lambda p: "
+                                            "p[0] + ' | ' + ' '.join(p[1:3]) + '\\n' + ' '.join(p[3:]) "
+                                            "if len(p) >= 5 else v.upper()"
+                                            ")(str(v).strip().upper().split())"
+                                        ),
                                     },
                                 },
                             ],
@@ -2355,6 +2478,26 @@ GEO_CATALOG: dict = {
                     }
                 }
             },
+        },
+    },
+
+    # ════════════════════════════════════════════════════════
+    # Uruguay 🇺🇾
+    # ════════════════════════════════════════════════════════
+    "uy": {
+        "label": "🇺🇾 Uruguay",
+        "catalog": {
+            # Шаблоны будут добавлены позже
+        },
+    },
+
+    # ════════════════════════════════════════════════════════
+    # Paraguay 🇵🇾
+    # ════════════════════════════════════════════════════════
+    "py": {
+        "label": "🇵🇾 Paraguay",
+        "catalog": {
+            # Шаблоны будут добавлены позже
         },
     },
 }

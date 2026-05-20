@@ -13,7 +13,7 @@ INFO_PATH = os.path.join(BASE_DIR, "info.json")
 DB_PATH   = os.path.join(BASE_DIR, "bot.db")
 
 VALID_ROLES = ("fd", "rd", "cr")
-VALID_GEOS  = ("bo", "pe")
+VALID_GEOS  = ("bo", "pe", "uy", "py")
 
 
 @contextmanager
@@ -86,7 +86,7 @@ def init_db():
         con.execute("""
             CREATE TABLE IF NOT EXISTS geos (
                 user_id  INTEGER NOT NULL,
-                geo      TEXT    NOT NULL CHECK(geo IN ('bo','pe')),
+                geo      TEXT    NOT NULL CHECK(geo IN ('bo','pe','uy','py')),
                 added_at TEXT    DEFAULT (datetime('now')),
                 PRIMARY KEY (user_id, geo)
             )

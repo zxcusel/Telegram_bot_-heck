@@ -110,7 +110,7 @@ def _allowed_lines(role: str | None) -> list[str]:
     if not role:
         return []
     if role == "all":
-        return ["fd", "rd", "check", "qr", "support", "rocket"]
+        return ["fd", "rd", "check", "qr", "support", "rocket", "fire"]
     roles = set(role.split("+"))
     result = []
     if "fd" in roles: result.append("fd")
@@ -119,10 +119,13 @@ def _allowed_lines(role: str | None) -> list[str]:
         result.append("check")
         result.append("qr")
         result.append("rocket")
+        result.append("fire")
     if "fd" in roles or "rd" in roles:
         if "qr" not in result:
             result.append("qr")
         result.append("support")
+        if "fire" not in result:
+            result.append("fire")
     return result
 
 
@@ -144,3 +147,4 @@ def geo_menu_for(user_id: int, role: str | None) -> InlineKeyboardMarkup:
         buttons.append([InlineKeyboardButton(text="⛔ Нет доступа к регионам", callback_data="noop")])
     buttons.append([InlineKeyboardButton(text="🔙 Назад", callback_data="back:welcome")])
     return InlineKeyboardMarkup(inline_keyboard=buttons)
+

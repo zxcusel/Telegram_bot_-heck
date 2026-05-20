@@ -42,6 +42,15 @@ def _broadcast_menu_kb() -> InlineKeyboardMarkup:
     ])
 
 
+# Карта гео-кодов → отображаемые названия
+_GEO_LABELS: dict[str, str] = {
+    "bo": "🇧🇴 Bolivia",
+    "pe": "🇵🇪 Peru",
+    "uy": "🇺🇾 Uruguay",
+    "py": "🇵🇾 Paraguay",
+}
+
+
 def _roles_kb(target_id: int, roles: list[str]) -> InlineKeyboardMarkup:
     fd_icon  = "✅" if "fd" in roles else "🚫"
     rd_icon  = "✅" if "rd" in roles else "🚫"
@@ -52,12 +61,16 @@ def _roles_kb(target_id: int, roles: list[str]) -> InlineKeyboardMarkup:
     geos     = get_geos(target_id)
     bo_icon  = "✅" if "bo" in geos else "🚫"
     pe_icon  = "✅" if "pe" in geos else "🚫"
+    uy_icon  = "✅" if "uy" in geos else "🚫"
+    py_icon  = "✅" if "py" in geos else "🚫"
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text=f"{fd_icon} FD",            callback_data=f"admin:toggle:fd:{target_id}")],
         [InlineKeyboardButton(text=f"{rd_icon} RD",            callback_data=f"admin:toggle:rd:{target_id}")],
         [InlineKeyboardButton(text=f"{cr_icon} Контентщик",    callback_data=f"admin:toggle:cr:{target_id}")],
         [InlineKeyboardButton(text=f"{bo_icon} 🇧🇴 Bolivia",  callback_data=f"admin:geo:bo:{target_id}")],
         [InlineKeyboardButton(text=f"{pe_icon} 🇵🇪 Peru",     callback_data=f"admin:geo:pe:{target_id}")],
+        [InlineKeyboardButton(text=f"{uy_icon} 🇺🇾 Uruguay",  callback_data=f"admin:geo:uy:{target_id}")],
+        [InlineKeyboardButton(text=f"{py_icon} 🇵🇾 Paraguay", callback_data=f"admin:geo:py:{target_id}")],
         [InlineKeyboardButton(text=ow_label,                    callback_data=ow_cb)],
         [InlineKeyboardButton(text="🗑 Очистить всё",          callback_data=f"admin:clear:{target_id}")],
         [InlineKeyboardButton(text="🔙 Назад",                 callback_data="admin:back_main")],
@@ -80,7 +93,7 @@ def _role_info_text(target_id: int, roles: list[str], extra: str = "") -> str:
     uname    = get_username(target_id) or "none"
     ow_str   = "👑 Администратор" if is_admin(target_id) else "🚫 Не администратор"
     geos     = get_geos(target_id)
-    geo_str  = ", ".join(("🇧🇴 Bolivia" if g == "bo" else "🇵🇪 Peru") for g in geos) or "нет"
+    geo_str  = ", ".join(_GEO_LABELS.get(g, g.upper()) for g in geos) or "нет"
     text     = (
         f"👤 <code>{target_id} - @{uname}</code>\n"
         f"Роли: <b>{_roles_text(roles)}</b>  |  {ow_str}\n"
@@ -231,12 +244,13 @@ async def cb_toggle_geo(call: CallbackQuery, state: FSMContext):
     geo       = parts[2]
     target_id = int(parts[3])
     geos = get_geos(target_id)
+    geo_label = _GEO_LABELS.get(geo, geo.upper())
     if geo in geos:
         remove_geo(target_id, geo)
-        action = f"регион {'🇧🇴 Bolivia' if geo == 'bo' else '🇵🇪 Peru'} убран 🚫"
+        action = f"регион {geo_label} убран 🚫"
     else:
         add_geo(target_id, geo)
-        action = f"регион {'🇧🇴 Bolivia' if geo == 'bo' else '🇵🇪 Peru'} выдан ✅"
+        action = f"регион {geo_label} выдан ✅"
     roles = get_roles(target_id)
     await _safe_edit(call.message, _role_info_text(target_id, roles, action),
                      _roles_kb(target_id, roles))
@@ -309,7 +323,9 @@ async def cb_user_list(call: CallbackQuery, state: FSMContext):
             geos   = get_geos(uid)
             bo_str = "BO✅" if "bo" in geos else "BO🚫"
             pe_str = "PE✅" if "pe" in geos else "PE🚫"
-            lines.append(f"{icon} {uid} - @{uname} : {fd_str}, {rd_str}, {cr_str} | {bo_str}, {pe_str}")
+            uy_str = "UY✅" if "uy" in geos else "UY🚫"
+            py_str = "PY✅" if "py" in geos else "PY🚫"
+            lines.append(f"{icon} {uid} - @{uname} : {fd_str}, {rd_str}, {cr_str} | {bo_str}, {pe_str}, {uy_str}, {py_str}")
         text = "📋 <b>Список пользователей</b>\n\n" + "\n".join(lines)
 
     await _safe_edit(call.message, text, _back_to_main_kb())

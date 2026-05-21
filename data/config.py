@@ -91,7 +91,7 @@ GEO_CATALOG: dict = {
                     "label": "Bolivia Proofs FD",
                     "items": {
                         "fd_proof1": {
-                            "label": "Bolivia FD 1", "asset": "assets/fd/proofs/psd1.png",
+                            "label": "Bolivia FD 1", "asset": "assets/Bolivia/FD/proofs/psd1.png",
                             "fields": [
                                 {"key": "name",   "prompt": "✏️ Введите ФИО (пример: Ivanov Ivan)",
                                  "text_config": {"font": "montserrat", "size": 36, "color": (0,0,0), "pos": (100, 200)}},
@@ -100,7 +100,7 @@ GEO_CATALOG: dict = {
                             ],
                         },
                         "fd_proof2": {
-                            "label": "Bolivia FD 2", "asset": "assets/fd/proofs/psd2.png",
+                            "label": "Bolivia FD 2", "asset": "assets/Bolivia/FD/proofs/psd2.png",
                             "fields": [
                                 {"key": "name",   "prompt": "✏️ Введите ФИО (пример: Ivanov Ivan)",
                                  "text_config": {"font": "montserrat", "size": 36, "color": (0,0,0), "pos": (100, 200)}},
@@ -109,7 +109,7 @@ GEO_CATALOG: dict = {
                             ],
                         },
                         "fd_proof3": {
-                            "label": "Bolivia FD 3", "asset": "assets/fd/proofs/psd3.png",
+                            "label": "Bolivia FD 3", "asset": "assets/Bolivia/FD/proofs/psd3.png",
                             "fields": [
                                 {"key": "name",   "prompt": "✏️ Введите ФИО (пример: Ivanov Ivan)",
                                  "text_config": {"font": "montserrat", "size": 36, "color": (0,0,0), "pos": (100, 200)}},
@@ -131,7 +131,7 @@ GEO_CATALOG: dict = {
 
                         # ── RD1 ──────────────────────────────────────────────────
                         "rd1": {
-                            "label": "Bolivia RD 1", "asset": "assets/rd/rd1.png", "preview": "assets/preview/RD1_prew.jpg",
+                            "label": "Bolivia RD 1", "asset": "assets/Bolivia/RD/rd1.png", "preview": "assets/Bolivia/Preview/RD/RD1_prew.jpg",
                             "fields": [
                                 {
                                     "key": "name",
@@ -160,7 +160,7 @@ GEO_CATALOG: dict = {
 
                         # ── RD2 ──────────────────────────────────────────────────
                         "rd2": {
-                            "label": "Bolivia RD 2", "asset": "assets/rd/rd2.jpg", "preview": "assets/preview/RD2_prew.jpg",
+                            "label": "Bolivia RD 2", "asset": "assets/Bolivia/RD/rd2.jpg", "preview": "assets/Bolivia/Preview/RD/RD2_prew.jpg",
                             "fields": [
                                 {
                                     "key": "name",
@@ -219,7 +219,7 @@ GEO_CATALOG: dict = {
                         # ── RD3 ──────────────────────────────────────────────────
                         "rd3": {
                             "label": "Bolivia RD 3",
-                            "asset": "assets/rd/rd3.jpg",
+                            "asset": "assets/Bolivia/RD/rd3.jpg",
                             "fields": [
                                 {
                                     "key": "name",
@@ -278,7 +278,7 @@ GEO_CATALOG: dict = {
 
                         # ── RD4 ──────────────────────────────────────────────────
                         "rd4": {
-                            "label": "Bolivia RD 4", "asset": "assets/rd/rd4.png", "preview": "assets/preview/RD4_prew.jpg",
+                            "label": "Bolivia RD 4", "asset": "assets/Bolivia/RD/rd4.png", "preview": "assets/Bolivia/Preview/RD/RD4_prew.jpg",
                             "fields": [
                                 {
                                     "key": "time",
@@ -327,7 +327,7 @@ GEO_CATALOG: dict = {
 
                         # ── RD5 ──────────────────────────────────────────────────
                         "rd5": {
-                            "label": "Bolivia RD 5", "asset": "assets/rd/rd5.jpg",
+                            "label": "Bolivia RD 5", "asset": "assets/Bolivia/RD/rd5.jpg",
                             "fields": [
                                 {
                                     "key": "name",
@@ -386,7 +386,7 @@ GEO_CATALOG: dict = {
 
                         # ── RD6 ──────────────────────────────────────────────────
                         "rd6": {
-                            "label": "Bolivia RD 6", "asset": "assets/rd/rd6.png", "preview": "assets/preview/RD6_prew.jpg",
+                            "label": "Bolivia RD 6", "asset": "assets/Bolivia/RD/rd6.png", "preview": "assets/Bolivia/Preview/RD/RD6_prew.jpg",
                             "fields": [
                                 {
                                     "key": "date",
@@ -496,7 +496,7 @@ GEO_CATALOG: dict = {
 
                         # ── RD7 ──────────────────────────────────────────────────
                         "rd7": {
-                            "label": "Bolivia RD 7", "asset": "assets/rd/rd7.jpg", "preview": "assets/preview/RD7_prew.jpg",
+                            "label": "Bolivia RD 7", "asset": "assets/Bolivia/RD/rd7.jpg", "preview": "assets/Bolivia/Preview/RD/RD7_prew.jpg",
                             "fields": [
                                 {
                                     "key": "time",
@@ -936,16 +936,16 @@ GEO_CATALOG: dict = {
                                 }
                             ]
                         },
-                        "rd9":  {"label": "Bolivia RD 9",  "asset": "assets/rd/rd9.png",
+                        "rd9":  {"label": "Bolivia RD 9",  "asset": "assets/Bolivia/RD/rd9.png",
                                  "fields": [{"key": "name", "prompt": "✏️ Введите ФИО (пример: Ivanov Ivan Ivanovich)",
                                   "text_config": {"font": "montserrat", "size": 36, "color": (0,0,0), "pos": (100, 200)}}]},
-                        "rd10":  {"label": "Bolivia RD 10",  "asset": "assets/rd/rd10.png",
+                        "rd10":  {"label": "Bolivia RD 10",  "asset": "assets/Bolivia/RD/rd10.png",
                                  "fields": [{"key": "name", "prompt": "✏️ Введите ФИО (пример: Ivanov Ivan Ivanovich)",
                                   "text_config": {"font": "montserrat", "size": 36, "color": (0,0,0), "pos": (100, 200)}}]},
-                        "rd11":  {"label": "Bolivia RD 11",  "asset": "assets/rd/rd11.png",
+                        "rd11":  {"label": "Bolivia RD 11",  "asset": "assets/Bolivia/RD/rd11.png",
                                  "fields": [{"key": "name", "prompt": "✏️ Введите ФИО (пример: Ivanov Ivan Ivanovich)",
                                   "text_config": {"font": "montserrat", "size": 36, "color": (0,0,0), "pos": (100, 200)}}]},
-                        "rd12": {"label": "Bolivia RD 12", "asset": "assets/rd/rd12.png",
+                        "rd12": {"label": "Bolivia RD 12", "asset": "assets/Bolivia/RD/rd12.png",
                                  "fields": [{"key": "name", "prompt": "✏️ Введите ФИО (пример: Ivanov Ivan Ivanovich)",
                                   "text_config": {"font": "montserrat", "size": 36, "color": (0,0,0), "pos": (100, 200)}}]},
                     },
@@ -958,7 +958,7 @@ GEO_CATALOG: dict = {
 
                         # ── PROOF №1 ─────────────────────────────────────────────
                         "rd_proof1": {
-                            "label": "Bolivia PROOF 1", "asset": "assets/rd/proofs/proof1.jpg", "preview": "assets/preview/RDPROOF_prew.jpg",
+                            "label": "Bolivia PROOF 1", "asset": "assets/Bolivia/RD/proofs/proof1.jpg", "preview": "assets/Bolivia/Preview/RD/RDPROOF_prew.jpg",
                             "fields": [
                                 {
                                     "key": "time",
@@ -1063,7 +1063,7 @@ GEO_CATALOG: dict = {
 
                         # PROOF №2–3 (заготовки)
                         "rd_proof2": {
-                            "label": "Bolivia PROOF 2", "asset": "assets/rd/proofs/proof2.jpg",
+                            "label": "Bolivia PROOF 2", "asset": "assets/Bolivia/RD/proofs/proof2.jpg",
                             "fields": [
                                 {
                                     "key": "time",
@@ -1123,7 +1123,7 @@ GEO_CATALOG: dict = {
                             ],
                         },
                         "rd_proof3": {
-                            "label": "Bolivia PROOF 3", "asset": "assets/rd/proofs/psd3.png",
+                            "label": "Bolivia PROOF 3", "asset": "assets/Bolivia/RD/proofs/psd3.png",
                             "fields": [
                                 {"key": "name",   "prompt": "✏️ Введите ФИО (пример: Ivanov Ivan Ivanovich)",
                                  "text_config": {"font": "opensans_semi", "size": 32, "color": (0,0,0), "pos": (100, 200)}},
@@ -1142,7 +1142,7 @@ GEO_CATALOG: dict = {
                     "label": "Bolivia Чек",
                     "items": {
                         "check_doc": {
-                            "label": "Bolivia Чек",
+                            "label": "Чек 1",
                             "asset": "assets/other/Check.png",
                             "preview": "assets/preview/Check_prew.png",
                             "fields": [
@@ -1210,36 +1210,19 @@ GEO_CATALOG: dict = {
                                 },
                             ],
                         },
-                    },
-                },
-            },
-        },
-        # ════════════════════════════════════════════════════════
-        # FIRE (Bolivia)
-        # ════════════════════════════════════════════════════════
-        "fire": {
-            "label": "🔥 Bolivia FIRE",
-            "sections": {
-                "fire_main": {
-                    "label": "Bolivia FIRE Чек",
-                    "items": {
                         "fire_check": {
-                            "label": "Bolivia FIRE Чек",
-                            "asset": "assets/Bolivia/FIRE/BoCheckYasta.jpg",
-                            "preview": "assets/Bolivia/FIRE/BoCheckYasta.jpg",
+                            "label": "Чек 2",
+                            "asset": "assets/Bolivia/Чек/Check2.jpg",
+                            "preview": "assets/Bolivia/Preview/Чек/Check2_prew.jpg",
                             "fields": [
                                 {
-                                    # Поле 1: Сумма. Поддерживает целое и дробное.
-                                    # Ввод: "236.55" или "236,55" или "236" → "236,55" / "236,00"
-                                    # Ввод: "1234.55" → "1.234,55"
-                                    # Рандомайзер: генерирует сумму из настроек бота
                                     "key": "amount",
-                                    "prompt": "💰 Введите сумму\nПримеры: 236 → 236,00 | 236.55 → 236,55 | 1234.55 → 1.234,55",
+                                    "prompt": "💰 Введите сумму",
                                     "text_config": {
                                         "font": "quicksand",
-                                        "size": 44,
+                                        "size": 45,
                                         "color": (60, 104, 106),
-                                        "pos": (148, 326),
+                                        "pos": (148, 337),
                                         "template_eval": (
                                             "lambda v: (lambda p: "
                                             "__import__('re').sub(r'(\\\\d)(?=(\\\\d{3})+$)', r'\\\\1.', str(int(p[0]))) + ',' + "
@@ -1249,9 +1232,6 @@ GEO_CATALOG: dict = {
                                     },
                                 },
                                 {
-                                    # Поле 2: Дата — collect_only.
-                                    # Ввод: "20.05.2026" или "20/05/2026"
-                                    # Конвертируется в "20 de mayo de 2026" в handlers/render.py
                                     "key": "date",
                                     "prompt": "📅 Введите дату (пример: 20.05.2026)",
                                     "text_config": {
@@ -1259,8 +1239,6 @@ GEO_CATALOG: dict = {
                                     },
                                 },
                                 {
-                                    # Поле 3: Время — collect_only.
-                                    # Ввод: "07:44"
                                     "key": "time",
                                     "prompt": "🕐 Введите время (пример: 07:44)",
                                     "text_config": {
@@ -1268,54 +1246,44 @@ GEO_CATALOG: dict = {
                                     },
                                 },
                                 {
-                                    # Поле 4: Отображение даты+времени (не запрашивается у пользователя).
-                                    # Рендерится из значений date и time через template.
                                     "key": "datetime_display",
                                     "prompt": "",
                                     "text_config": {
-                                        "font": "nunito_sans",
-                                        "size": 18,
-                                        "color": (130, 126, 123),
-                                        "align": "center",
-                                        "pos": (288, 389),
+                                        "font": "quicksand",
+                                        "size": 22,
+                                        "color": (0, 0, 0),
+                                        "pos": (215, 394),
                                         "template": "{date}, {time}",
                                     },
                                 },
                                 {
-                                    # Поле 5: Номер транзакции
-                                    # Рандомайзер: 9 цифр (fire_check)
                                     "key": "transaction",
                                     "prompt": "🔢 Введите номер транзакции",
                                     "text_config": {
-                                        "font": "nunito_sans",
-                                        "size": 19,
-                                        "color": (102, 102, 102),
-                                        "pos": (84, 495),
+                                        "font": "quicksand",
+                                        "size": 22,
+                                        "color": (0, 0, 0),
+                                        "pos": (84, 501),
                                     },
                                 },
                                 {
-                                    # Поле 6: Номер заказа
-                                    # Рандомайзер: 20 цифр (fire_check)
                                     "key": "order",
                                     "prompt": "🔢 Введите номер заказа",
                                     "text_config": {
-                                        "font": "nunito_sans",
-                                        "size": 19,
-                                        "color": (52, 52, 52),
-                                        "pos": (84, 583),
+                                        "font": "quicksand",
+                                        "size": 22,
+                                        "color": (0, 0, 0),
+                                        "pos": (84, 589),
                                     },
                                 },
                                 {
-                                    # Поле 7: DESTINO (счёт получателя)
-                                    # Формат ввода: 72781074 DIEGO EDGAR ABASTO CACERES
-                                    # Рендер: "72781074 | DIEGO EDGAR ABASTO\nCACERES"
                                     "key": "destino",
                                     "prompt": "👤 DESTINO — счёт + ФИО капсом (4 слова)\nПример: 72781074 DIEGO EDGAR ABASTO CACERES",
                                     "text_config": {
-                                        "font": "nunito_sans",
-                                        "size": 20,
+                                        "font": "quicksand",
+                                        "size": 22,
                                         "color": (0, 0, 0),
-                                        "pos": (84, 670),
+                                        "pos": (84, 679),
                                         "line_spacing": 1.3,
                                         "template_eval": (
                                             "lambda v: (lambda p: "
@@ -1326,16 +1294,13 @@ GEO_CATALOG: dict = {
                                     },
                                 },
                                 {
-                                    # Поле 8: ORIGEN (счёт отправителя)
-                                    # Формат ввода: 63395815 DIEGO EDGAR ABASTO CACERES
-                                    # Рендер: "63395815 | DIEGO EDGAR ABASTO\nCACERES"
                                     "key": "origen",
                                     "prompt": "👤 ORIGEN — счёт + ФИО капсом (4 слова)\nПример: 63395815 PEDRO JUAN GARCIA LOPEZ",
                                     "text_config": {
-                                        "font": "nunito_sans",
-                                        "size": 20,
+                                        "font": "quicksand",
+                                        "size": 22,
                                         "color": (0, 0, 0),
-                                        "pos": (84, 790),
+                                        "pos": (84, 799),
                                         "line_spacing": 1.3,
                                         "template_eval": (
                                             "lambda v: (lambda p: "
@@ -1359,8 +1324,8 @@ GEO_CATALOG: dict = {
                     "items": {
                         "qr_code": {
                             "label": "Bolivia QR",
-                            "asset": "assets/other/QR_code.png",
-                            "preview": "assets/preview/QRcode_prew.png",
+                            "asset": "assets/Bolivia/QRCode/QR_code.png",
+                            "preview": "assets/Bolivia/Preview/QRCode/QRcode_prew.png",
                             "fields": [
                                 {
                                     "key": "timer",
@@ -1407,8 +1372,8 @@ GEO_CATALOG: dict = {
                     "items": {
                         "support_chat": {
                             "label": "Bolivia Support",
-                            "asset": "assets/other/SUPPORT.jpg",
-                            "preview": "assets/preview/SUPPORT_prew.jpg",
+                            "asset": "assets/Bolivia/SUPPORT/SUPPORT.jpg",
+                            "preview": "assets/Bolivia/Preview/SUPPORT/SUPPORT_prew.jpg",
                             "fields": [
                                 {
                                     "key": "msg1",

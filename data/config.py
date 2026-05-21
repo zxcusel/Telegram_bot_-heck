@@ -52,9 +52,11 @@ FONTS: dict[str, str] = {
     "roboto_cond_reg": "assets/fonts/RobotoCondensed-Regular.ttf",
     "roboto_cond_extrabold": "assets/fonts/RobotoCondensed-ExtraBold.ttf",
     "roboto_cond_semibold": "assets/fonts/RobotoCondensed-SemiBold.ttf",
-    "nunito_sans":         "assets/fonts/NunitoSans-VariableFont_YTLC,opsz,wdth,wght.ttf",
     "nunito_sans_italic":  "assets/fonts/NunitoSans-Italic-VariableFont_YTLC,opsz,wdth,wght.ttf",
     "quicksand":           "assets/fonts/Quicksand-VariableFont_wght.ttf",
+    "alte_regular":        "assets/fonts/AlteHaasGroteskRegular.ttf",
+    "alte_bold":           "assets/fonts/AlteHaasGroteskBold.ttf",
+    "arial_italic":        "assets/fonts/Arial-Italic.ttf",
 }
 
 
@@ -2515,8 +2517,106 @@ GEO_CATALOG: dict = {
                         "label": "Uruguay Чеки",
                         "items": {
                             "check1_uy": {
-                                "label": "🧾 Чек 1 (Пустышка)",
-                                "fields": []
+                                "label": "🧾 Чек 1",
+                                "asset": "assets/Uruguay/Чек/Check1.jpg",
+                                "preview": "assets/Uruguay/Preview/Чек/Check1_prew.jpg",
+                                "fields": [
+                                    {
+                                        "key": "name",
+                                        "prompt": "✏️ Введите Имя",
+                                        "text_config": {
+                                            "font": "alte_regular", "size": 19, "color": (46, 49, 54),
+                                            "pos": (92, 67), "align": "left",
+                                            "template_eval": "lambda v: f'Transferiste a {str(v).upper()}'"
+                                        }
+                                    },
+                                    {
+                                        "key": "amount",
+                                        "prompt": "💰 Введите сумму (пример: 1950)",
+                                        "text_config": {
+                                            "font": "alte_bold", "size": 40, "color": (54, 57, 74),
+                                            "pos": (122, 97), "align": "left",
+                                            "template": "{amount},00",
+                                            "format_number_dot": True
+                                        }
+                                    },
+                                    {
+                                        "key": "date",
+                                        "prompt": "📅 Введите дату (пример: 20 de abril 2026 12:20)",
+                                        "text_config": {
+                                            "font": "alte_regular", "size": 19, "color": (171, 171, 179),
+                                            "pos": (92, 145), "align": "left"
+                                        }
+                                    },
+                                    {
+                                        "key": "comment",
+                                        "prompt": "💬 Введите комментарий (пример: PAGO)",
+                                        "text_config": {
+                                            "font": "arial_italic", "size": 19, "color": (57, 56, 68),
+                                            "pos": (107, 225), "align": "left"
+                                        }
+                                    },
+                                    {
+                                        "key": "acc_1",
+                                        "prompt": "🔢 Введите Номер счета 1",
+                                        "text_config": {
+                                            "font": "alte_regular", "size": 21, "color": (34, 37, 44),
+                                            "pos": (504, 342), "align": "right"
+                                        }
+                                    },
+                                    {
+                                        "key": "payer_1",
+                                        "prompt": "👤 Введите имя плательщика 1",
+                                        "text_config": {
+                                            "font": "alte_regular", "size": 21, "color": (34, 37, 44),
+                                            "pos": (503, 373), "align": "right",
+                                            "template_eval": "lambda v: str(v).upper()"
+                                        }
+                                    },
+                                    {
+                                        "key": "service",
+                                        "prompt": "🔧 Введите Сервис (пример: MIDINERO)",
+                                        "text_config": {
+                                            "font": "alte_bold", "size": 21.5, "color": (32, 36, 56),
+                                            "pos": (503, 434), "align": "right"
+                                        }
+                                    },
+                                    {
+                                        "key": "acc_2",
+                                        "prompt": "🔢 Введите Номер счета 2",
+                                        "text_config": {
+                                            "font": "alte_regular", "size": 21, "color": (34, 37, 44),
+                                            "pos": (504, 483), "align": "right"
+                                        }
+                                    },
+                                    {
+                                        "key": "payer_2",
+                                        "prompt": "👤 Введите имя плательщика 2",
+                                        "text_config": {
+                                            "font": "alte_regular", "size": 21, "color": (34, 37, 44),
+                                            "pos": (503, 514), "align": "right",
+                                            "template_eval": "lambda v: str(v).upper()"
+                                        }
+                                    },
+                                    {
+                                        "key": "ref_num",
+                                        "prompt": "📄 Введите Справочный номер",
+                                        "text_config": {
+                                            "font": "alte_regular", "size": 21, "color": (34, 37, 44),
+                                            "pos": (499, 634), "align": "right"
+                                        }
+                                    },
+                                    {
+                                        "key": "amount",
+                                        "prompt": "",
+                                        "text_config": {
+                                            "font": "alte_regular", "size": 21, "color": (34, 37, 44),
+                                            "pos": (503, 769), "align": "right",
+                                            "template": "$ {amount},00",
+                                            "format_number_dot": True
+                                        }
+                                    }
+                                ]
                             },
                             "check2_uy": {
                                 "label": "🧾 Чек 2 (Пустышка)",

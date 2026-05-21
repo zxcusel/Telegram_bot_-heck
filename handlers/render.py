@@ -101,8 +101,12 @@ class RenderStates(StatesGroup):
 def _get_field_keyboard(field_key: str, s: dict, item_key: str = None) -> InlineKeyboardMarkup:
     buttons = []
     
-    # 🎲 Рандомайзер
-    if s["rand_enabled"] and field_key in ("sum", "amount", "commission", "number", "account", "transaction", "operation", "card_recipient", "card_sender", "phone", "order"):
+    # 🎲 Рандомайзер сумм
+    if s["rand_enabled"] and field_key in ("sum", "amount", "commission"):
+        buttons.append([InlineKeyboardButton(text="🎲 Сгенерировать", callback_data="render:random")])
+        
+    # 🎲 Рандомайзер счетов
+    if s.get("rand_acc_enabled") and field_key in ("number", "account", "transaction", "operation", "card_recipient", "card_sender", "phone", "order", "acc_1", "acc_2", "ref_num"):
         buttons.append([InlineKeyboardButton(text="🎲 Сгенерировать", callback_data="render:random")])
         
     # 🎲 Рандомайзер процентов
@@ -828,6 +832,10 @@ async def cb_render_shortcuts(call: CallbackQuery, state: FSMContext):
             else:
                 length = 8
             val = "".join([str(random.randint(0, 9)) for _ in range(length)])
+        elif key in ("acc_1", "acc_2"):
+            val = "".join([str(random.randint(0, 9)) for _ in range(7)])
+        elif key == "ref_num":
+            val = "".join([str(random.randint(0, 9)) for _ in range(8)])
         elif key == "transaction":
             if item_key == "fire_check":
                 digits = 9

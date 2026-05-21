@@ -59,6 +59,9 @@ FONTS: dict[str, str] = {
     "alte_regular":        "assets/fonts/AlteHaasGroteskRegular.ttf",
     "alte_bold":           "assets/fonts/AlteHaasGroteskBold.ttf",
     "arial_italic":        "assets/fonts/Arial-Italic.ttf",
+    "inter":               "assets/fonts/Inter-Regular.ttf",
+    "inter_semibold":      "assets/fonts/Inter-SemiBold.ttf",
+    "montserrat_extrabold": "assets/fonts/Montserrat-ExtraBold.ttf",
 }
 
 
@@ -2630,8 +2633,91 @@ GEO_CATALOG: dict = {
                         "label": "Paraguay Чеки",
                         "items": {
                             "check1_py": {
-                                "label": "🧾 Чек 1 (Пустышка)",
-                                "fields": []
+                                "label": "🧾 Чек 1",
+                                "asset": "assets/Paraguay/Чек/Check1.jpg",
+                                "preview": "assets/Paraguay/Preview/Чек/Check1_prew.jpg",
+                                "fields": [
+                                    {
+                                        "key": "transaction",
+                                        "prompt": "🔢 Введите номер транзакции (например: 2605181854871)",
+                                        "text_config": {
+                                            "font": "inter", "size": 25, "color": (106, 106, 108),
+                                            "pos": (418, 252), "align": "left"
+                                        }
+                                    },
+                                    {
+                                        "key": "date",
+                                        "prompt": "📅 Введите дату (пример: 18/05/2026)",
+                                        "text_config": {
+                                            "collect_only": True
+                                        }
+                                    },
+                                    {
+                                        "key": "time",
+                                        "prompt": "🕐 Введите время (пример: 16:17)",
+                                        "text_config": {
+                                            "collect_only": True
+                                        }
+                                    },
+                                    {
+                                        "key": "datetime_display",
+                                        "prompt": "",
+                                        "text_config": {
+                                            "font": "inter", "size": 25, "color": (106, 106, 108),
+                                            "pos": (57, 309), "align": "left",
+                                            "template": "{date} a las {time} h"
+                                        }
+                                    },
+                                    {
+                                        "key": "amount",
+                                        "prompt": "💰 Введите сумму (пример: 270000)",
+                                        "text_config": {
+                                            "font": "montserrat_extrabold", "size": 66.5, "color": (44, 42, 46),
+                                            "pos": (144, 417), "align": "left",
+                                            "format_number_dot": True
+                                        }
+                                    },
+                                    {
+                                        "key": "name_1",
+                                        "prompt": "👤 Введите ФИО отправителя (DE)",
+                                        "text_config": {
+                                            "font": "inter_semibold", "size": 30, "color": (37, 37, 37),
+                                            "pos": (57, 794), "align": "left"
+                                        }
+                                    },
+                                    {
+                                        "key": "acc_num",
+                                        "prompt": "🔢 Введите номер счета (например: 619279241)",
+                                        "text_config": {
+                                            "font": "inter", "size": 29, "color": (106, 106, 108),
+                                            "pos": (425, 871), "align": "left"
+                                        }
+                                    },
+                                    {
+                                        "key": "name_2",
+                                        "prompt": "👤 Введите ФИО получателя (PARA)",
+                                        "text_config": {
+                                            "font": "inter_semibold", "size": 30, "color": (37, 37, 37),
+                                            "pos": (57, 1150), "align": "left"
+                                        }
+                                    },
+                                    {
+                                        "key": "acc_num",
+                                        "prompt": "",
+                                        "text_config": {
+                                            "font": "inter", "size": 29, "color": (106, 106, 108),
+                                            "pos": (145, 1228), "align": "left"
+                                        }
+                                    },
+                                    {
+                                        "key": "bank_name",
+                                        "prompt": "🏦 Введите финансовую организацию (например: SOLAR BANCO S.A.E.)",
+                                        "text_config": {
+                                            "font": "inter", "size": 29, "color": (106, 106, 108),
+                                            "pos": (57, 1306), "align": "left"
+                                        }
+                                    }
+                                ]
                             },
                             "check2_py": {
                                 "label": "🧾 Чек 2 (Пустышка)",

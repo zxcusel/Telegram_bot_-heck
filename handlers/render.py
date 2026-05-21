@@ -142,7 +142,7 @@ def _get_field_keyboard(field_key: str, s: dict, item_key: str = None) -> Inline
         buttons.append([InlineKeyboardButton(text=f"🏦 {s['pinned_bank']}", callback_data="render:pin_bank")])
         
     # 🕒 AM/PM
-    if "time" in field_key and item_key not in ("rd6", "rd7", "qr_pe"):
+    if "time" in field_key and item_key not in ("rd6", "rd7", "qr_pe", "check1_py"):
         row = []
         am_label = "☀️ A.M."
         pm_label = "🌙 P.M."
@@ -572,7 +572,7 @@ async def collect_text_field(message: Message, state: FSMContext):
         val = message.text.strip()
         
         # Применяем суффикс времени если он выбран в state
-        if data.get("time_suffix") and "time" in askable[step]["key"] and item_key != "qr_pe":
+        if data.get("time_suffix") and "time" in askable[step]["key"] and item_key not in ("qr_pe", "check1_py"):
             if "M." not in val.upper():  # Если пользователь сам не написал AM/PM
                 suff = data['time_suffix']
                 if item_key in ("check_doc", "check_pe"):

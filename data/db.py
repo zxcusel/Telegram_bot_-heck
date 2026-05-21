@@ -228,7 +228,10 @@ def add_geo(user_id: int, geo: str):
     if geo not in VALID_GEOS: return
     with _conn() as con:
         con.execute("INSERT OR IGNORE INTO users (user_id) VALUES (?)", (user_id,))
-        con.execute("INSERT OR IGNORE INTO geos (user_id, geo) VALUES (?,?)", (user_id, geo))
+        try:
+            con.execute("INSERT INTO geos (user_id, geo) VALUES (?,?)", (user_id, geo))
+        except sqlite3.IntegrityError:
+            pass
 
 def remove_geo(user_id: int, geo: str):
     if geo not in VALID_GEOS: return

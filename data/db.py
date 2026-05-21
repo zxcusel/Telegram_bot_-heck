@@ -97,6 +97,26 @@ def init_db():
                 PRIMARY KEY (user_id, geo)
             )
         """)
+        
+        # Авто-миграция для старой таблицы geos, где разрешены только bo и pe
+        schema_geos = con.execute("SELECT sql FROM sqlite_master WHERE type='table' AND name='geos'").fetchone()
+        if schema_geos and "'uy'" not in schema_geos[0]:
+            try:
+                con.execute("PRAGMA foreign_keys=OFF")
+                con.execute("""
+                    CREATE TABLE geos_new (
+                        user_id  INTEGER NOT NULL,
+                        geo      TEXT    NOT NULL CHECK(geo IN ('bo','pe','uy','py')),
+                        added_at TEXT    DEFAULT (datetime('now')),
+                        PRIMARY KEY (user_id, geo)
+                    )
+                """)
+                con.execute("INSERT INTO geos_new SELECT * FROM geos")
+                con.execute("DROP TABLE geos")
+                con.execute("ALTER TABLE geos_new RENAME TO geos")
+                con.execute("PRAGMA foreign_keys=ON")
+            except Exception as e:
+                print(f"Migration error: {e}")
         # Миграция из info.json
         data = json.load(open(INFO_PATH, encoding="utf-8"))
         for uid_str in data.get("admins", []):
@@ -232,7 +252,10 @@ def add_geo(user_id: int, geo: str):
     if geo not in VALID_GEOS: return
     with _conn() as con:
         con.execute("INSERT OR IGNORE INTO users (user_id) VALUES (?)", (user_id,))
-        con.execute("INSERT OR IGNORE INTO geos (user_id, geo) VALUES (?,?)", (user_id, geo))
+        try:
+            con.execute("INSERT INTO geos (user_id, geo) VALUES (?,?)", (user_id, geo))
+        except sqlite3.IntegrityError:
+            pass
 
 def remove_geo(user_id: int, geo: str):
     if geo not in VALID_GEOS: return

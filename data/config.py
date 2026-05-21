@@ -1213,7 +1213,7 @@ GEO_CATALOG: dict = {
                             ],
                         },
                         "fire_check": {
-                            "label": "Чек 2",
+                            "label": "Чек 2 [в тесте]",
                             "asset": "assets/Bolivia/Чек/Check2.jpg",
                             "preview": "assets/Bolivia/Preview/Чек/Check2_prew.jpg",
                             "fields": [

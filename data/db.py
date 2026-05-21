@@ -68,8 +68,12 @@ def init_db():
             ("rand_percent_max","REAL DEFAULT 100.0"),("rand_bank_enabled","INTEGER DEFAULT 0"),
             ("rand_acc_enabled","INTEGER DEFAULT 0"),
         ]:
-            try: con.execute(f"ALTER TABLE users ADD COLUMN {col_name} {col_def}")
-            except sqlite3.OperationalError: pass
+            try:
+                con.execute(f"ALTER TABLE users ADD COLUMN {col_name} {col_def}")
+            except sqlite3.OperationalError as e:
+                err_msg = str(e).lower()
+                if "duplicate" not in err_msg and "already exists" not in err_msg:
+                    raise
 
         con.execute("""
             CREATE TABLE IF NOT EXISTS admins (

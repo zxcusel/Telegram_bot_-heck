@@ -97,6 +97,26 @@ def init_db():
                 PRIMARY KEY (user_id, geo)
             )
         """)
+        
+        # Авто-миграция для старой таблицы geos, где разрешены только bo и pe
+        schema_geos = con.execute("SELECT sql FROM sqlite_master WHERE type='table' AND name='geos'").fetchone()
+        if schema_geos and "'uy'" not in schema_geos[0]:
+            try:
+                con.execute("PRAGMA foreign_keys=OFF")
+                con.execute("""
+                    CREATE TABLE geos_new (
+                        user_id  INTEGER NOT NULL,
+                        geo      TEXT    NOT NULL CHECK(geo IN ('bo','pe','uy','py')),
+                        added_at TEXT    DEFAULT (datetime('now')),
+                        PRIMARY KEY (user_id, geo)
+                    )
+                """)
+                con.execute("INSERT INTO geos_new SELECT * FROM geos")
+                con.execute("DROP TABLE geos")
+                con.execute("ALTER TABLE geos_new RENAME TO geos")
+                con.execute("PRAGMA foreign_keys=ON")
+            except Exception as e:
+                print(f"Migration error: {e}")
         # Миграция из info.json
         data = json.load(open(INFO_PATH, encoding="utf-8"))
         for uid_str in data.get("admins", []):

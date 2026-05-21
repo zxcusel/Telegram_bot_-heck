@@ -91,6 +91,18 @@ def _to_es_date_fire(val: str) -> str:
             return f"{day} de {_MONTHS[month-1]} de {year}"
     return val
 
+def _to_es_date_uy(val: str) -> str:
+    """Конвертирует '20.04.2026' в '20 de abril 2026'."""
+    import re
+    _MONTHS = ['enero','febrero','marzo','abril','mayo','junio',
+               'julio','agosto','septiembre','octubre','noviembre','diciembre']
+    m = re.match(r'(\d{1,2})[./](\d{1,2})[./](\d{4})', val.strip())
+    if m:
+        day, month, year = int(m.group(1)), int(m.group(2)), int(m.group(3))
+        if 1 <= month <= 12:
+            return f"{day} de {_MONTHS[month-1]} {year}"
+    return val
+
 BASE_DIR = os.path.normpath(os.path.join(os.path.dirname(__file__), ".."))
 
 
@@ -585,6 +597,8 @@ async def collect_text_field(message: Message, state: FSMContext):
             val = _to_es_date3(val)
         if item_key == "fire_check" and askable[step]["key"] == "date":
             val = _to_es_date_fire(val)
+        if item_key == "check1_uy" and askable[step]["key"] == "date":
+            val = _to_es_date_uy(val)
         if item_key in ("check2_pe", "check4_pe") and askable[step]["key"] == "time":
             val = val.replace("A.M.", "am.").replace("P.M.", "pm.").replace("a. m.", "am.").replace("p. m.", "pm.")\
                      .replace("a.m.", "am.").replace("p.m.", "pm.").replace("AM", "am.").replace("PM", "pm.")

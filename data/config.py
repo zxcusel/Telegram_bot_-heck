@@ -2509,10 +2509,25 @@ GEO_CATALOG: dict = {
                                     },
                                     {
                                         "key": "date",
-                                        "prompt": "📅 Введите дату (пример: 20 de abril 2026 12:20)",
+                                        "prompt": "📅 Введите дату (пример: 20.04.2026)",
+                                        "text_config": {
+                                            "collect_only": True
+                                        }
+                                    },
+                                    {
+                                        "key": "time",
+                                        "prompt": "🕐 Введите время (пример: 12:20)",
+                                        "text_config": {
+                                            "collect_only": True
+                                        }
+                                    },
+                                    {
+                                        "key": "datetime_display",
+                                        "prompt": "",
                                         "text_config": {
                                             "font": "alte_regular", "size": 19, "color": (171, 171, 179),
-                                            "pos": (92, 145), "align": "left"
+                                            "pos": (92, 145), "align": "left",
+                                            "template": "{date} {time}"
                                         }
                                     },
                                     {

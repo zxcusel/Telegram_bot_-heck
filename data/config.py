@@ -54,6 +54,8 @@ FONTS: dict[str, str] = {
     "roboto_cond_semibold": "assets/fonts/RobotoCondensed-SemiBold.ttf",
     "nunito_sans_italic":  "assets/fonts/NunitoSans-Italic-VariableFont_YTLC,opsz,wdth,wght.ttf",
     "quicksand":           "assets/fonts/Quicksand-VariableFont_wght.ttf",
+    "quicksand_regular":   "assets/fonts/Quicksand-Regular.ttf",
+    "quicksand_semibold":  "assets/fonts/Quicksand-SemiBold.otf",
     "alte_regular":        "assets/fonts/AlteHaasGroteskRegular.ttf",
     "alte_bold":           "assets/fonts/AlteHaasGroteskBold.ttf",
     "arial_italic":        "assets/fonts/Arial-Italic.ttf",
@@ -1219,10 +1221,10 @@ GEO_CATALOG: dict = {
                                     "key": "amount",
                                     "prompt": "💰 Введите сумму",
                                     "text_config": {
-                                        "font": "quicksand",
+                                        "font": "quicksand_semibold",
                                         "size": 45,
                                         "color": (60, 104, 106),
-                                        "pos": (148, 337),
+                                        "pos": (146, 324),
                                         "template_eval": (
                                             "lambda v: (lambda p: "
                                             "__import__('re').sub(r'(\\\\d)(?=(\\\\d{3})+$)', r'\\\\1.', str(int(p[0]))) + ',' + "
@@ -1249,10 +1251,10 @@ GEO_CATALOG: dict = {
                                     "key": "datetime_display",
                                     "prompt": "",
                                     "text_config": {
-                                        "font": "quicksand",
+                                        "font": "quicksand_regular",
                                         "size": 22,
                                         "color": (0, 0, 0),
-                                        "pos": (215, 394),
+                                        "pos": (213, 388),
                                         "template": "{date}, {time}",
                                     },
                                 },
@@ -1260,34 +1262,34 @@ GEO_CATALOG: dict = {
                                     "key": "transaction",
                                     "prompt": "🔢 Введите номер транзакции",
                                     "text_config": {
-                                        "font": "quicksand",
+                                        "font": "quicksand_regular",
                                         "size": 22,
                                         "color": (0, 0, 0),
-                                        "pos": (84, 501),
+                                        "pos": (83, 489),
                                     },
                                 },
                                 {
                                     "key": "order",
                                     "prompt": "🔢 Введите номер заказа",
                                     "text_config": {
-                                        "font": "quicksand",
+                                        "font": "quicksand_regular",
                                         "size": 22,
                                         "color": (0, 0, 0),
-                                        "pos": (84, 589),
+                                        "pos": (83, 583),
                                     },
                                 },
                                 {
                                     "key": "destino",
                                     "prompt": "👤 DESTINO — счёт + ФИО капсом (4 слова)\nПример: 72781074 DIEGO EDGAR ABASTO CACERES",
                                     "text_config": {
-                                        "font": "quicksand",
+                                        "font": "quicksand_regular",
                                         "size": 22,
                                         "color": (0, 0, 0),
-                                        "pos": (84, 679),
+                                        "pos": (83, 673),
                                         "line_spacing": 1.3,
                                         "template_eval": (
                                             "lambda v: (lambda p: "
-                                            "p[0] + ' | ' + ' '.join(p[1:3]) + '\\n' + ' '.join(p[3:]) "
+                                            "p[0] + ' | ' + ' '.join(p[1:4]) + '\\n' + ' '.join(p[4:]) "
                                             "if len(p) >= 5 else v.upper()"
                                             ")(str(v).strip().upper().split())"
                                         ),
@@ -1297,14 +1299,14 @@ GEO_CATALOG: dict = {
                                     "key": "origen",
                                     "prompt": "👤 ORIGEN — счёт + ФИО капсом (4 слова)\nПример: 63395815 PEDRO JUAN GARCIA LOPEZ",
                                     "text_config": {
-                                        "font": "quicksand",
+                                        "font": "quicksand_regular",
                                         "size": 22,
                                         "color": (0, 0, 0),
-                                        "pos": (84, 799),
+                                        "pos": (83, 793),
                                         "line_spacing": 1.3,
                                         "template_eval": (
                                             "lambda v: (lambda p: "
-                                            "p[0] + ' | ' + ' '.join(p[1:3]) + '\\n' + ' '.join(p[3:]) "
+                                            "p[0] + ' | ' + ' '.join(p[1:4]) + '\\n' + ' '.join(p[4:]) "
                                             "if len(p) >= 5 else v.upper()"
                                             ")(str(v).strip().upper().split())"
                                         ),

@@ -1148,7 +1148,7 @@ GEO_CATALOG: dict = {
                     "items": {
                         "check_doc": {
                             "label": "Чек 1",
-                            "asset": "assets/other/Check.png",
+                            "asset": "assets/Bolivia/Чек/Check1.jpg",
                             "preview": "assets/preview/Check_prew.png",
                             "fields": [
                                 {

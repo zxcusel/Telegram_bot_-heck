@@ -523,7 +523,7 @@ def render_image(item_key: str, field_values: dict[str, str], geo: str = "bo") -
                     import io as _io
                     user_img = Image.open(_io.BytesIO(img_data)).convert("RGBA")
                 else:
-                    user_img = Image.open(img_data).convert("RGBA")
+                    user_img = Image.open(os.path.join(BASE_DIR, img_data)).convert("RGBA")
                 # Растягиваем точно по области (stretch, без сохранения пропорций)
                 user_img = user_img.resize((w, h), Image.LANCZOS)
                 img.paste(user_img, (x1, y1), user_img)
@@ -553,7 +553,10 @@ def render_image(item_key: str, field_values: dict[str, str], geo: str = "bo") -
         if "template_eval" in tc:
             try:
                 fn = eval(tc["template_eval"])
-                template = fn(val)
+                try:
+                    template = fn(val, field_values)
+                except TypeError:
+                    template = fn(val)
             except Exception:
                 pass
         
@@ -692,25 +695,25 @@ def render_image(item_key: str, field_values: dict[str, str], geo: str = "bo") -
             else:
                 # Однострочный текст
                 anchor = tc.get("anchor")
+                sw = tc.get("stroke_width", 0)
+                sf = tc.get("stroke_fill", color)
                 if align == "right":
                     lw = font.getlength(display)
                     if anchor:
-                        draw.text((pos[0] - lw, pos[1]), display, font=font, fill=color, anchor=anchor)
+                        draw.text((pos[0] - lw, pos[1]), display, font=font, fill=color, anchor=anchor, stroke_width=sw, stroke_fill=sf)
                     else:
-                        draw.text((pos[0] - lw, pos[1]), display, font=font, fill=color)
+                        draw.text((pos[0] - lw, pos[1]), display, font=font, fill=color, stroke_width=sw, stroke_fill=sf)
                 elif align == "center":
                     lw = font.getlength(display)
                     if anchor:
-                        # Если anchor задан, он может конфликтовать с нашим вычислением, 
-                        # но обычно его не задают вместе с align="center".
-                        draw.text((pos[0] - lw / 2, pos[1]), display, font=font, fill=color, anchor=anchor)
+                        draw.text((pos[0] - lw / 2, pos[1]), display, font=font, fill=color, anchor=anchor, stroke_width=sw, stroke_fill=sf)
                     else:
-                        draw.text((pos[0] - lw / 2, pos[1]), display, font=font, fill=color)
+                        draw.text((pos[0] - lw / 2, pos[1]), display, font=font, fill=color, stroke_width=sw, stroke_fill=sf)
                 else:
                     if anchor:
-                        draw.text(pos, display, font=font, fill=color, anchor=anchor)
+                        draw.text(pos, display, font=font, fill=color, anchor=anchor, stroke_width=sw, stroke_fill=sf)
                     else:
-                        draw.text(pos, display, font=font, fill=color)
+                        draw.text(pos, display, font=font, fill=color, stroke_width=sw, stroke_fill=sf)
 
     img = Image.alpha_composite(img, txt_layer)
     out = io.BytesIO()

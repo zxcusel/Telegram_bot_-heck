@@ -175,6 +175,19 @@ def _get_field_keyboard(field_key: str, s: dict, item_key: str = None) -> Inline
             InlineKeyboardButton(text="SOLAR", callback_data="render:set:SOLAR"),
             InlineKeyboardButton(text="ATLAS", callback_data="render:set:ATLAS")
         ])
+
+    if field_key == "bank" and item_key == "check3_uy":
+        buttons.append([
+            InlineKeyboardButton(text="Itaú", callback_data="render:set:Itaú"),
+            InlineKeyboardButton(text="Santander", callback_data="render:set:Santander")
+        ])
+        buttons.append([
+            InlineKeyboardButton(text="BBVA", callback_data="render:set:BBVA"),
+            InlineKeyboardButton(text="Scotiabank", callback_data="render:set:Scotiabank")
+        ])
+        buttons.append([
+            InlineKeyboardButton(text="Oca blue", callback_data="render:set:Oca blue")
+        ])
         
     # 📅 Закрепленная дата
     if s["pinned_date"] and "date" in field_key:
@@ -230,6 +243,27 @@ def _get_field_keyboard(field_key: str, s: dict, item_key: str = None) -> Inline
         ])
         buttons.append([
             InlineKeyboardButton(text="ETH", callback_data="render:set:ETH")
+        ])
+
+    # Кнопки для Uruguay Check 3 (Иконки)
+    if field_key == "network":
+        buttons.append([
+            InlineKeyboardButton(text="2 из 4", callback_data="render:set:assets/Uruguay/Чек/icon/M1.png"),
+            InlineKeyboardButton(text="3 из 4", callback_data="render:set:assets/Uruguay/Чек/icon/M2.png"),
+            InlineKeyboardButton(text="4 из 4", callback_data="render:set:assets/Uruguay/Чек/icon/M3.png")
+        ])
+
+    if field_key == "wifi":
+        buttons.append([
+            InlineKeyboardButton(text="2 из 3", callback_data="render:set:assets/Uruguay/Чек/icon/W1.png"),
+            InlineKeyboardButton(text="3 из 3", callback_data="render:set:assets/Uruguay/Чек/icon/W2.png")
+        ])
+
+    if field_key == "battery":
+        buttons.append([
+            InlineKeyboardButton(text="30 из 100", callback_data="render:set:assets/Uruguay/Чек/icon/B1.png"),
+            InlineKeyboardButton(text="50 из 100", callback_data="render:set:assets/Uruguay/Чек/icon/B2.png"),
+            InlineKeyboardButton(text="100 из 100", callback_data="render:set:assets/Uruguay/Чек/icon/B3.png")
         ])
 
     if field_key == "long_short":
@@ -673,7 +707,7 @@ async def collect_text_field(message: Message, state: FSMContext):
             s_temp["perc_sign"] = data.get("perc_sign", "+")
 
             # Авто-рандом банков на промежуточных шагах
-            while done_step < len(askable) and askable[done_step]["key"] == "bank" and s.get("rand_bank_enabled") and item_key not in ("check2_py", "check3_py", "check2_uy"):
+            while done_step < len(askable) and askable[done_step]["key"] == "bank" and s.get("rand_bank_enabled") and item_key not in ("check2_py", "check3_py", "check2_uy", "check3_uy"):
                 val_rand = _get_random_bank(item_key)
                 values["bank"] = val_rand
                 if item_key == "check2_py":
@@ -770,7 +804,7 @@ async def collect_photo_field(message: Message, state: FSMContext):
             s = get_settings(message.from_user.id)
 
             # Авто-рандом банков на промежуточных шагах
-            while done_step < len(askable) and askable[done_step]["key"] == "bank" and s.get("rand_bank_enabled") and item_key not in ("check2_py", "check3_py", "check2_uy"):
+            while done_step < len(askable) and askable[done_step]["key"] == "bank" and s.get("rand_bank_enabled") and item_key not in ("check2_py", "check3_py", "check2_uy", "check3_uy"):
                 values["bank"] = _get_random_bank(item_key)
                 done_step += 1
 

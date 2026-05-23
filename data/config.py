@@ -53,6 +53,8 @@ FONTS: dict[str, str] = {
     "roboto_cond_extrabold": "assets/fonts/RobotoCondensed-ExtraBold.ttf",
     "roboto_cond_semibold": "assets/fonts/RobotoCondensed-SemiBold.ttf",
     "nunito_sans_italic":  "assets/fonts/NunitoSans-Italic-VariableFont_YTLC,opsz,wdth,wght.ttf",
+    "nunito_medium":       "assets/fonts/Nunito-Medium.otf",
+    "nunito_bold":         "assets/fonts/Nunito-Medium.otf",
     "quicksand":           "assets/fonts/Quicksand-VariableFont_wght.ttf",
     "quicksand_regular":   "assets/fonts/Quicksand-Regular.ttf",
     "quicksand_semibold":  "assets/fonts/Quicksand-SemiBold.otf",
@@ -2707,6 +2709,89 @@ GEO_CATALOG: dict = {
                                         "text_config": {
                                             "font": "sf_pro_text_bold", "size": 24, "color": (8, 8, 8),
                                             "pos": (725, 795), "align": "right"
+                                        }
+                                    }
+                                ]
+                            },
+                            "check3_uy": {
+                                "label": "🧾 Чек 3",
+                                "asset": "assets/Uruguay/Чек/Check3.jpg",
+                                "preview": "assets/Uruguay/Preview/Чек/Check3_prew.jpg",
+                                "fields": [
+                                    {
+                                        "key": "time",
+                                        "prompt": "🕐 Введите время (пример: 15:23)",
+                                        "text_config": {
+                                            "font": "sf_pro_text_bold", "size": 40, "color": (8, 8, 8),
+                                            "pos": (93, 38), "align": "left"
+                                        }
+                                    },
+                                    {
+                                        "key": "amount",
+                                        "prompt": "💰 Введите сумму (пример: 1700)",
+                                        "text_config": {
+                                            "font": "nunito_bold", "size": 62, "color": (40, 42, 59),
+                                            "pos": (461, 718), "align": "center",
+                                            "template": "Enviaste UYU {amount},00",
+                                            "format_number_dot": True,
+                                            "stroke_width": 1,
+                                            "stroke_fill": (40, 42, 59)
+                                        }
+                                    },
+                                    {
+                                        "key": "receiver_name",
+                                        "prompt": "👤 Введите получателя (пример: VIGN FERR AYR)",
+                                        "text_config": {
+                                            "collect_only": True
+                                        }
+                                    },
+                                    {
+                                        "key": "bank",
+                                        "prompt": "🏦 Выберите банк:",
+                                        "text_config": {
+                                            "collect_only": True
+                                        },
+                                        "options": [
+                                            {"text": "Itaú", "value": "Itaú"},
+                                            {"text": "Santander", "value": "Santander"},
+                                            {"text": "BBVA", "value": "BBVA"},
+                                            {"text": "Scotiabank", "value": "Scotiabank"},
+                                            {"text": "Oca blue", "value": "Oca blue"}
+                                        ]
+                                    },
+                                    {
+                                        "key": "_info_text",
+                                        "prompt": "",
+                                        "text_config": {
+                                            "font": "nunito_medium", "size": 35, "color": (43, 43, 52),
+                                            "pos": (461, 839), "align": "center",
+                                            "line_spacing": 1.2,
+                                            "template_eval": "lambda v, fv: f\"{ ' '.join(w + '*' * (3 if i==0 else 4 if i==1 else 3) for i, w in enumerate(str(fv.get('receiver_name','')).upper().split())) } recibe el dinero en\\nsu cuenta {fv.get('bank','')}.\\nSi querés podés compartirle el comprobante.\"",
+                                            "template": "{_info_text}"
+                                        }
+                                    },
+                                    {
+                                        "key": "network",
+                                        "prompt": "📶 Сеть",
+                                        "text_config": {
+                                            "image_paste": True,
+                                            "area": (673, 44, 721, 77)
+                                        }
+                                    },
+                                    {
+                                        "key": "wifi",
+                                        "prompt": "🌐 Интернет",
+                                        "text_config": {
+                                            "image_paste": True,
+                                            "area": (738, 46, 778, 77)
+                                        }
+                                    },
+                                    {
+                                        "key": "battery",
+                                        "prompt": "🔋 Зарядка",
+                                        "text_config": {
+                                            "image_paste": True,
+                                            "area": (794, 45, 861, 78)
                                         }
                                     }
                                 ]

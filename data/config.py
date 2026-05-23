@@ -62,6 +62,8 @@ FONTS: dict[str, str] = {
     "inter":               "assets/fonts/Inter-Regular.ttf",
     "inter_semibold":      "assets/fonts/Inter-SemiBold.ttf",
     "montserrat_extrabold": "assets/fonts/Montserrat-ExtraBold.ttf",
+    "montserrat_semibold": "assets/fonts/Montserrat-SemiBold.ttf",
+    "montserrat_extralight": "assets/fonts/Montserrat-ExtraLight.ttf",
 }
 
 
@@ -2720,8 +2722,107 @@ GEO_CATALOG: dict = {
                                 ]
                             },
                             "check2_py": {
-                                "label": "🧾 Чек 2 (Пустышка)",
-                                "fields": []
+                                "label": "🧾 Чек 2",
+                                "asset": "assets/Paraguay/Чек/Check2.jpg",
+                                "fields": [
+                                    {
+                                        "key": "amount",
+                                        "prompt": "💰 Введите сумму (пример: 123456)",
+                                        "text_config": {
+                                            "font": "montserrat_semibold", "size": 33, "color": (66, 104, 161),
+                                            "pos": (53, 391), "align": "left",
+                                            "template": "Gs. {amount}",
+                                            "format_number_dot": True
+                                        }
+                                    },
+                                    {
+                                        "key": "name",
+                                        "prompt": "✏️ Введите Имя (пример: Ivanov Ivan)",
+                                        "text_config": {
+                                            "font": "montserrat_semibold", "size": 20, "color": (35, 53, 65),
+                                            "pos": (161, 473), "align": "left"
+                                        }
+                                    },
+                                    {
+                                        "key": "name",
+                                        "prompt": "",
+                                        "text_config": {
+                                            "font": "montserrat_semibold", "size": 17, "color": (35, 53, 65),
+                                            "pos": (506, 603), "align": "right"
+                                        }
+                                    },
+                                    {
+                                        "key": "bank",
+                                        "prompt": "🏦 Выберите банк",
+                                        "text_config": {
+                                            "collect_only": True
+                                        }
+                                    },
+                                    {
+                                        "key": "bank",
+                                        "prompt": "",
+                                        "text_config": {
+                                            "font": "montserrat", "size": 19, "color": (35, 53, 65),
+                                            "pos": (161, 504), "align": "left",
+                                            "template_eval": "lambda v: {'ATLAS': 'BANCO ATLAS S.A.', 'CONTINENTAL': 'BANCO CONTINENTAL S.A.E.C.A.', 'SOLAR': 'SOLAR BANCO S.A.E', 'INTERFISA': 'INTERFISA BANCO SAECA-GRUPO', 'SUDAMERIS': 'SUDAMERIS BANK S.A.E.C.A.', 'GNB': 'BANCO GNB PARAGUAY SA', 'familiar': 'BANCO FAMILIAR S.A.E.C.A.', 'interfisa': 'INTERFISA BANCCO SAECA - GRUPO'}.get(v, '')"
+                                        }
+                                    },
+                                    {
+                                        "key": "_bank_image",
+                                        "prompt": "",
+                                        "text_config": {
+                                            "image_paste": True,
+                                            "area": (64, 467, 149, 552)
+                                        }
+                                    },
+                                    {
+                                        "key": "account",
+                                        "prompt": "🔢 Введите номер получателя (11 цифр)",
+                                        "text_config": {
+                                            "font": "montserrat_light", "size": 20, "color": (35, 53, 65),
+                                            "pos": (229, 530), "align": "left"
+                                        }
+                                    },
+                                    {
+                                        "key": "account_end",
+                                        "prompt": "🔢 Введите 3 цифры на конце (рекомендуется 278)",
+                                        "text_config": {
+                                            "font": "montserrat_extralight", "size": 20, "color": (35, 53, 65),
+                                            "pos": (473, 654), "align": "left"
+                                        }
+                                    },
+                                    {
+                                        "key": "date",
+                                        "prompt": "📅 Введите дату (пример: 19.05.2026)",
+                                        "text_config": {
+                                            "collect_only": True
+                                        }
+                                    },
+                                    {
+                                        "key": "time",
+                                        "prompt": "🕐 Введите время (пример: 14:39)",
+                                        "text_config": {
+                                            "collect_only": True
+                                        }
+                                    },
+                                    {
+                                        "key": "_datetime",
+                                        "prompt": "",
+                                        "text_config": {
+                                            "font": "montserrat_semibold", "size": 17.8, "color": (35, 53, 65),
+                                            "pos": (506, 700), "align": "right",
+                                            "template": "{date} - {time} Hs"
+                                        }
+                                    },
+                                    {
+                                        "key": "transaction",
+                                        "prompt": "🔢 Введите номер транзакции",
+                                        "text_config": {
+                                            "font": "montserrat_semibold", "size": 17.9, "color": (35, 53, 65),
+                                            "pos": (506, 746), "align": "right"
+                                        }
+                                    }
+                                ]
                             }
                         }
                     }

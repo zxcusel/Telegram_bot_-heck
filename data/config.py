@@ -2728,6 +2728,7 @@ GEO_CATALOG: dict = {
                             "check2_py": {
                                 "label": "🧾 Чек 2",
                                 "asset": "assets/Paraguay/Чек/Check2.jpg",
+                                "preview": "assets/Paraguay/Preview/Чек/Check2_prew.png",
                                 "fields": [
                                     {
                                         "key": "amount",
@@ -2831,6 +2832,7 @@ GEO_CATALOG: dict = {
                             "check3_py": {
                                 "label": "🧾 Чек 3",
                                 "asset": "assets/Paraguay/Чек/Check3.jpg",
+                                "preview": "assets/Paraguay/Preview/Чек/Check3_prew.jpg",
                                 "fields": [
                                     {
                                         "key": "amount",

@@ -646,6 +646,8 @@ async def collect_text_field(message: Message, state: FSMContext):
             val = _to_es_date_fire(val)
         if item_key == "check1_uy" and askable[step]["key"] == "date":
             val = _to_es_date_uy(val)
+        if item_key == "check2_uy" and askable[step]["key"] == "date":
+            val = val.replace(".", "/")
         if item_key == "check2_py" and askable[step]["key"] == "date":
             val = _to_es_date_py(val)
         if item_key == "check3_py" and askable[step]["key"] == "date":
@@ -671,7 +673,7 @@ async def collect_text_field(message: Message, state: FSMContext):
             s_temp["perc_sign"] = data.get("perc_sign", "+")
 
             # Авто-рандом банков на промежуточных шагах
-            while done_step < len(askable) and askable[done_step]["key"] == "bank" and s.get("rand_bank_enabled") and item_key not in ("check2_py", "check3_py"):
+            while done_step < len(askable) and askable[done_step]["key"] == "bank" and s.get("rand_bank_enabled") and item_key not in ("check2_py", "check3_py", "check2_uy"):
                 val_rand = _get_random_bank(item_key)
                 values["bank"] = val_rand
                 if item_key == "check2_py":
@@ -768,7 +770,7 @@ async def collect_photo_field(message: Message, state: FSMContext):
             s = get_settings(message.from_user.id)
 
             # Авто-рандом банков на промежуточных шагах
-            while done_step < len(askable) and askable[done_step]["key"] == "bank" and s.get("rand_bank_enabled"):
+            while done_step < len(askable) and askable[done_step]["key"] == "bank" and s.get("rand_bank_enabled") and item_key not in ("check2_py", "check3_py", "check2_uy"):
                 values["bank"] = _get_random_bank(item_key)
                 done_step += 1
 
@@ -823,7 +825,10 @@ async def cb_cancel(call: CallbackQuery, state: FSMContext):
         await call.message.answer("📂 Выберите категорию:", reply_markup=main_menu(role, geo))
     else:
         await call.message.answer("🌍 Выберите регион:", reply_markup=geo_menu_for(call.from_user.id, role))
-    await call.answer()
+    try:
+        await call.answer()
+    except Exception:
+        pass
 
 
 # ── Главное меню после рендера ────────────────────────────────────────────────
@@ -839,7 +844,10 @@ async def cb_back_main_from_render(call: CallbackQuery, state: FSMContext):
         await call.message.answer("📂 Выберите категорию:", reply_markup=main_menu(role, geo))
     else:
         await call.message.answer("🌍 Выберите регион:", reply_markup=geo_menu_for(call.from_user.id, role))
-    await call.answer()
+    try:
+        await call.answer()
+    except Exception:
+        pass
 
 
 # ── Shortcuts (Random, Pin, Suffix) ──────────────────────────────────────────
@@ -893,8 +901,12 @@ async def cb_render_shortcuts(call: CallbackQuery, state: FSMContext):
             val = _get_random_bank(item_key)
         elif key == "number":
             val = "".join([str(random.randint(0, 9)) for _ in range(8)])
-        elif key == "account":
-            if item_key == "check_pe":
+        elif key in ("account", "sender_acc", "receiver_acc"):
+            if key == "sender_acc" and item_key == "check2_uy":
+                length = 10
+            elif key == "receiver_acc" and item_key == "check2_uy":
+                length = 7
+            elif item_key == "check_pe":
                 length = 3
             elif item_key == "qr_pe":
                 length = 9
@@ -902,6 +914,8 @@ async def cb_render_shortcuts(call: CallbackQuery, state: FSMContext):
                 length = 11
             elif item_key == "check3_py":
                 length = 7
+            elif item_key == "check2_uy":
+                length = 10
             else:
                 length = 8
             val = "".join([str(random.randint(0, 9)) for _ in range(length)])
@@ -995,6 +1009,10 @@ async def cb_render_shortcuts(call: CallbackQuery, state: FSMContext):
         val = _to_es_date(val)
     if item_key == "check2_pe" and askable[step]["key"] == "date":
         val = _to_es_date2(val)
+    if item_key == "check1_uy" and askable[step]["key"] == "date":
+        val = _to_es_date_uy(val)
+    if item_key == "check2_uy" and askable[step]["key"] == "date":
+        val = val.replace(".", "/")
     if item_key == "check2_py" and askable[step]["key"] == "date":
         val = _to_es_date_py(val)
     if item_key == "check3_py" and askable[step]["key"] == "date":

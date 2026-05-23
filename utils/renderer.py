@@ -644,6 +644,39 @@ def render_image(item_key: str, field_values: dict[str, str], geo: str = "bo") -
             draw.text((x_suffix, y_suffix), suffix,  font=f_suffix, fill=color)
             continue
 
+        # ── prefix mode (e.g. "UYU 30 000" with two sizes) ───────────────────
+        prefix      = tc.get("prefix")
+        prefix_size = tc.get("prefix_size")
+        if prefix and prefix_size and not area:
+            f_main   = font
+            f_prefix = _load_font(tc.get("font", "montserrat"), prefix_size)
+            main_w   = f_main.getlength(display)
+            sp_w     = f_main.getlength(" ") if tc.get("prefix_space", True) else 0
+            pref_w   = f_prefix.getlength(prefix)
+            total_w  = pref_w + sp_w + main_w
+            
+            pos = tc.get("pos", (50, 50))
+            x, y = pos
+            if align == "center":
+                x_start = x - total_w / 2
+            elif align == "right":
+                x_start = x - total_w
+            else:
+                x_start = x
+            
+            x_pref = x_start
+            x_main = x_start + pref_w + sp_w
+            
+            asc_m, _ = f_main.getmetrics()
+            asc_p, _ = f_prefix.getmetrics()
+            
+            y_pref = y + tc.get("prefix_y_offset", 0)
+            y_main = y + tc.get("main_y_offset", 0)
+            
+            draw.text((x_pref, y_pref), prefix, font=f_prefix, fill=color)
+            draw.text((x_main, y_main), display, font=f_main, fill=color)
+            continue
+
         # ── area or pos ───────────────────────────────────────────────────────
         if area:
             _draw_area(draw, display, font, color, area,
@@ -665,6 +698,14 @@ def render_image(item_key: str, field_values: dict[str, str], geo: str = "bo") -
                         draw.text((pos[0] - lw, pos[1]), display, font=font, fill=color, anchor=anchor)
                     else:
                         draw.text((pos[0] - lw, pos[1]), display, font=font, fill=color)
+                elif align == "center":
+                    lw = font.getlength(display)
+                    if anchor:
+                        # Если anchor задан, он может конфликтовать с нашим вычислением, 
+                        # но обычно его не задают вместе с align="center".
+                        draw.text((pos[0] - lw / 2, pos[1]), display, font=font, fill=color, anchor=anchor)
+                    else:
+                        draw.text((pos[0] - lw / 2, pos[1]), display, font=font, fill=color)
                 else:
                     if anchor:
                         draw.text(pos, display, font=font, fill=color, anchor=anchor)

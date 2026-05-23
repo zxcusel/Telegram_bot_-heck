@@ -66,6 +66,7 @@ FONTS: dict[str, str] = {
     "montserrat_extralight": "assets/fonts/Montserrat-ExtraLight.ttf",
     "sf_pro_text_medium": "assets/fonts/SF-Pro-Text-Medium.ttf",
     "sf_pro_text_regular": "assets/fonts/SFProText-Regular.ttf",
+    "sf_pro_text_bold":    "assets/fonts/SFProText-Bold.otf",
     "inter_light":         "assets/fonts/Inter-Light.ttf",
     "inter_extralight":    "assets/fonts/Inter-ExtraLight.ttf",
 }
@@ -2610,8 +2611,105 @@ GEO_CATALOG: dict = {
                                 ]
                             },
                             "check2_uy": {
-                                "label": "🧾 Чек 2 (Пустышка)",
-                                "fields": []
+                                "label": "🧾 Чек 2",
+                                "asset": "assets/Uruguay/Чек/Check2.jpg",
+                                "preview": "assets/Uruguay/Preview/Чек/Check2_prew.jpg",
+                                "fields": [
+                                    {
+                                        "key": "amount",
+                                        "prompt": "💰 Введите сумму (пример: 123456)",
+                                        "text_config": {
+                                            "font": "sf_pro_text_bold", "size": 54, "color": (47, 47, 47),
+                                            "pos": (385, 189), "align": "center",
+                                            "template": "{amount},00",
+                                            "format_number_dot": True,
+                                            "prefix": "UYU",
+                                            "prefix_size": 37,
+                                            "prefix_y_offset": 10
+                                        }
+                                    },
+                                    {
+                                        "key": "amount",
+                                        "prompt": "",
+                                        "text_config": {
+                                            "font": "sf_pro_text_bold", "size": 24, "color": (8, 8, 8),
+                                            "pos": (725, 870), "align": "right",
+                                            "template": "UYU {amount}.0"
+                                        }
+                                    },
+                                    {
+                                        "key": "sender_acc",
+                                        "prompt": "🔢 Введите Номер отправителя (10 цифр)",
+                                        "text_config": {
+                                            "font": "sf_pro_text_bold", "size": 28, "color": (8, 8, 8),
+                                            "pos": (385, 351), "align": "center",
+                                            "template": "CA UYU {sender_acc}"
+                                        }
+                                    },
+                                    {
+                                        "key": "bank",
+                                        "prompt": "🏦 Введите Банк (пример: Itaú)",
+                                        "text_config": {
+                                            "collect_only": True
+                                        }
+                                    },
+                                    {
+                                        "key": "receiver_acc",
+                                        "prompt": "🔢 Введите Номер получателя (7 цифр)",
+                                        "text_config": {
+                                            "collect_only": True
+                                        }
+                                    },
+                                    {
+                                        "key": "_bank_acc",
+                                        "prompt": "",
+                                        "text_config": {
+                                            "font": "sf_pro_text_bold", "size": 28, "color": (8, 8, 8),
+                                            "pos": (385, 451), "align": "center",
+                                            "template": "{bank} {receiver_acc}"
+                                        }
+                                    },
+                                    {
+                                        "key": "name",
+                                        "prompt": "👤 Введите получателя (пример: CARD BUE WILF)",
+                                        "text_config": {
+                                            "font": "sf_pro_text_bold", "size": 28, "color": (48, 52, 52),
+                                            "pos": (304, 539), "align": "left",
+                                            "template_eval": "lambda v: ' '.join(w + '*' * (3 if i==0 else 2 if i==1 else 4) for i, w in enumerate(str(v).upper().split()))"
+                                        }
+                                    },
+                                    {
+                                        "key": "date",
+                                        "prompt": "📅 Введите дату (пример: 04.01.2026)",
+                                        "text_config": {
+                                            "collect_only": True
+                                        }
+                                    },
+                                    {
+                                        "key": "time",
+                                        "prompt": "🕐 Введите время (пример: 15:23)",
+                                        "text_config": {
+                                            "collect_only": True
+                                        }
+                                    },
+                                    {
+                                        "key": "_datetime",
+                                        "prompt": "",
+                                        "text_config": {
+                                            "font": "sf_pro_text_bold", "size": 24, "color": (8, 8, 8),
+                                            "pos": (725, 647), "align": "right",
+                                            "template": "{date} {time}"
+                                        }
+                                    },
+                                    {
+                                        "key": "account",
+                                        "prompt": "🔢 Введите Ссылку",
+                                        "text_config": {
+                                            "font": "sf_pro_text_bold", "size": 24, "color": (8, 8, 8),
+                                            "pos": (725, 795), "align": "right"
+                                        }
+                                    }
+                                ]
                             }
                         }
                     }

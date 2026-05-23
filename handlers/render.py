@@ -115,6 +115,16 @@ def _to_es_date_py(val: str) -> str:
         return f"{day} {month_es} {year}"
     return val
 
+def _to_es_date_py_check3(val: str) -> str:
+    """Конвертирует '18.05.2026' в '18/may/2026'."""
+    import re
+    m = re.match(r'(\d{1,2})[./](\d{1,2})[./](\d{4})', val.strip())
+    if m:
+        day, month, year = int(m.group(1)), f"{int(m.group(2)):02d}", int(m.group(3))
+        month_es = _ES_MONTHS.get(month, month)
+        return f"{day:02d}/{month_es}/{year}"
+    return val
+
 BASE_DIR = os.path.normpath(os.path.join(os.path.dirname(__file__), ".."))
 
 
@@ -157,6 +167,13 @@ def _get_field_keyboard(field_key: str, s: dict, item_key: str = None) -> Inline
         buttons.append([
             InlineKeyboardButton(text="familiar", callback_data="render:set:familiar"),
             InlineKeyboardButton(text="interfisa", callback_data="render:set:interfisa")
+        ])
+        
+    if field_key == "bank" and item_key == "check3_py":
+        buttons.append([
+            InlineKeyboardButton(text="GNB", callback_data="render:set:GNB"),
+            InlineKeyboardButton(text="SOLAR", callback_data="render:set:SOLAR"),
+            InlineKeyboardButton(text="ATLAS", callback_data="render:set:ATLAS")
         ])
         
     # 📅 Закрепленная дата
@@ -464,7 +481,7 @@ async def cb_item_selected(call: CallbackQuery, state: FSMContext):
     # Авто-рандом банков: если первое поле — bank и рандом включён, пропускаем его
     start_step = 0
     auto_values = {}
-    while start_step < len(askable) and askable[start_step]["key"] == "bank" and s.get("rand_bank_enabled") and item_key != "check2_py":
+    while start_step < len(askable) and askable[start_step]["key"] == "bank" and s.get("rand_bank_enabled") and item_key not in ("check2_py", "check3_py"):
         auto_values["bank"] = _get_random_bank(item_key)
         start_step += 1
 
@@ -631,6 +648,8 @@ async def collect_text_field(message: Message, state: FSMContext):
             val = _to_es_date_uy(val)
         if item_key == "check2_py" and askable[step]["key"] == "date":
             val = _to_es_date_py(val)
+        if item_key == "check3_py" and askable[step]["key"] == "date":
+            val = _to_es_date_py_check3(val)
         if item_key in ("check2_pe", "check4_pe") and askable[step]["key"] == "time":
             val = val.replace("A.M.", "am.").replace("P.M.", "pm.").replace("a. m.", "am.").replace("p. m.", "pm.")\
                      .replace("a.m.", "am.").replace("p.m.", "pm.").replace("AM", "am.").replace("PM", "pm.")
@@ -642,6 +661,8 @@ async def collect_text_field(message: Message, state: FSMContext):
         values[askable[step]["key"]] = val
         if item_key == "check2_py" and askable[step]["key"] == "bank":
             values["_bank_image"] = f"assets/Paraguay/Чек/bank/{val}.jpg"
+        if item_key == "check3_py" and askable[step]["key"] == "bank":
+            values["_bank_image"] = f"assets/Paraguay/Чек/bank2/{val}.png"
         done_step = step + 1
 
         if done_step < len(askable):
@@ -650,11 +671,13 @@ async def collect_text_field(message: Message, state: FSMContext):
             s_temp["perc_sign"] = data.get("perc_sign", "+")
 
             # Авто-рандом банков на промежуточных шагах
-            while done_step < len(askable) and askable[done_step]["key"] == "bank" and s.get("rand_bank_enabled") and item_key != "check2_py":
+            while done_step < len(askable) and askable[done_step]["key"] == "bank" and s.get("rand_bank_enabled") and item_key not in ("check2_py", "check3_py"):
                 val_rand = _get_random_bank(item_key)
                 values["bank"] = val_rand
                 if item_key == "check2_py":
                     values["_bank_image"] = f"assets/Paraguay/Чек/bank/{val_rand}.jpg"
+                if item_key == "check3_py":
+                    values["_bank_image"] = f"assets/Paraguay/Чек/bank2/{val_rand}.png"
                 done_step += 1
 
             if done_step < len(askable):
@@ -877,6 +900,8 @@ async def cb_render_shortcuts(call: CallbackQuery, state: FSMContext):
                 length = 9
             elif item_key == "check2_py":
                 length = 11
+            elif item_key == "check3_py":
+                length = 7
             else:
                 length = 8
             val = "".join([str(random.randint(0, 9)) for _ in range(length)])
@@ -972,9 +997,13 @@ async def cb_render_shortcuts(call: CallbackQuery, state: FSMContext):
         val = _to_es_date2(val)
     if item_key == "check2_py" and askable[step]["key"] == "date":
         val = _to_es_date_py(val)
+    if item_key == "check3_py" and askable[step]["key"] == "date":
+        val = _to_es_date_py_check3(val)
     values[askable[step]["key"]] = val
     if item_key == "check2_py" and askable[step]["key"] == "bank":
         values["_bank_image"] = f"assets/Paraguay/Чек/bank/{val}.jpg"
+    if item_key == "check3_py" and askable[step]["key"] == "bank":
+        values["_bank_image"] = f"assets/Paraguay/Чек/bank2/{val}.png"
     done_step = step + 1
 
     if done_step < len(askable):

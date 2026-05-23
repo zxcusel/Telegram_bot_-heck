@@ -64,6 +64,10 @@ FONTS: dict[str, str] = {
     "montserrat_extrabold": "assets/fonts/Montserrat-ExtraBold.ttf",
     "montserrat_semibold": "assets/fonts/Montserrat-SemiBold.ttf",
     "montserrat_extralight": "assets/fonts/Montserrat-ExtraLight.ttf",
+    "sf_pro_text_medium": "assets/fonts/SF-Pro-Text-Medium.ttf",
+    "sf_pro_text_regular": "assets/fonts/SFProText-Regular.ttf",
+    "inter_light":         "assets/fonts/Inter-Light.ttf",
+    "inter_extralight":    "assets/fonts/Inter-ExtraLight.ttf",
 }
 
 
@@ -2820,6 +2824,87 @@ GEO_CATALOG: dict = {
                                         "text_config": {
                                             "font": "montserrat_semibold", "size": 17.9, "color": (35, 53, 65),
                                             "pos": (506, 746), "align": "right"
+                                        }
+                                    }
+                                ]
+                            },
+                            "check3_py": {
+                                "label": "🧾 Чек 3",
+                                "asset": "assets/Paraguay/Чек/Check3.jpg",
+                                "fields": [
+                                    {
+                                        "key": "amount",
+                                        "prompt": "💰 Введите сумму (пример: 123456)",
+                                        "text_config": {
+                                            "font": "montserrat_semibold", "size": 28, "color": (68, 114, 225),
+                                            "pos": (93, 228), "align": "left",
+                                            "template": "{amount}",
+                                            "format_number_dot": True
+                                        }
+                                    },
+                                    {
+                                        "key": "sender_name",
+                                        "prompt": "👤 Имя отправителя",
+                                        "text_config": {
+                                            "font": "sf_pro_text_medium", "size": 22, "color": (255, 255, 255),
+                                            "pos": (62, 349), "align": "left"
+                                        }
+                                    },
+                                    {
+                                        "key": "bank",
+                                        "prompt": "🏦 Выберите банк",
+                                        "text_config": {
+                                            "collect_only": True
+                                        }
+                                    },
+                                    {
+                                        "key": "bank",
+                                        "prompt": "",
+                                        "text_config": {
+                                            "font": "inter_extralight", "size": 22, "color": (182, 182, 182),
+                                            "pos": (62, 500), "align": "left",
+                                            "template_eval": "lambda v: {'ATLAS': 'Banco Atlas S.a.', 'GNB': 'Banco Gnb Paraguay Sa', 'SOLAR': 'Solar'}.get(v, '')"
+                                        }
+                                    },
+                                    {
+                                        "key": "_bank_image",
+                                        "prompt": "",
+                                        "text_config": {
+                                            "image_paste": True,
+                                            "area": (437, 443, 500, 506)
+                                        }
+                                    },
+                                    {
+                                        "key": "name",
+                                        "prompt": "✏️ Введите Имя получателя",
+                                        "text_config": {
+                                            "font": "sf_pro_text_medium", "size": 22, "color": (255, 255, 255),
+                                            "pos": (62, 472), "align": "left"
+                                        }
+                                    },
+                                    {
+                                        "key": "account",
+                                        "prompt": "🔢 Введите номер счета (7 цифр)",
+                                        "text_config": {
+                                            "font": "inter_light", "size": 19, "color": (205, 205, 205),
+                                            "pos": (127, 526), "align": "left"
+                                        }
+                                    },
+                                    {
+                                        "key": "date",
+                                        "prompt": "📅 Введите дату (пример: 18.05.2026)",
+                                        "text_config": {
+                                            "font": "sf_pro_text_regular", "size": 22, "color": (255, 255, 255),
+                                            "pos": (63, 594), "align": "left"
+                                        }
+                                    },
+                                    {
+                                        "key": "time",
+                                        "prompt": "🕐 Введите время (пример: 13:23)",
+                                        "text_config": {
+                                            "font": "sf_pro_text_regular", "size": 22, "color": (255, 255, 255),
+                                            "pos": (63, 621), "align": "left",
+                                            "template": "{time} Hs."
                                         }
                                     }
                                 ]

@@ -6,7 +6,7 @@ from aiogram.types import CallbackQuery, Message, InlineKeyboardMarkup, InlineKe
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 
-from data.db import get_settings, update_setting
+from data.db import get_settings, update_setting, get_available_names, clear_name_blacklist
 from keyboards.inline import cancel_kb
 from utils.logger import log
 
@@ -28,6 +28,7 @@ def settings_kb(user_id: int) -> InlineKeyboardMarkup:
     rand_percent_text = "✅ Рандомайзер процентов: ВКЛ" if s.get("rand_percent_enabled") else "❌ Рандомайзер процентов: ВЫКЛ"
     rand_bank_text = "✅ Рандомайзер банков: ВКЛ" if s.get("rand_bank_enabled") else "❌ Рандомайзер банков: ВЫКЛ"
     rand_acc_text = "✅ Рандомайзер счетов: ВКЛ" if s.get("rand_acc_enabled") else "❌ Рандомайзер счетов: ВЫКЛ"
+    rand_name_text = f"✅ Рандом имен: ВКЛ (осталось {len(get_available_names())})" if s.get("rand_name_enabled") else f"❌ Рандом имен: ВЫКЛ (осталось {len(get_available_names())})"
     
     # AM/PM
     suffix = s["time_suffix"] or "Нет"
@@ -58,6 +59,8 @@ def settings_kb(user_id: int) -> InlineKeyboardMarkup:
         ],
         [InlineKeyboardButton(text=rand_bank_text, callback_data="set:toggle_rand_bank")],
         [InlineKeyboardButton(text=rand_acc_text, callback_data="set:toggle_rand_acc")],
+        [InlineKeyboardButton(text=rand_name_text, callback_data="set:toggle_rand_name")],
+        [InlineKeyboardButton(text="🔄 Сбросить блэклист имен", callback_data="set:clear_name_blacklist")],
         [InlineKeyboardButton(text=suffix_text, callback_data="set:toggle_suffix")],
         [InlineKeyboardButton(text=date_text, callback_data="set:pinned_date")],
         [InlineKeyboardButton(text=name_text, callback_data="set:pinned_name")],
@@ -114,6 +117,24 @@ async def cb_toggle_rand_acc(call: CallbackQuery):
     log.setting_changed(call.from_user.id, "rand_acc_enabled", new_val, call.from_user.username)
     await call.message.edit_reply_markup(reply_markup=settings_kb(call.from_user.id))
     await call.answer("Рандомайзер счетов изменен")
+
+
+@router.callback_query(F.data == "set:toggle_rand_name")
+async def cb_toggle_rand_name(call: CallbackQuery):
+    s = get_settings(call.from_user.id)
+    new_val = 0 if s.get("rand_name_enabled") else 1
+    update_setting(call.from_user.id, "rand_name_enabled", new_val)
+    log.setting_changed(call.from_user.id, "rand_name_enabled", new_val, call.from_user.username)
+    await call.message.edit_reply_markup(reply_markup=settings_kb(call.from_user.id))
+    await call.answer("Рандомайзер имен изменен")
+
+
+@router.callback_query(F.data == "set:clear_name_blacklist")
+async def cb_clear_name_blacklist(call: CallbackQuery):
+    clear_name_blacklist()
+    log.setting_changed(call.from_user.id, "name_blacklist", "cleared", call.from_user.username)
+    await call.message.edit_reply_markup(reply_markup=settings_kb(call.from_user.id))
+    await call.answer("Блэклист имен успешно очищен!")
 
 
 @router.callback_query(F.data == "set:toggle_suffix")

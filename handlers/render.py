@@ -32,6 +32,29 @@ def _get_random_bank(item_key: str) -> str:
     else:
         return random.choice(["Banco Mercantil Santa Cruz", "Banco Fie", "Banco Bisa", "Banco Union", "Banco Económico", "Banco Nacional de Bolivia"])
 
+def _is_name_field(field_key: str) -> bool:
+    return field_key in ("name", "fullname", "recipient_name")
+
+def _advance_steps(askable: list, start_step: int, values: dict, s: dict, item_key: str) -> int:
+    from data.db import get_and_blacklist_random_name
+    done_step = start_step
+    while done_step < len(askable):
+        key = askable[done_step]["key"]
+        if key == "bank" and s.get("rand_bank_enabled") and item_key not in ("check2_py", "check3_py", "check2_uy", "check3_uy", "check4_uy"):
+            val_rand = _get_random_bank(item_key)
+            values["bank"] = val_rand
+            if item_key == "check2_py":
+                values["_bank_image"] = f"assets/Paraguay/Чек/bank/{val_rand}.jpg"
+            if item_key == "check3_py":
+                values["_bank_image"] = f"assets/Paraguay/Чек/bank2/{val_rand}.png"
+            done_step += 1
+        elif _is_name_field(key) and s.get("rand_name_enabled"):
+            values[key] = get_and_blacklist_random_name()
+            done_step += 1
+        else:
+            break
+    return done_step
+
 # ── Испанские сокращения месяцев ──────────────────────────────────────────────
 _ES_MONTHS = {
     "01": "ene", "02": "feb", "03": "mar", "04": "abr",
@@ -205,6 +228,10 @@ def _get_field_keyboard(field_key: str, s: dict, item_key: str = None) -> Inline
     # 👤 Закрепленное ФИО
     if s.get("pinned_name") and field_key in ("name", "fullname"):
         buttons.append([InlineKeyboardButton(text=f"👤 {s['pinned_name']}", callback_data="render:pin_name")])
+        
+    # 🎲 Рандомайзер имен
+    if not s.get("rand_name_enabled") and field_key in ("name", "fullname", "recipient_name"):
+        buttons.append([InlineKeyboardButton(text="🎲 Сгенерировать имя", callback_data="render:random_name")])
         
     # 🏦 Закрепленный банк
     if s.get("pinned_bank") and field_key == "bank":
@@ -420,17 +447,26 @@ async def _finish_render(message: Message, item_key: str, values: dict, item: di
 
         log.render_done(message.from_user.id, item.get("label", item_key), message.from_user.username)
         
+        warning_suffix = ""
+        try:
+            from data.db import get_available_names
+            rem_count = len(get_available_names())
+            if rem_count <= 50:
+                warning_suffix = f"\n\n⚠️ <b>Внимание! Имена заканчиваются: осталось всего {rem_count} шт. Пожалуйста, пополните name.json!</b>"
+        except Exception:
+            pass
+
         if render_mode == "video":
             await message.answer_video(
                 video=BufferedInputFile(media_bytes.read(), filename="result.mp4"),
-                caption=f"✅ Готово! Видео: <b>{item['label']}</b>",
+                caption=f"✅ Готово! Видео: <b>{item['label']}</b>" + warning_suffix,
                 parse_mode="HTML",
                 reply_markup=after_render_kb(geo, item_key)
             )
         else:
             await message.answer_photo(
                 photo=BufferedInputFile(media_bytes.read(), filename="result.png"),
-                caption=f"✅ Готово! Шаблон: <b>{item['label']}</b>",
+                caption=f"✅ Готово! Шаблон: <b>{item['label']}</b>" + warning_suffix,
                 parse_mode="HTML",
                 reply_markup=after_render_kb(geo, item_key)
             )
@@ -485,32 +521,7 @@ async def cb_item_selected(call: CallbackQuery, state: FSMContext):
 
     if not askable:
         await state.clear()
-        render_mode = item.get("render_mode")
-        wait_text = "⏳ Генерирую видео..." if render_mode == "video" else "⏳ Генерирую..."
-        wait = await call.message.answer(wait_text)
-        try:
-            if render_mode == "video":
-                from utils.renderer import render_video
-                media_bytes = render_video(item_key, {}, geo)
-                await _try_delete(call.bot, call.message.chat.id, wait.message_id)
-                await call.message.answer_video(
-                    video=BufferedInputFile(media_bytes.read(), filename="result.mp4"),
-                    caption=f"✅ Готово! Видео: <b>{item['label']}</b>",
-                    parse_mode="HTML",
-                    reply_markup=after_render_kb(geo, item_key)
-                )
-            else:
-                from utils.renderer import render_image
-                media_bytes = render_image(item_key, {}, geo)
-                await _try_delete(call.bot, call.message.chat.id, wait.message_id)
-                await call.message.answer_photo(
-                    photo=BufferedInputFile(media_bytes.read(), filename="result.png"),
-                    caption=f"✅ Готово! Шаблон: <b>{item['label']}</b>",
-                    parse_mode="HTML",
-                    reply_markup=after_render_kb(geo, item_key)
-                )
-        except Exception as e:
-            await wait.edit_text(f"❌ Ошибка рендеринга: {e}")
+        await _finish_render(call.message, item_key, {}, item, geo=geo)
         await call.answer()
         return
 
@@ -521,12 +532,18 @@ async def cb_item_selected(call: CallbackQuery, state: FSMContext):
     s_temp = s.copy()
     s_temp["perc_sign"] = "+"
 
-    # Авто-рандом банков: если первое поле — bank и рандом включён, пропускаем его
-    start_step = 0
     auto_values = {}
-    while start_step < len(askable) and askable[start_step]["key"] == "bank" and s.get("rand_bank_enabled") and item_key not in ("check2_py", "check3_py", "check2_uy", "check3_uy", "check4_uy"):
-        auto_values["bank"] = _get_random_bank(item_key)
-        start_step += 1
+    try:
+        start_step = _advance_steps(askable, 0, auto_values, s, item_key)
+    except ValueError:
+        await call.answer("❌ В списке name.json не осталось имен! Пополните список или отключите 'Рандом имен' в настройках.", show_alert=True)
+        return
+
+    if start_step >= len(askable):
+        await state.clear()
+        await _finish_render(call.message, item_key, auto_values, item, geo=geo)
+        await call.answer()
+        return
 
     checklist = _build_checklist(item["label"], askable, done_step=start_step, values=auto_values)
     caption = checklist + f"\n\n{askable[start_step]['prompt']}"
@@ -710,32 +727,23 @@ async def collect_text_field(message: Message, state: FSMContext):
             values["_bank_image"] = f"assets/Paraguay/Чек/bank2/{val}.png"
         done_step = step + 1
 
+        s = get_settings(message.from_user.id)
+        s_temp = s.copy()
+        s_temp["perc_sign"] = data.get("perc_sign", "+")
+
+        try:
+            done_step = _advance_steps(askable, done_step, values, s, item_key)
+        except ValueError:
+            await message.answer("❌ В списке name.json не осталось имен! Пополните список или отключите 'Рандом имен' в настройках.")
+            await state.clear()
+            return
+
         if done_step < len(askable):
-            s = get_settings(message.from_user.id)
-            s_temp = s.copy()
-            s_temp["perc_sign"] = data.get("perc_sign", "+")
-
-            # Авто-рандом банков на промежуточных шагах
-            while done_step < len(askable) and askable[done_step]["key"] == "bank" and s.get("rand_bank_enabled") and item_key not in ("check2_py", "check3_py", "check2_uy", "check3_uy", "check4_uy"):
-                val_rand = _get_random_bank(item_key)
-                values["bank"] = val_rand
-                if item_key == "check2_py":
-                    values["_bank_image"] = f"assets/Paraguay/Чек/bank/{val_rand}.jpg"
-                if item_key == "check3_py":
-                    values["_bank_image"] = f"assets/Paraguay/Чек/bank2/{val_rand}.png"
-                done_step += 1
-
-            if done_step < len(askable):
-                checklist = _build_checklist(item["label"], askable, done_step=done_step, values=values)
-                await _update_checklist(message.bot, message.chat.id, msg_id, has_photo,
-                                        checklist + f"\n\n{askable[done_step]['prompt']}",
-                                        reply_markup=_get_field_keyboard(askable[done_step]["key"], s_temp, item_key))
-                await state.update_data(step=done_step, values=values, time_suffix=s["time_suffix"])
-            else:
-                await state.clear()
-                await _finish_render(message, item_key, values, item,
-                                     checklist_msg_id=msg_id, has_photo=has_photo,
-                                     geo=geo)
+            checklist = _build_checklist(item["label"], askable, done_step=done_step, values=values)
+            await _update_checklist(message.bot, message.chat.id, msg_id, has_photo,
+                                    checklist + f"\n\n{askable[done_step]['prompt']}",
+                                    reply_markup=_get_field_keyboard(askable[done_step]["key"], s_temp, item_key))
+            await state.update_data(step=done_step, values=values, time_suffix=s["time_suffix"])
         else:
             await state.clear()
             await _finish_render(message, item_key, values, item,
@@ -809,25 +817,20 @@ async def collect_photo_field(message: Message, state: FSMContext):
         values[askable[step]["key"]] = file_bytes.read()
         done_step = step + 1
 
+        s = get_settings(message.from_user.id)
+        try:
+            done_step = _advance_steps(askable, done_step, values, s, item_key)
+        except ValueError:
+            await message.answer("❌ В списке name.json не осталось имен! Пополните список или отключите 'Рандом имен' в настройках.")
+            await state.clear()
+            return
+
         if done_step < len(askable):
-            s = get_settings(message.from_user.id)
-
-            # Авто-рандом банков на промежуточных шагах
-            while done_step < len(askable) and askable[done_step]["key"] == "bank" and s.get("rand_bank_enabled") and item_key not in ("check2_py", "check3_py", "check2_uy", "check3_uy"):
-                values["bank"] = _get_random_bank(item_key)
-                done_step += 1
-
-            if done_step < len(askable):
-                checklist = _build_checklist(item["label"], askable, done_step=done_step, values=values)
-                await _update_checklist(message.bot, message.chat.id, msg_id, has_photo,
-                                        checklist + f"\n\n{askable[done_step]['prompt']}",
-                                        reply_markup=_get_field_keyboard(askable[done_step]["key"], s, item_key))
-                await state.update_data(step=done_step, values=values, time_suffix=s["time_suffix"])
-            else:
-                await state.clear()
-                await _finish_render(message, item_key, values, item,
-                                     checklist_msg_id=msg_id, has_photo=has_photo,
-                                     geo=geo)
+            checklist = _build_checklist(item["label"], askable, done_step=done_step, values=values)
+            await _update_checklist(message.bot, message.chat.id, msg_id, has_photo,
+                                    checklist + f"\n\n{askable[done_step]['prompt']}",
+                                    reply_markup=_get_field_keyboard(askable[done_step]["key"], s, item_key))
+            await state.update_data(step=done_step, values=values, time_suffix=s["time_suffix"])
         else:
             await state.clear()
             await _finish_render(message, item_key, values, item,
@@ -998,6 +1001,16 @@ async def cb_render_shortcuts(call: CallbackQuery, state: FSMContext):
                 val = f"+{''.join([str(random.randint(0, 9)) for _ in range(11)])}"
         else:
             val = "0"
+    elif action == "random_name":
+        from data.db import get_and_blacklist_random_name
+        try:
+            val = get_and_blacklist_random_name()
+        except ValueError:
+            try:
+                await call.answer("❌ В списке name.json не осталось доступных имен!", show_alert=True)
+            except Exception:
+                pass
+            return
     elif action == "perc_sign":
         new_sign = parts[2]
         await state.update_data(perc_sign=new_sign)
@@ -1067,8 +1080,15 @@ async def cb_render_shortcuts(call: CallbackQuery, state: FSMContext):
         values["_bank_image"] = f"assets/Paraguay/Чек/bank2/{val}.png"
     done_step = step + 1
 
+    s = get_settings(call.from_user.id)
+    try:
+        done_step = _advance_steps(askable, done_step, values, s, item_key)
+    except ValueError:
+        await call.answer("❌ В списке name.json не осталось имен! Пополните список или отключите 'Рандом имен' в настройках.", show_alert=True)
+        await state.clear()
+        return
+
     if done_step < len(askable):
-        s = get_settings(call.from_user.id)
         s_temp = s.copy()
         s_temp["perc_sign"] = data.get("perc_sign", "+")
         checklist = _build_checklist(item["label"], askable, done_step=done_step, values=values)

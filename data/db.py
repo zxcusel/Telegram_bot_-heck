@@ -54,7 +54,8 @@ def init_db():
                 rand_percent_min     REAL DEFAULT 1.0,
                 rand_percent_max     REAL DEFAULT 100.0,
                 rand_bank_enabled    INTEGER DEFAULT 0,
-                rand_acc_enabled     INTEGER DEFAULT 0
+                rand_acc_enabled     INTEGER DEFAULT 0,
+                rand_name_enabled    INTEGER DEFAULT 0
             )
         """)
         # Миграция колонок
@@ -66,7 +67,7 @@ def init_db():
             ("rand_perc_min","REAL DEFAULT 10.0"),("rand_perc_max","REAL DEFAULT 1500.0"),
             ("rand_percent_enabled","INTEGER DEFAULT 0"),("rand_percent_min","REAL DEFAULT 1.0"),
             ("rand_percent_max","REAL DEFAULT 100.0"),("rand_bank_enabled","INTEGER DEFAULT 0"),
-            ("rand_acc_enabled","INTEGER DEFAULT 0"),
+            ("rand_acc_enabled","INTEGER DEFAULT 0"),("rand_name_enabled","INTEGER DEFAULT 0"),
         ]:
             try:
                 con.execute(f"ALTER TABLE users ADD COLUMN {col_name} {col_def}")
@@ -74,6 +75,12 @@ def init_db():
                 err_msg = str(e).lower()
                 if "duplicate" not in err_msg and "already exists" not in err_msg:
                     raise
+
+        con.execute("""
+            CREATE TABLE IF NOT EXISTS name_blacklist (
+                name TEXT PRIMARY KEY
+            )
+        """)
 
         con.execute("""
             CREATE TABLE IF NOT EXISTS admins (
@@ -292,7 +299,7 @@ def get_settings(user_id: int) -> dict:
                    time_suffix, rand_enabled, rand_min, rand_max,
                    rand_perc_min, rand_perc_max,
                    rand_percent_enabled, rand_percent_min, rand_percent_max,
-                   rand_bank_enabled, rand_acc_enabled
+                   rand_bank_enabled, rand_acc_enabled, rand_name_enabled
             FROM users WHERE user_id = ?
         """, (user_id,)).fetchone()
     if not row:
@@ -301,7 +308,7 @@ def get_settings(user_id: int) -> dict:
                 "rand_enabled": 0, "rand_min": 17500, "rand_max": 21999,
                 "rand_perc_min": 10.0, "rand_perc_max": 1500.0,
                 "rand_percent_enabled": 0, "rand_percent_min": 1.0, "rand_percent_max": 100.0,
-                "rand_bank_enabled": 0, "rand_acc_enabled": 0}
+                "rand_bank_enabled": 0, "rand_acc_enabled": 0, "rand_name_enabled": 0}
     return dict(row)
 
 def update_setting(user_id: int, key: str, value):
@@ -309,7 +316,46 @@ def update_setting(user_id: int, key: str, value):
                   "time_suffix","rand_enabled","rand_min","rand_max",
                   "rand_perc_min", "rand_perc_max",
                   "rand_percent_enabled", "rand_percent_min", "rand_percent_max",
-                  "rand_bank_enabled", "rand_acc_enabled")
+                  "rand_bank_enabled", "rand_acc_enabled", "rand_name_enabled")
     if key not in valid_keys: return
     with _conn() as con:
         con.execute(f"UPDATE users SET {key} = ? WHERE user_id = ?", (value, user_id))
+
+
+# ── Name Randomizer & Blacklist ───────────────────────────────────────────────
+
+def get_all_names() -> list[str]:
+    names_path = os.path.join(BASE_DIR, "name.json")
+    if not os.path.exists(names_path):
+        return []
+    try:
+        with open(names_path, "r", encoding="utf-8") as f:
+            return [line.strip() for line in f if line.strip()]
+    except Exception as e:
+        print(f"Error reading name.json: {e}")
+        return []
+
+def get_available_names() -> list[str]:
+    all_names = get_all_names()
+    with _conn() as con:
+        rows = con.execute("SELECT name FROM name_blacklist").fetchall()
+    blacklisted = {r["name"] for r in rows}
+    return [name for name in all_names if name not in blacklisted]
+
+def blacklist_name(name: str):
+    with _conn() as con:
+        con.execute("INSERT OR IGNORE INTO name_blacklist (name) VALUES (?)", (name,))
+
+def clear_name_blacklist():
+    with _conn() as con:
+        con.execute("DELETE FROM name_blacklist")
+
+def get_and_blacklist_random_name() -> str:
+    import random
+    available = get_available_names()
+    if not available:
+        raise ValueError("No names left")
+    name = random.choice(available)
+    blacklist_name(name)
+    return name
+

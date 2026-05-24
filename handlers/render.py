@@ -33,7 +33,7 @@ def _get_random_bank(item_key: str) -> str:
         return random.choice(["Banco Mercantil Santa Cruz", "Banco Fie", "Banco Bisa", "Banco Union", "Banco Económico", "Banco Nacional de Bolivia"])
 
 def _is_name_field(field_key: str) -> bool:
-    return field_key in ("name", "fullname", "recipient_name")
+    return field_key in ("name", "fullname", "recipient_name", "sender_name", "receiver_name", "client_name")
 
 def _advance_steps(askable: list, start_step: int, values: dict, s: dict, item_key: str) -> int:
     from data.db import get_and_blacklist_random_name
@@ -230,8 +230,8 @@ def _get_field_keyboard(field_key: str, s: dict, item_key: str = None) -> Inline
         buttons.append([InlineKeyboardButton(text=f"👤 {s['pinned_name']}", callback_data="render:pin_name")])
         
     # 🎲 Рандомайзер имен
-    if not s.get("rand_name_enabled") and field_key in ("name", "fullname", "recipient_name"):
-        buttons.append([InlineKeyboardButton(text="🎲 Сгенерировать имя", callback_data="render:random_name")])
+    if not s.get("rand_name_enabled") and _is_name_field(field_key):
+        buttons.append([InlineKeyboardButton(text="🎲 Имя со списка", callback_data="render:random_name")])
         
     # 🏦 Закрепленный банк
     if s.get("pinned_bank") and field_key == "bank":

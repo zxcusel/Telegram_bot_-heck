@@ -2803,7 +2803,7 @@ GEO_CATALOG: dict = {
                                 "fields": [
                                     {
                                         "key": "sender_name",
-                                        "prompt": "1 Имя отправителя",
+                                        "prompt": "👤 Имя отправителя",
                                         "text_config": {
                                             "font": "montserrat_medium", "size": 27, "color": (35, 53, 65),
                                             "pos": (836, 535), "align": "right"
@@ -2811,7 +2811,7 @@ GEO_CATALOG: dict = {
                                     },
                                     {
                                         "key": "account",
-                                        "prompt": "2 Сумма списания",
+                                        "prompt": "💳 Сумма списания",
                                         "text_config": {
                                             "font": "sf_pro_medium", "size": 28, "color": (106, 115, 126),
                                             "pos": (835, 590), "align": "right",
@@ -2820,7 +2820,7 @@ GEO_CATALOG: dict = {
                                     },
                                     {
                                         "key": "receiver_name",
-                                        "prompt": "3 Имя получателя",
+                                        "prompt": "👤 Имя получателя",
                                         "text_config": {
                                             "font": "montserrat_medium", "size": 27, "color": (35, 53, 65),
                                             "pos": (835, 684), "align": "right"
@@ -2828,7 +2828,7 @@ GEO_CATALOG: dict = {
                                     },
                                     {
                                         "key": "bank",
-                                        "prompt": "4 Банк",
+                                        "prompt": "🏦 Банк",
                                         "text_config": {
                                             "collect_only": True
                                         }
@@ -2853,7 +2853,7 @@ GEO_CATALOG: dict = {
                                     },
                                     {
                                         "key": "amount",
-                                        "prompt": "4 Сумма перевода (пример: 6424)",
+                                        "prompt": "💰 Сумма перевода (пример: 6424)",
                                         "text_config": {
                                             "font": "sf_pro", "size": 37, "color": (35, 53, 65),
                                             "pos": (835, 851), "align": "right",
@@ -2863,14 +2863,14 @@ GEO_CATALOG: dict = {
                                     },
                                     {
                                         "key": "date",
-                                        "prompt": "5 Дата (пример: 18.11.2025)",
+                                        "prompt": "📅 Дата (пример: 18.11.2025)",
                                         "text_config": {
                                             "collect_only": True
                                         }
                                     },
                                     {
                                         "key": "time",
-                                        "prompt": "6 Время (пример: 03:19)",
+                                        "prompt": "🕐 Время (пример: 03:19)",
                                         "text_config": {
                                             "collect_only": True
                                         }
@@ -2896,7 +2896,7 @@ GEO_CATALOG: dict = {
                                     },
                                     {
                                         "key": "acc_2",
-                                        "prompt": "7 Номер счета",
+                                        "prompt": "🔢 Номер счета",
                                         "text_config": {
                                             "font": "sf_pro", "size": 37, "color": (35, 53, 65),
                                             "pos": (835, 1442), "align": "right"

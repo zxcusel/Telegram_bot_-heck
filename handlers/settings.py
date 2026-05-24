@@ -21,7 +21,7 @@ class SettingStates(StatesGroup):
     wait_pinned_name = State()
     wait_pinned_bank = State()
 
-def settings_kb(user_id: int) -> InlineKeyboardMarkup:
+def settings_kb(user_id: int, confirm_clear: bool = False) -> InlineKeyboardMarkup:
     s = get_settings(user_id)
     
     rand_text = "✅ Рандомайзер сумм: ВКЛ" if s["rand_enabled"] else "❌ Рандомайзер сумм: ВЫКЛ"
@@ -46,6 +46,14 @@ def settings_kb(user_id: int) -> InlineKeyboardMarkup:
     p_bank = s["pinned_bank"] or "Не задан"
     bank_text = f"🏦 Банк: {p_bank}"
 
+    if confirm_clear:
+        blacklist_btn = [
+            InlineKeyboardButton(text="⚠️ Подтвердить сброс?", callback_data="set:confirm_clear_name_blacklist"),
+            InlineKeyboardButton(text="❌ Отмена", callback_data="set:cancel_clear_name_blacklist")
+        ]
+    else:
+        blacklist_btn = [InlineKeyboardButton(text="🔄 Сбросить блэклист имен", callback_data="set:clear_name_blacklist")]
+
     buttons = [
         [InlineKeyboardButton(text=rand_text, callback_data="set:toggle_rand")],
         [
@@ -60,7 +68,7 @@ def settings_kb(user_id: int) -> InlineKeyboardMarkup:
         [InlineKeyboardButton(text=rand_bank_text, callback_data="set:toggle_rand_bank")],
         [InlineKeyboardButton(text=rand_acc_text, callback_data="set:toggle_rand_acc")],
         [InlineKeyboardButton(text=rand_name_text, callback_data="set:toggle_rand_name")],
-        [InlineKeyboardButton(text="🔄 Сбросить блэклист имен", callback_data="set:clear_name_blacklist")],
+        blacklist_btn,
         [InlineKeyboardButton(text=suffix_text, callback_data="set:toggle_suffix")],
         [InlineKeyboardButton(text=date_text, callback_data="set:pinned_date")],
         [InlineKeyboardButton(text=name_text, callback_data="set:pinned_name")],
@@ -131,10 +139,22 @@ async def cb_toggle_rand_name(call: CallbackQuery):
 
 @router.callback_query(F.data == "set:clear_name_blacklist")
 async def cb_clear_name_blacklist(call: CallbackQuery):
+    await call.message.edit_reply_markup(reply_markup=settings_kb(call.from_user.id, confirm_clear=True))
+    await call.answer()
+
+
+@router.callback_query(F.data == "set:confirm_clear_name_blacklist")
+async def cb_confirm_clear_name_blacklist(call: CallbackQuery):
     clear_name_blacklist()
     log.setting_changed(call.from_user.id, "name_blacklist", "cleared", call.from_user.username)
-    await call.message.edit_reply_markup(reply_markup=settings_kb(call.from_user.id))
+    await call.message.edit_reply_markup(reply_markup=settings_kb(call.from_user.id, confirm_clear=False))
     await call.answer("Блэклист имен успешно очищен!")
+
+
+@router.callback_query(F.data == "set:cancel_clear_name_blacklist")
+async def cb_cancel_clear_name_blacklist(call: CallbackQuery):
+    await call.message.edit_reply_markup(reply_markup=settings_kb(call.from_user.id, confirm_clear=False))
+    await call.answer("Сброс отменен")
 
 
 @router.callback_query(F.data == "set:toggle_suffix")

@@ -36,7 +36,6 @@ def _is_name_field(field_key: str) -> bool:
     return field_key in ("name", "fullname", "recipient_name", "sender_name", "receiver_name", "client_name")
 
 def _advance_steps(askable: list, start_step: int, values: dict, s: dict, item_key: str) -> int:
-    from data.db import get_and_blacklist_random_name
     done_step = start_step
     while done_step < len(askable):
         key = askable[done_step]["key"]
@@ -47,9 +46,6 @@ def _advance_steps(askable: list, start_step: int, values: dict, s: dict, item_k
                 values["_bank_image"] = f"assets/Paraguay/Чек/bank/{val_rand}.jpg"
             if item_key == "check3_py":
                 values["_bank_image"] = f"assets/Paraguay/Чек/bank2/{val_rand}.png"
-            done_step += 1
-        elif _is_name_field(key) and s.get("rand_name_enabled"):
-            values[key] = get_and_blacklist_random_name()
             done_step += 1
         else:
             break
@@ -226,11 +222,11 @@ def _get_field_keyboard(field_key: str, s: dict, item_key: str = None) -> Inline
         buttons.append([InlineKeyboardButton(text=f"📅 {s['pinned_date']}", callback_data="render:pin_date")])
         
     # 👤 Закрепленное ФИО
-    if s.get("pinned_name") and field_key in ("name", "fullname"):
+    if s.get("pinned_name") and _is_name_field(field_key):
         buttons.append([InlineKeyboardButton(text=f"👤 {s['pinned_name']}", callback_data="render:pin_name")])
         
     # 🎲 Рандомайзер имен
-    if not s.get("rand_name_enabled") and _is_name_field(field_key):
+    if s.get("rand_name_enabled") and _is_name_field(field_key):
         buttons.append([InlineKeyboardButton(text="🎲 Имя со списка", callback_data="render:random_name")])
         
     # 🏦 Закрепленный банк

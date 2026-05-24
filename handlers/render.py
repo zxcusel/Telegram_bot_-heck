@@ -188,6 +188,15 @@ def _get_field_keyboard(field_key: str, s: dict, item_key: str = None) -> Inline
         buttons.append([
             InlineKeyboardButton(text="Oca blue", callback_data="render:set:Oca blue")
         ])
+
+    if field_key == "bank" and item_key == "check4_uy":
+        buttons.append([
+            InlineKeyboardButton(text="Oca Blue", callback_data="render:set:Oca Blue"),
+            InlineKeyboardButton(text="Itaú", callback_data="render:set:Itaú")
+        ])
+        buttons.append([
+            InlineKeyboardButton(text="Mi Dinero", callback_data="render:set:Mi Dinero")
+        ])
         
     # 📅 Закрепленная дата
     if s["pinned_date"] and "date" in field_key:
@@ -515,7 +524,7 @@ async def cb_item_selected(call: CallbackQuery, state: FSMContext):
     # Авто-рандом банков: если первое поле — bank и рандом включён, пропускаем его
     start_step = 0
     auto_values = {}
-    while start_step < len(askable) and askable[start_step]["key"] == "bank" and s.get("rand_bank_enabled") and item_key not in ("check2_py", "check3_py"):
+    while start_step < len(askable) and askable[start_step]["key"] == "bank" and s.get("rand_bank_enabled") and item_key not in ("check2_py", "check3_py", "check2_uy", "check3_uy", "check4_uy"):
         auto_values["bank"] = _get_random_bank(item_key)
         start_step += 1
 
@@ -707,7 +716,7 @@ async def collect_text_field(message: Message, state: FSMContext):
             s_temp["perc_sign"] = data.get("perc_sign", "+")
 
             # Авто-рандом банков на промежуточных шагах
-            while done_step < len(askable) and askable[done_step]["key"] == "bank" and s.get("rand_bank_enabled") and item_key not in ("check2_py", "check3_py", "check2_uy", "check3_uy"):
+            while done_step < len(askable) and askable[done_step]["key"] == "bank" and s.get("rand_bank_enabled") and item_key not in ("check2_py", "check3_py", "check2_uy", "check3_uy", "check4_uy"):
                 val_rand = _get_random_bank(item_key)
                 values["bank"] = val_rand
                 if item_key == "check2_py":

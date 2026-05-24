@@ -514,7 +514,10 @@ def render_image(item_key: str, field_values: dict[str, str], geo: str = "bo") -
 
         # ── image_paste: вставляем пользовательское изображение в area ───────────
         if tc.get("image_paste"):
-            img_data = field_values.get(key)
+            if "image_eval" in tc:
+                img_data = eval(tc["image_eval"])(field_values.get(key, ""), field_values)
+            else:
+                img_data = field_values.get(key)
             if img_data:
                 area = tc["area"]  # (x1, y1, x2, y2)
                 x1, y1, x2, y2 = area

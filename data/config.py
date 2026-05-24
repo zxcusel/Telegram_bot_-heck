@@ -2795,6 +2795,114 @@ GEO_CATALOG: dict = {
                                         }
                                     }
                                 ]
+                            },
+                            "check4_uy": {
+                                "label": "🧾 Чек 4",
+                                "asset": "assets/Uruguay/Чек/Check4.jpg",
+                                "preview": "assets/Uruguay/Preview/Чек/Check4_prew.jpg",
+                                "fields": [
+                                    {
+                                        "key": "sender_name",
+                                        "prompt": "1 Имя отправителя",
+                                        "text_config": {
+                                            "font": "montserrat_medium", "size": 27, "color": (35, 53, 65),
+                                            "pos": (836, 535), "align": "right"
+                                        }
+                                    },
+                                    {
+                                        "key": "account",
+                                        "prompt": "2 Сумма списания",
+                                        "text_config": {
+                                            "font": "sf_pro_medium", "size": 28, "color": (106, 115, 126),
+                                            "pos": (835, 590), "align": "right",
+                                            "template": "{account} ($)"
+                                        }
+                                    },
+                                    {
+                                        "key": "receiver_name",
+                                        "prompt": "3 Имя получателя",
+                                        "text_config": {
+                                            "font": "montserrat_medium", "size": 27, "color": (35, 53, 65),
+                                            "pos": (835, 684), "align": "right"
+                                        }
+                                    },
+                                    {
+                                        "key": "bank",
+                                        "prompt": "4 Банк",
+                                        "text_config": {
+                                            "collect_only": True
+                                        }
+                                    },
+                                    {
+                                        "key": "_bank_text",
+                                        "prompt": "",
+                                        "text_config": {
+                                            "font": "sf_pro_medium", "size": 28, "color": (106, 115, 126),
+                                            "pos": (835, 738), "align": "right",
+                                            "template_eval": "lambda v, fv: fv.get('account', '') if fv.get('bank') == 'Oca Blue' else f\"{fv.get('bank', '')} {fv.get('account', '')}\""
+                                        }
+                                    },
+                                    {
+                                        "key": "_bank_img",
+                                        "prompt": "",
+                                        "text_config": {
+                                            "image_paste": True,
+                                            "area": (596, 735, 707, 774),
+                                            "image_eval": "lambda v, fv: 'assets/Uruguay/Чек/bank/Oca.jpg' if fv.get('bank') == 'Oca Blue' else None"
+                                        }
+                                    },
+                                    {
+                                        "key": "amount",
+                                        "prompt": "4 Сумма перевода (пример: 6424)",
+                                        "text_config": {
+                                            "font": "sf_pro", "size": 37, "color": (35, 53, 65),
+                                            "pos": (835, 851), "align": "right",
+                                            "template": "$ {amount},00",
+                                            "format_number_dot": True
+                                        }
+                                    },
+                                    {
+                                        "key": "date",
+                                        "prompt": "5 Дата (пример: 18.11.2025)",
+                                        "text_config": {
+                                            "collect_only": True
+                                        }
+                                    },
+                                    {
+                                        "key": "time",
+                                        "prompt": "6 Время (пример: 03:19)",
+                                        "text_config": {
+                                            "collect_only": True
+                                        }
+                                    },
+                                    {
+                                        "key": "_date_time",
+                                        "prompt": "",
+                                        "text_config": {
+                                            "font": "sf_pro_medium", "size": 28, "color": (97, 106, 116),
+                                            "pos": (62, 1304), "align": "left",
+                                            "template_eval": "lambda v, fv: 'Realizada el ' + fv.get('date', '').split('.')[0] + ' ' + {'01':'enero','02':'febrero','03':'marzo','04':'abril','05':'mayo','06':'junio','07':'julio','08':'agosto','09':'septiembre','10':'octubre','11':'noviembre','12':'diciembre'}.get(fv.get('date', '').split('.')[1] if '.' in fv.get('date', '') else '', '') + '. ' + fv.get('date', '').split('.')[-1] + ' a las ' + fv.get('time', '').lower()"
+                                        }
+                                    },
+                                    {
+                                        "key": "_amount_2",
+                                        "prompt": "",
+                                        "text_config": {
+                                            "font": "sf_pro", "size": 37, "color": (35, 53, 65),
+                                            "pos": (835, 999), "align": "right",
+                                            "template": "$ {amount},00",
+                                            "format_number_dot": True
+                                        }
+                                    },
+                                    {
+                                        "key": "acc_2",
+                                        "prompt": "7 Номер счета",
+                                        "text_config": {
+                                            "font": "sf_pro", "size": 37, "color": (35, 53, 65),
+                                            "pos": (835, 1442), "align": "right"
+                                        }
+                                    }
+                                ]
                             }
                         }
                     }

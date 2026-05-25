@@ -330,7 +330,23 @@ def _get_field_keyboard(field_key: str, s: dict, item_key: str = None) -> Inline
         "rd8":  ("amount",     "Bs. 3 500", "3 500"),
         "rd6":  ("commission", "Bs. 1 920", "1 920"),
     }
-    _ALL_RD_AMOUNTS = {**_PE_RD_AMOUNTS, **_BO_RD_AMOUNTS}
+    _UY_RD_AMOUNTS = {
+        "rd2_uy":  ("amount",     "$U 10 920", "10920"),
+        "rd3_uy":  ("amount",     "$U 13 860", "13860"),
+        "rd4_uy":  ("amount",     "$U 7 980",  "7980"),
+        "rd5_uy":  ("amount",     "$U 23 520", "23520"),
+        "rd7_uy":  ("amount",     "$U 29 400", "29400"),
+        "rd6_uy":  ("commission", "$U 33 600", "33600"),
+    }
+    _PY_RD_AMOUNTS = {
+        "rd2_py":  ("amount",     "Gs. 1.560.000", "1560000"),
+        "rd3_py":  ("amount",     "Gs. 1.980.000", "1980000"),
+        "rd4_py":  ("amount",     "Gs. 1.140.000", "1140000"),
+        "rd5_py":  ("amount",     "Gs. 3.360.000", "3360000"),
+        "rd7_py":  ("amount",     "Gs. 4.200.000", "4200000"),
+        "rd6_py":  ("commission", "Gs. 4.800.000", "4800000"),
+    }
+    _ALL_RD_AMOUNTS = {**_PE_RD_AMOUNTS, **_BO_RD_AMOUNTS, **_UY_RD_AMOUNTS, **_PY_RD_AMOUNTS}
     if item_key in _ALL_RD_AMOUNTS:
         _fkey, _label, _val = _ALL_RD_AMOUNTS[item_key]
         if field_key == _fkey:
@@ -339,7 +355,7 @@ def _get_field_keyboard(field_key: str, s: dict, item_key: str = None) -> Inline
                 callback_data=f"render:set:{_val}"
             )])
             
-    if item_key == "rd1" and field_key == "commission":
+    if item_key in ("rd1", "rd1_uy", "rd1_py") and field_key == "commission":
         buttons.append([
             InlineKeyboardButton(text="💡 1590", callback_data="render:set:1590"),
             InlineKeyboardButton(text="💡 890", callback_data="render:set:890")

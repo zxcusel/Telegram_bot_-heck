@@ -96,8 +96,10 @@ def _wrap(text: str, font: ImageFont.FreeTypeFont, max_w: int) -> list[str]:
     return lines or [""]
 
 
+import re
+
 def _format_number(value: str) -> str:
-    clean = value.strip().replace(",", "").replace(".", "").replace(" ", "")
+    clean = re.sub(r'[^\d]', '', value)
     try:
         return f"{int(clean):,}".replace(",", " ")
     except ValueError:
@@ -106,7 +108,7 @@ def _format_number(value: str) -> str:
 
 def _format_number_dot(value: str) -> str:
     """Форматирование с точкой-разделителем тысяч: 10000 → 10.000"""
-    clean = value.strip().replace(",", "").replace(".", "").replace(" ", "")
+    clean = re.sub(r'[^\d]', '', value)
     try:
         return f"{int(clean):,}".replace(",", ".")
     except ValueError:
@@ -115,7 +117,7 @@ def _format_number_dot(value: str) -> str:
 
 def _format_number_comma(value: str) -> str:
     """Форматирование с запятой-разделителем тысяч: 10000 → 10,000"""
-    clean = value.strip().replace(",", "").replace(".", "").replace(" ", "")
+    clean = re.sub(r'[^\d]', '', value)
     try:
         return f"{int(clean):,}"
     except ValueError:
@@ -124,7 +126,7 @@ def _format_number_comma(value: str) -> str:
 
 def _format_number_none(value: str) -> str:
     """Убирает все разделители: 1 000 -> 1000"""
-    clean = value.strip().replace(",", "").replace(".", "").replace(" ", "")
+    clean = re.sub(r'[^\d]', '', value)
     return clean
 
 

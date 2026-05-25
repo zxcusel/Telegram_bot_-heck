@@ -164,10 +164,15 @@ GEO_CATALOG: dict = {
                                              "font": "montserrat", "size": 45, "color": (0, 255, 84)},
                                             {"text": " ha sido bloqueado temporalmente. Para retirar los fondos de la plataforma a la cuenta del beneficiario, su cliente está obligado a pagar una tarifa de ",
                                              "font": "montserrat", "size": 45, "color": (255, 255, 255)},
-                                            {"text": "Bs. 1,590.00.",
-                                             "font": "montserrat", "size": 45, "color": (255, 0, 0)},
+                                            {"text": "Bs. {commission}.00.",
+                                             "font": "montserrat", "size": 45, "color": (255, 0, 0), "format_number_comma": True},
                                         ],
                                     },
+                                },
+                                {
+                                    "key": "commission",
+                                    "prompt": "💰 Введите сумму (рекомендуется A - 1590, B - 890)",
+                                    "text_config": {"collect_only": True}
                                 },
                             ],
                         },

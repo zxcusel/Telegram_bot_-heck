@@ -171,7 +171,7 @@ GEO_CATALOG: dict = {
                                 },
                                 {
                                     "key": "commission",
-                                    "prompt": "💰 Введите сумму (рекомендуется A - 1590, B - 890)",
+                                    "prompt": "💰 Введите сумму (рекомендуется 1590, 890)",
                                     "text_config": {"collect_only": True}
                                 },
                             ],

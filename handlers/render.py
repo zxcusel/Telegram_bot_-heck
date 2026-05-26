@@ -355,7 +355,7 @@ def _get_field_keyboard(field_key: str, s: dict, item_key: str = None) -> Inline
                 callback_data=f"render:set:{_val}"
             )])
             
-    if item_key in ("rd1", "rd1_uy", "rd1_py") and field_key == "commission":
+    if item_key == "rd1" and field_key == "commission":
         buttons.append([
             InlineKeyboardButton(text="💡 1590", callback_data="render:set:1590"),
             InlineKeyboardButton(text="💡 890", callback_data="render:set:890")

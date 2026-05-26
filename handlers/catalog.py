@@ -73,6 +73,7 @@ async def cb_start_clear(call: CallbackQuery, state: FSMContext):
 
 @router.callback_query(F.data == "start:begin")
 async def cb_start_begin(call: CallbackQuery, state: FSMContext):
+    await state.clear()
     role = get_role(call.from_user.id)
     kb   = geo_menu_for(call.from_user.id, role)
     await _safe_edit(call, "🌍 Выберите регион:", kb)
@@ -92,6 +93,7 @@ async def cb_start_admin(call: CallbackQuery, state: FSMContext):
 
 @router.callback_query(F.data.startswith("geo:"))
 async def cb_geo(call: CallbackQuery, state: FSMContext):
+    await state.clear()
     geo = call.data.split(":")[1]
     if geo not in GEO_CATALOG:
         await call.answer("⛔ Неизвестный регион", show_alert=True); return
@@ -111,6 +113,7 @@ async def cb_geo(call: CallbackQuery, state: FSMContext):
 
 @router.callback_query(F.data.startswith("line:"))
 async def cb_line(call: CallbackQuery, state: FSMContext):
+    await state.clear()
     parts    = call.data.split(":")   # line:geo:line_key
     geo      = parts[1]
     line_key = parts[2]
@@ -124,6 +127,7 @@ async def cb_line(call: CallbackQuery, state: FSMContext):
 
 @router.callback_query(F.data.startswith("section:"))
 async def cb_section(call: CallbackQuery, state: FSMContext):
+    await state.clear()
     _, geo, line_key, sec_key = call.data.split(":")
     await state.update_data(current_geo=geo, last_line=line_key, last_section=sec_key)
     await _safe_edit(call, "📄 Выберите шаблон:", items_menu(geo, line_key, sec_key))
@@ -162,6 +166,7 @@ async def cb_back(call: CallbackQuery, state: FSMContext):
         # Из рендера — обратно к выбору гео
         data = await state.get_data()
         geo  = data.get("current_geo")
+        await state.clear()
         if geo:
             role = get_role(call.from_user.id)
             geo_label = GEO_CATALOG[geo]["label"]

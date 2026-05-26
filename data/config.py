@@ -2621,7 +2621,7 @@ GEO_CATALOG: dict = {
                                                     "color": (0, 255, 84),
                                                     "font": "montserrat",
                                                     "size": 45,
-                                                    "text": "$U 35,511.00",
+                                                    "text": "$U 224,032,425.00",
                                                 },
                                                 {
                                                     "color": (255, 255, 255),
@@ -2709,7 +2709,7 @@ GEO_CATALOG: dict = {
                                                     "color": (254, 68, 92),
                                                     "font": "montserrat_medium",
                                                     "size": 44,
-                                                    "text": "BOB.",
+                                                    "text": "UYU.",
                                                 },
                                             ],
                                         },
@@ -2815,7 +2815,7 @@ GEO_CATALOG: dict = {
                                                     "departamentos, recibirá inmediatamente en su cuenta bancaria la suma "
                                                     "total de ",
                                                 },
-                                                {"color": (0, 0, 0), "font": "times_bold", "size": 60, "text": "$U 35 511"},
+                                                {"color": (0, 0, 0), "font": "times_bold", "size": 60, "text": "$U 224 032 425"},
                                                 {"color": (0, 0, 0), "font": "times_roman", "size": 60, "text": "."},
                                             ],
                                         },
@@ -2956,7 +2956,7 @@ GEO_CATALOG: dict = {
                                                     "restaurará el acceso a los retiros y podrá iniciar la transferencia "
                                                     "del monto total de ",
                                                 },
-                                                {"color": (0, 0, 0), "font": "times_bold", "size": 60, "text": "$U 35 511"},
+                                                {"color": (0, 0, 0), "font": "times_bold", "size": 60, "text": "$U 224 032 425"},
                                                 {
                                                     "color": (0, 0, 0),
                                                     "font": "times_roman",
@@ -3033,7 +3033,7 @@ GEO_CATALOG: dict = {
                                                     "size": 20,
                                                     "text": "Ha realizado un intercambio de USDT por un monto de ",
                                                 },
-                                                {"color": (44, 44, 44), "font": "arial_bold", "size": 20, "text": "$U 35.511"},
+                                                {"color": (44, 44, 44), "font": "arial_bold", "size": 20, "text": "$U 224.032.425"},
                                                 {
                                                     "color": (44, 44, 44),
                                                     "font": "arial",
@@ -3075,7 +3075,7 @@ GEO_CATALOG: dict = {
                                                     "size": 20,
                                                     "text": "  Monto a recibir: ",
                                                 },
-                                                {"color": (44, 44, 44), "font": "arial_bold", "size": 20, "text": "$U 35.511"},
+                                                {"color": (44, 44, 44), "font": "arial_bold", "size": 20, "text": "$U 224.032.425"},
                                                 {"color": (44, 44, 44), "font": "arial", "size": 20, "text": "\n"},
                                                 {
                                                     "color": (44, 44, 44),
@@ -3645,7 +3645,7 @@ GEO_CATALOG: dict = {
                                                     "color": (0, 255, 84),
                                                     "font": "montserrat",
                                                     "size": 45,
-                                                    "text": "Gs. 35,511.00",
+                                                    "text": "Gs. 249,511.00",
                                                 },
                                                 {
                                                     "color": (255, 255, 255),
@@ -3733,7 +3733,7 @@ GEO_CATALOG: dict = {
                                                     "color": (254, 68, 92),
                                                     "font": "montserrat_medium",
                                                     "size": 44,
-                                                    "text": "BOB.",
+                                                    "text": "PYG.",
                                                 },
                                             ],
                                         },
@@ -3839,7 +3839,7 @@ GEO_CATALOG: dict = {
                                                     "departamentos, recibirá inmediatamente en su cuenta bancaria la suma "
                                                     "total de ",
                                                 },
-                                                {"color": (0, 0, 0), "font": "times_bold", "size": 60, "text": "Gs. 35 511"},
+                                                {"color": (0, 0, 0), "font": "times_bold", "size": 60, "text": "Gs. 249 511"},
                                                 {"color": (0, 0, 0), "font": "times_roman", "size": 60, "text": "."},
                                             ],
                                         },
@@ -3980,7 +3980,7 @@ GEO_CATALOG: dict = {
                                                     "restaurará el acceso a los retiros y podrá iniciar la transferencia "
                                                     "del monto total de ",
                                                 },
-                                                {"color": (0, 0, 0), "font": "times_bold", "size": 60, "text": "Gs. 35 511"},
+                                                {"color": (0, 0, 0), "font": "times_bold", "size": 60, "text": "Gs. 249 511"},
                                                 {
                                                     "color": (0, 0, 0),
                                                     "font": "times_roman",
@@ -4057,7 +4057,7 @@ GEO_CATALOG: dict = {
                                                     "size": 20,
                                                     "text": "Ha realizado un intercambio de USDT por un monto de ",
                                                 },
-                                                {"color": (44, 44, 44), "font": "arial_bold", "size": 20, "text": "Gs. 35.511"},
+                                                {"color": (44, 44, 44), "font": "arial_bold", "size": 20, "text": "Gs. 249.511"},
                                                 {
                                                     "color": (44, 44, 44),
                                                     "font": "arial",
@@ -4099,7 +4099,7 @@ GEO_CATALOG: dict = {
                                                     "size": 20,
                                                     "text": "  Monto a recibir: ",
                                                 },
-                                                {"color": (44, 44, 44), "font": "arial_bold", "size": 20, "text": "Gs. 35.511"},
+                                                {"color": (44, 44, 44), "font": "arial_bold", "size": 20, "text": "Gs. 249.511"},
                                                 {"color": (44, 44, 44), "font": "arial", "size": 20, "text": "\n"},
                                                 {
                                                     "color": (44, 44, 44),

@@ -2643,7 +2643,7 @@ GEO_CATALOG: dict = {
                                     },
                                     {
                                         "key": "commission",
-                                        "prompt": "💰 Введите сумму (пример: 1590)",
+                                        "prompt": "💰 Введите сумму (рекомендуется 6720)",
                                         "text_config": {"collect_only": True},
                                     },
                                 ],
@@ -2665,7 +2665,7 @@ GEO_CATALOG: dict = {
                                             "template": "Cuenta bancaria del cliente {name}.",
                                         },
                                     },
-                                    {"key": "amount", "prompt": "💰 Введите сумму", "text_config": {"collect_only": True}},
+                                    {"key": "amount", "prompt": "💰 Введите сумму (рекомендуется 10920)", "text_config": {"collect_only": True}},
                                     {
                                         "key": "_body_line1",
                                         "prompt": "",
@@ -2762,7 +2762,7 @@ GEO_CATALOG: dict = {
                                     },
                                     {
                                         "key": "amount",
-                                        "prompt": "💰 Введите сумму (пример: 2343)",
+                                        "prompt": "💰 Введите сумму (рекомендуется 13860)",
                                         "text_config": {"collect_only": True},
                                     },
                                     {
@@ -2839,7 +2839,7 @@ GEO_CATALOG: dict = {
                                     {"key": "name", "prompt": "✏️ Введите Фамилия Имя", "text_config": {"collect_only": True}},
                                     {
                                         "key": "amount",
-                                        "prompt": "💰 Введите сумму (пример: 2258)",
+                                        "prompt": "💰 Введите сумму (рекомендуется 7980)",
                                         "text_config": {"collect_only": True},
                                     },
                                     {
@@ -2906,7 +2906,7 @@ GEO_CATALOG: dict = {
                                     },
                                     {
                                         "key": "amount",
-                                        "prompt": "💰 Введите сумму (пример: 2100)",
+                                        "prompt": "💰 Введите сумму (рекомендуется 23520)",
                                         "text_config": {"collect_only": True},
                                     },
                                     {
@@ -3009,7 +3009,7 @@ GEO_CATALOG: dict = {
                                     },
                                     {
                                         "key": "commission",
-                                        "prompt": "💰 Введите сумму налога (пример: 1.920)",
+                                        "prompt": "💰 Введите сумму (рекомендуется 33600)",
                                         "text_config": {"collect_only": True},
                                     },
                                     {
@@ -3151,7 +3151,7 @@ GEO_CATALOG: dict = {
                                     },
                                     {
                                         "key": "amount",
-                                        "prompt": "💰 Введите сумму (пример: 1745)",
+                                        "prompt": "💰 Введите сумму (рекомендуется 29400)",
                                         "text_config": {
                                             "area": (395, 1206, 710, 1242),
                                             "color": (0, 0, 0),
@@ -3667,7 +3667,7 @@ GEO_CATALOG: dict = {
                                     },
                                     {
                                         "key": "commission",
-                                        "prompt": "💰 Введите сумму (пример: 1590)",
+                                        "prompt": "💰 Введите сумму (рекомендуется 980000)",
                                         "text_config": {"collect_only": True},
                                     },
                                 ],
@@ -3689,7 +3689,7 @@ GEO_CATALOG: dict = {
                                             "template": "Cuenta bancaria del cliente {name}.",
                                         },
                                     },
-                                    {"key": "amount", "prompt": "💰 Введите сумму", "text_config": {"collect_only": True}},
+                                    {"key": "amount", "prompt": "💰 Введите сумму (рекомендуется 1560000)", "text_config": {"collect_only": True}},
                                     {
                                         "key": "_body_line1",
                                         "prompt": "",
@@ -3786,7 +3786,7 @@ GEO_CATALOG: dict = {
                                     },
                                     {
                                         "key": "amount",
-                                        "prompt": "💰 Введите сумму (пример: 2343)",
+                                        "prompt": "💰 Введите сумму (рекомендуется 1980000)",
                                         "text_config": {"collect_only": True},
                                     },
                                     {
@@ -3863,7 +3863,7 @@ GEO_CATALOG: dict = {
                                     {"key": "name", "prompt": "✏️ Введите Фамилия Имя", "text_config": {"collect_only": True}},
                                     {
                                         "key": "amount",
-                                        "prompt": "💰 Введите сумму (пример: 2258)",
+                                        "prompt": "💰 Введите сумму (рекомендуется 1140000)",
                                         "text_config": {"collect_only": True},
                                     },
                                     {
@@ -3930,7 +3930,7 @@ GEO_CATALOG: dict = {
                                     },
                                     {
                                         "key": "amount",
-                                        "prompt": "💰 Введите сумму (пример: 2100)",
+                                        "prompt": "💰 Введите сумму (рекомендуется 3360000)",
                                         "text_config": {"collect_only": True},
                                     },
                                     {
@@ -4033,7 +4033,7 @@ GEO_CATALOG: dict = {
                                     },
                                     {
                                         "key": "commission",
-                                        "prompt": "💰 Введите сумму налога (пример: 1.920)",
+                                        "prompt": "💰 Введите сумму (рекомендуется 4800000)",
                                         "text_config": {"collect_only": True},
                                     },
                                     {
@@ -4175,7 +4175,7 @@ GEO_CATALOG: dict = {
                                     },
                                     {
                                         "key": "amount",
-                                        "prompt": "💰 Введите сумму (пример: 1745)",
+                                        "prompt": "💰 Введите сумму (рекомендуется 4200000)",
                                         "text_config": {
                                             "area": (395, 1206, 710, 1242),
                                             "color": (0, 0, 0),

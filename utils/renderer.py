@@ -69,6 +69,16 @@ def _resolve_geo_asset_path(asset_path: str, geo: str = "bo") -> str:
 def _load_font(alias: str, size_pt: int | float) -> ImageFont.FreeTypeFont:
     size_px = max(1, round(float(size_pt) * PT_TO_PX))
     path = os.path.join(BASE_DIR, FONTS.get(alias, FONTS["montserrat"]))
+    
+    # Решаем проблему с регистром на Linux (Pterodactyl)
+    dir_name, base_name = os.path.split(path)
+    if os.path.exists(dir_name):
+        lower_base = base_name.lower()
+        for f in os.listdir(dir_name):
+            if f.lower() == lower_base:
+                path = os.path.join(dir_name, f)
+                break
+
     try:
         return ImageFont.truetype(path, size=size_px)
     except (IOError, OSError):

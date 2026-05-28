@@ -3645,7 +3645,7 @@ GEO_CATALOG: dict = {
                                                     "color": (0, 255, 84),
                                                     "font": "montserrat",
                                                     "size": 45,
-                                                    "text": "Gs. 249,511.00",
+                                                    "text": "Gs. 24,951,100",
                                                 },
                                                 {
                                                     "color": (255, 255, 255),
@@ -3660,7 +3660,7 @@ GEO_CATALOG: dict = {
                                                     "font": "montserrat",
                                                     "format_number_comma": True,
                                                     "size": 45,
-                                                    "text": "Gs. {commission}.00.",
+                                                    "text": "Gs. {commission}.",
                                                 },
                                             ],
                                         },

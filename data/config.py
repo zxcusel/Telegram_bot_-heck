@@ -3848,7 +3848,7 @@ GEO_CATALOG: dict = {
                                 "label": "Paraguay RD 3",
                             },
                             "rd4_py": {
-                                "asset": "assets/Paraguay/RD/rd4.png",
+                                "asset": "assets/Paraguay/RD/rd4.jpg",
                                 "fields": [
                                     {
                                         "key": "time",

@@ -83,6 +83,12 @@ def init_db():
         """)
 
         con.execute("""
+            CREATE TABLE IF NOT EXISTS banned_users (
+                user_id INTEGER PRIMARY KEY
+            )
+        """)
+
+        con.execute("""
             CREATE TABLE IF NOT EXISTS admins (
                 user_id  INTEGER PRIMARY KEY,
                 added_at TEXT DEFAULT (datetime('now'))
@@ -213,8 +219,26 @@ def get_roles(user_id: int) -> list[str]:
         return [r["role"] for r in con.execute(
             "SELECT role FROM roles WHERE user_id = ? ORDER BY role", (user_id,)).fetchall()]
 
+def is_banned(user_id: int) -> bool:
+    with _conn() as con:
+        return con.execute("SELECT 1 FROM banned_users WHERE user_id = ?", (user_id,)).fetchone() is not None
+
+def ban_user(user_id: int):
+    with _conn() as con:
+        con.execute("INSERT OR IGNORE INTO banned_users (user_id) VALUES (?)", (user_id,))
+
+def unban_user(user_id: int):
+    with _conn() as con:
+        con.execute("DELETE FROM banned_users WHERE user_id = ?", (user_id,))
+
+def get_banned_users() -> list[int]:
+    with _conn() as con:
+        return [r["user_id"] for r in con.execute("SELECT user_id FROM banned_users").fetchall()]
+
 def has_any_access(user_id: int) -> bool:
-    """Доступ = есть роль И есть гео (или администратор)."""
+    """Доступ = есть роль И есть гео (или администратор). Забаненным доступ закрыт."""
+    if is_banned(user_id):
+        return False
     if is_admin(user_id):
         return True
     return bool(get_roles(user_id)) and bool(get_geos(user_id))

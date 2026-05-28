@@ -10,6 +10,7 @@ from data.db import (
     is_admin, add_admin, remove_admin, add_role, remove_role, clear_roles,
     get_roles, get_geos, add_geo, remove_geo, clear_geos,
     get_all_admins, get_all_users_all, get_username, upsert_user,
+    is_banned, ban_user, unban_user, get_banned_users
 )
 
 router = Router()
@@ -30,6 +31,8 @@ def _admin_main_kb() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="🎭 Выдать роль пользователю", callback_data="admin:set_role")],
         [InlineKeyboardButton(text="📋 Список пользователей",      callback_data="admin:user_list")],
+        [InlineKeyboardButton(text="🚫 Забанить",                 callback_data="admin:ban_menu")],
+        [InlineKeyboardButton(text="⛔️ ЧС",                        callback_data="admin:blacklist_menu")],
         [InlineKeyboardButton(text="📢 Отправить сообщение",      callback_data="admin:broadcast_menu")],
         [InlineKeyboardButton(text="🔙 Назад",                     callback_data="admin:exit")],
     ])
@@ -313,23 +316,88 @@ async def cb_user_list(call: CallbackQuery, state: FSMContext):
     else:
         lines = []
         for uid in users:
+            if is_banned(uid):
+                continue
             # Подтягиваем актуальный username через Telegram API
             uname = await _fetch_and_save(call.bot, uid) or "none"
             roles  = get_roles(uid)
-            fd_str = "FD✅" if "fd" in roles else "FD🚫"
-            rd_str = "RD✅" if "rd" in roles else "RD🚫"
-            cr_str = "CR✅" if "cr" in roles else "CR🚫"
-            icon   = "👑" if is_admin(uid) else "👤"
             geos   = get_geos(uid)
-            bo_str = "BO✅" if "bo" in geos else "BO🚫"
-            pe_str = "PE✅" if "pe" in geos else "PE🚫"
-            uy_str = "UY✅" if "uy" in geos else "UY🚫"
-            py_str = "PY✅" if "py" in geos else "PY🚫"
-            lines.append(f"{icon} {uid} - @{uname} : {fd_str}, {rd_str}, {cr_str} | {bo_str}, {pe_str}, {uy_str}, {py_str}")
-        text = "📋 <b>Список пользователей</b>\n\n" + "\n".join(lines)
+            
+            role_strs = []
+            if is_admin(uid): role_strs.append("🛠 Админ")
+            if "fd" in roles: role_strs.append("⭐️ FD")
+            if "rd" in roles: role_strs.append("⚡ RD")
+            if "cr" in roles: role_strs.append("🧾 CR")
+            roles_text = ", ".join(role_strs) if role_strs else "👤 Без роли"
+            
+            geo_strs = []
+            if "bo" in geos: geo_strs.append("🇧🇴 BO")
+            if "pe" in geos: geo_strs.append("🇵🇪 PE")
+            if "uy" in geos: geo_strs.append("🇺🇾 UY")
+            if "py" in geos: geo_strs.append("🇵🇾 PY")
+            geos_text = ", ".join(geo_strs) if geo_strs else "Нет гео"
+            
+            icon = "🛠" if is_admin(uid) else ("⭐️" if "fd" in roles else ("⚡" if "rd" in roles else ("🧾" if "cr" in roles else "👤")))
+            lines.append(f"{icon} <b>{uid} | @{uname}</b>\n   ├ {roles_text}\n   └ {geos_text}")
+        text = "📋 <b>Список пользователей</b>\n\n" + "\n\n".join(lines)
 
     await _safe_edit(call.message, text, _back_to_main_kb())
     await call.answer()
+
+
+# ── Бан / ЧС ──────────────────────────────────────────────────────────────────
+
+@router.callback_query(F.data == "admin:ban_menu")
+async def cb_ban_menu(call: CallbackQuery, state: FSMContext):
+    if not is_admin(call.from_user.id): return
+    users = get_all_users_all()
+    candidates = [u for u in users if u != call.from_user.id and not is_banned(u)]
+    if not candidates:
+        await call.answer("Нет активных пользователей.", show_alert=True)
+        return
+    
+    buttons = []
+    for uid in candidates:
+        uname = get_username(uid) or "none"
+        buttons.append([InlineKeyboardButton(text=f"👤 {uid} - @{uname} — 🚫 Забанить", callback_data=f"admin:toggle_ban:{uid}:1")])
+    buttons.append([InlineKeyboardButton(text="🔙 Назад", callback_data="admin:back_main")])
+    kb = InlineKeyboardMarkup(inline_keyboard=buttons)
+    await _safe_edit(call.message, "🚫 Выберите пользователя для блокировки:", kb)
+    await call.answer()
+
+@router.callback_query(F.data == "admin:blacklist_menu")
+async def cb_blacklist_menu(call: CallbackQuery, state: FSMContext):
+    if not is_admin(call.from_user.id): return
+    users = get_all_users_all()
+    candidates = [u for u in users if u != call.from_user.id and is_banned(u)]
+    if not candidates:
+        await call.answer("ЧС пуст.", show_alert=True)
+        return
+    
+    buttons = []
+    for uid in candidates:
+        uname = get_username(uid) or "none"
+        buttons.append([InlineKeyboardButton(text=f"👤 {uid} - @{uname} — 🔓 Разбанить", callback_data=f"admin:toggle_ban:{uid}:0")])
+    buttons.append([InlineKeyboardButton(text="🔙 Назад", callback_data="admin:back_main")])
+    kb = InlineKeyboardMarkup(inline_keyboard=buttons)
+    await _safe_edit(call.message, "⛔️ Черный список (ЧС):", kb)
+    await call.answer()
+
+@router.callback_query(F.data.startswith("admin:toggle_ban:"))
+async def cb_toggle_ban(call: CallbackQuery, state: FSMContext):
+    if not is_admin(call.from_user.id): return
+    parts = call.data.split(":")
+    target_id = int(parts[2])
+    do_ban = int(parts[3])
+    
+    if do_ban:
+        ban_user(target_id)
+        await call.answer("Пользователь забанен!")
+    else:
+        unban_user(target_id)
+        await call.answer("Пользователь разбанен!")
+    
+    await _safe_edit(call.message, "✅ Успешно обновлено.", _back_to_main_kb())
 
 
 # ── Рассылка сообщений ────────────────────────────────────────────────────────

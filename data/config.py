@@ -3827,7 +3827,7 @@ GEO_CATALOG: dict = {
                                                     "departamentos, recibirá inmediatamente en su cuenta bancaria la suma "
                                                     "total de ",
                                                 },
-                                                {"color": (0, 0, 0), "font": "times_bold", "size": 60, "text": "Gs. 249 511"},
+                                                {"color": (0, 0, 0), "font": "times_bold", "size": 60, "text": "Gs. 24 951 100"},
                                                 {"color": (0, 0, 0), "font": "times_roman", "size": 60, "text": "."},
                                             ],
                                         },

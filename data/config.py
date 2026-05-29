@@ -2958,7 +2958,7 @@ GEO_CATALOG: dict = {
                                 "label": "Uruguay RD 5",
                             },
                             "rd6_uy": {
-                                "asset": "assets/Uruguay/RD/rd6.png",
+                                "asset": "assets/Uruguay/RD/rd6.jpg",
                                 "fields": [
                                     {
                                         "key": "date",
@@ -4060,7 +4060,7 @@ GEO_CATALOG: dict = {
                                 "label": "Paraguay RD 5",
                             },
                             "rd6_py": {
-                                "asset": "assets/Paraguay/RD/rd6.png",
+                                "asset": "assets/Paraguay/RD/rd6.jpg",
                                 "fields": [
                                     {
                                         "key": "date",

@@ -3004,9 +3004,9 @@ GEO_CATALOG: dict = {
                                         "key": "_body",
                                         "prompt": "",
                                         "text_config": {
-                                            "area": (655, 457, 1620, 795),
+                                            "area": (655, 485, 1620, 860),
                                             "blank_line_size": 10,
-                                            "line_spacing": 1.15,
+                                            "line_spacing": 1.25,
                                             "segments": [
                                                 {
                                                     "color": (44, 44, 44),
@@ -4106,9 +4106,9 @@ GEO_CATALOG: dict = {
                                         "key": "_body",
                                         "prompt": "",
                                         "text_config": {
-                                            "area": (655, 457, 1620, 795),
+                                            "area": (655, 485, 1620, 860),
                                             "blank_line_size": 10,
-                                            "line_spacing": 1.15,
+                                            "line_spacing": 1.25,
                                             "segments": [
                                                 {
                                                     "color": (44, 44, 44),

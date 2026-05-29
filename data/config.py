@@ -548,7 +548,7 @@ GEO_CATALOG: dict = {
                                     "key": "amount",
                                     "prompt": "💰 Введите сумму (рекомендуется 1 745)",
                                     "text_config": {
-                                        "font": "sf_pro_medium", "size": 29,
+                                        "font": "sf_pro_text_regular", "size": 29,
                                         "color": (0, 0, 0),
                                         "area": (395, 1206, 710, 1242),
                                         "template": "Bs. {amount}.00",
@@ -1946,7 +1946,7 @@ GEO_CATALOG: dict = {
                                         "key": "amount",
                                         "prompt": "💰 Введите сумму (например: 1250)",
                                         "text_config": {
-                                            "font": "sf_pro_medium", "size": 29,
+                                            "font": "sf_pro_text_regular", "size": 29,
                                             "color": (0, 0, 0),
                                             "area": (395, 1206, 710, 1242),
                                             "template": "S/. {amount}.00",
@@ -2621,7 +2621,7 @@ GEO_CATALOG: dict = {
                                                     "color": (0, 255, 84),
                                                     "font": "montserrat",
                                                     "size": 45,
-                                                    "text": "$U 224,032,425.00",
+                                                    "text": "$U 168,286",
                                                 },
                                                 {
                                                     "color": (255, 255, 255),
@@ -2636,7 +2636,7 @@ GEO_CATALOG: dict = {
                                                     "font": "montserrat",
                                                     "format_number_comma": True,
                                                     "size": 45,
-                                                    "text": "$U {commission}.00.",
+                                                    "text": "$U {commission}.",
                                                 },
                                             ],
                                         },
@@ -2824,7 +2824,7 @@ GEO_CATALOG: dict = {
                                 "label": "Uruguay RD 3",
                             },
                             "rd4_uy": {
-                                "asset": "assets/Uruguay/RD/rd4.png",
+                                "asset": "assets/Uruguay/RD/rd4.jpg",
                                 "fields": [
                                     {
                                         "key": "time",
@@ -2956,7 +2956,7 @@ GEO_CATALOG: dict = {
                                                     "restaurará el acceso a los retiros y podrá iniciar la transferencia "
                                                     "del monto total de ",
                                                 },
-                                                {"color": (0, 0, 0), "font": "times_bold", "size": 60, "text": "$U 224 032 425"},
+                                                {"color": (0, 0, 0), "font": "times_bold", "size": 60, "text": "$U 169 286"},
                                                 {
                                                     "color": (0, 0, 0),
                                                     "font": "times_roman",
@@ -3155,10 +3155,10 @@ GEO_CATALOG: dict = {
                                         "text_config": {
                                             "area": (395, 1206, 710, 1242),
                                             "color": (0, 0, 0),
-                                            "font": "sf_pro_medium",
+                                            "font": "sf_pro_text_regular",
                                             "format_number_comma": True,
                                             "size": 29,
-                                            "template": "$U {amount}.00",
+                                            "template": "$U {amount}",
                                         },
                                     },
                                     {
@@ -3980,7 +3980,7 @@ GEO_CATALOG: dict = {
                                                     "restaurará el acceso a los retiros y podrá iniciar la transferencia "
                                                     "del monto total de ",
                                                 },
-                                                {"color": (0, 0, 0), "font": "times_bold", "size": 60, "text": "Gs. 249 511"},
+                                                {"color": (0, 0, 0), "font": "times_bold", "size": 60, "text": "Gs. 24 951 100"},
                                                 {
                                                     "color": (0, 0, 0),
                                                     "font": "times_roman",
@@ -4179,10 +4179,10 @@ GEO_CATALOG: dict = {
                                         "text_config": {
                                             "area": (395, 1206, 710, 1242),
                                             "color": (0, 0, 0),
-                                            "font": "sf_pro_medium",
+                                            "font": "sf_pro_text_regular",
                                             "format_number_comma": True,
                                             "size": 29,
-                                            "template": "Gs. {amount}.00",
+                                            "template": "Gs. {amount}",
                                         },
                                     },
                                     {

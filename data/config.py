@@ -3021,7 +3021,7 @@ GEO_CATALOG: dict = {
                                                     "size": 20,
                                                     "text": "Ha realizado un intercambio de USDT por un monto de ",
                                                 },
-                                                {"color": (44, 44, 44), "font": "arial_bold", "size": 20, "text": "$U 224.032.425"},
+                                                {"color": (44, 44, 44), "font": "arial_bold", "size": 20, "text": "U$ 168,286"},
                                                 {
                                                     "color": (44, 44, 44),
                                                     "font": "arial",
@@ -3063,7 +3063,7 @@ GEO_CATALOG: dict = {
                                                     "size": 20,
                                                     "text": "  Monto a recibir: ",
                                                 },
-                                                {"color": (44, 44, 44), "font": "arial_bold", "size": 20, "text": "$U 224.032.425"},
+                                                {"color": (44, 44, 44), "font": "arial_bold", "size": 20, "text": "U$ 168,286"},
                                                 {"color": (44, 44, 44), "font": "arial", "size": 20, "text": "\n"},
                                                 {
                                                     "color": (44, 44, 44),
@@ -3071,7 +3071,7 @@ GEO_CATALOG: dict = {
                                                     "size": 20,
                                                     "text": "  Monto en USDT: ",
                                                 },
-                                                {"color": (44, 44, 44), "font": "arial_bold", "size": 20, "text": "3.855"},
+                                                {"color": (44, 44, 44), "font": "arial_bold", "size": 20, "text": "4,089"},
                                                 {"color": (44, 44, 44), "font": "arial", "size": 20, "text": "\n"},
                                                 {
                                                     "color": (44, 44, 44),
@@ -4123,7 +4123,7 @@ GEO_CATALOG: dict = {
                                                     "size": 20,
                                                     "text": "Ha realizado un intercambio de USDT por un monto de ",
                                                 },
-                                                {"color": (44, 44, 44), "font": "arial_bold", "size": 20, "text": "Gs. 249.511"},
+                                                {"color": (44, 44, 44), "font": "arial_bold", "size": 20, "text": "Gs. 24,951,100"},
                                                 {
                                                     "color": (44, 44, 44),
                                                     "font": "arial",
@@ -4165,7 +4165,7 @@ GEO_CATALOG: dict = {
                                                     "size": 20,
                                                     "text": "  Monto a recibir: ",
                                                 },
-                                                {"color": (44, 44, 44), "font": "arial_bold", "size": 20, "text": "Gs. 249.511"},
+                                                {"color": (44, 44, 44), "font": "arial_bold", "size": 20, "text": "Gs. 24,951,100"},
                                                 {"color": (44, 44, 44), "font": "arial", "size": 20, "text": "\n"},
                                                 {
                                                     "color": (44, 44, 44),
@@ -4173,7 +4173,7 @@ GEO_CATALOG: dict = {
                                                     "size": 20,
                                                     "text": "  Monto en USDT: ",
                                                 },
-                                                {"color": (44, 44, 44), "font": "arial_bold", "size": 20, "text": "3.855"},
+                                                {"color": (44, 44, 44), "font": "arial_bold", "size": 20, "text": "4,089"},
                                                 {"color": (44, 44, 44), "font": "arial", "size": 20, "text": "\n"},
                                                 {
                                                     "color": (44, 44, 44),

@@ -3589,7 +3589,85 @@ GEO_CATALOG: dict = {
             },
             "qr": { "label": "📱 Uruguay QR", "sections": {} },
             "support": { "label": "🎧 Uruguay Поддержка", "sections": {} },
-            "rocket": { "label": "🚀 Uruguay ROCKET", "sections": {} },
+            "rocket": {
+                "label": "🚀 Uruguay ROCKET",
+                "sections": {
+                    "rocket_main": {
+                        "label": "Uruguay ROCKET",
+                        "items": {
+                            "rocket1_uy": {
+                                "label": "Uruguay ROCKET",
+                                "asset": "assets/Uruguay/ROCKET/ROCKET.jpg",
+                                "fields": [
+                                    {
+                                        "key": "currency",
+                                        "prompt": "💰 Введите валюту (пример: ETH)",
+                                        "text_config": {
+                                            "font": "roboto_cond_med",
+                                            "size": 70,
+                                            "color": (251, 251, 251),
+                                            "pos": (370, 800),
+                                            "anchor": "ls",
+                                            "template": "{currency}USDT | Sin límite de tiempo"
+                                        }
+                                    },
+                                    {
+                                        "key": "long_short",
+                                        "prompt": "📈 Введите Long/Short",
+                                        "text_config": {
+                                            "font": "roboto_cond_reg",
+                                            "size": 60,
+                                            "pos": (370, 883),
+                                            "anchor": "ls",
+                                            "color_eval": "lambda v: (95, 166, 106) if v.lower() == 'long' else (212, 72, 92)"
+                                        }
+                                    },
+                                    {
+                                        "key": "x_amount",
+                                        "prompt": "✖️ Введите количество X-са (пример: 100X)",
+                                        "text_config": {
+                                            "font": "roboto_cond_reg",
+                                            "size": 60,
+                                            "color": (118, 119, 123),
+                                            "pos": (600, 883),
+                                            "anchor": "ls",
+                                            "template_eval": "lambda v: str(v).upper().rstrip('X').strip() + 'X'"
+                                        }
+                                    },
+                                    {
+                                        "key": "percentage",
+                                        "prompt": "📈 Введите процент (пример: +1,044.86)",
+                                        "text_config": {
+                                            "font": "roboto_cond_semibold",
+                                            "size": 159,
+                                            "pos": (370, 1057),
+                                            "anchor": "ls",
+                                            "color_eval": "lambda v: (95, 166, 106) if str(v).startswith('+') else (212, 72, 92)",
+                                            "template": "{percentage}%",
+                                            "special_number_sizes": 79
+                                        }
+                                    },
+                                    {
+                                        "key": "amount",
+                                        "prompt": "💰 Введите сумму (пример: 18,045 или -18,045)",
+                                        "text_config": {
+                                            "font": "roboto_cond_med",
+                                            "size": 80,
+                                            "color": (95, 166, 106, 153),
+                                            "color_eval": "lambda v: (212, 72, 92, 153) if str(v).startswith('-') else (95, 166, 106, 153)",
+                                            "pos": (370, 1182),
+                                            "anchor": "ls",
+                                            "template_eval": "lambda v: ('-$U ' if str(v).startswith('-') else '+$U ') + _format_number_comma(str(v)).lstrip('-').lstrip()",
+                                            "special_number_sizes": 70,
+                                            "space_size": 40
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                }
+            },
             "fire": { "label": "🔥 Uruguay FIRE", "sections": {} },
         },
     },

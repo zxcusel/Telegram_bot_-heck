@@ -145,7 +145,7 @@ GEO_CATALOG: dict = {
 
                         # ── RD1 ──────────────────────────────────────────────────
                         "rd1": {
-                            "label": "Bolivia RD 1", "asset": "assets/Bolivia/RD/rd1.png", "preview": "assets/Bolivia/Preview/RD/RD1_prew.jpg",
+                            "label": "Bolivia RD 1", "asset": "assets/Bolivia/RD/rd1.jpg", "preview": "assets/Bolivia/Preview/RD/RD1_prew.jpg",
                             "fields": [
                                 {
                                     "key": "name",
@@ -297,7 +297,7 @@ GEO_CATALOG: dict = {
 
                         # ── RD4 ──────────────────────────────────────────────────
                         "rd4": {
-                            "label": "Bolivia RD 4", "asset": "assets/Bolivia/RD/rd4.png", "preview": "assets/Bolivia/Preview/RD/RD4_prew.jpg",
+                            "label": "Bolivia RD 4", "asset": "assets/Bolivia/RD/rd4.jpg", "preview": "assets/Bolivia/Preview/RD/RD4_prew.jpg",
                             "fields": [
                                 {
                                     "key": "time",
@@ -405,7 +405,7 @@ GEO_CATALOG: dict = {
 
                         # ── RD6 ──────────────────────────────────────────────────
                         "rd6": {
-                            "label": "Bolivia RD 6", "asset": "assets/Bolivia/RD/rd6.png", "preview": "assets/Bolivia/Preview/RD/RD6_prew.jpg",
+                            "label": "Bolivia RD 6", "asset": "assets/Bolivia/RD/rd6.jpg", "preview": "assets/Bolivia/Preview/RD/RD6_prew.jpg",
                             "fields": [
                                 {
                                     "key": "date",
@@ -955,18 +955,6 @@ GEO_CATALOG: dict = {
                                 }
                             ]
                         },
-                        "rd9":  {"label": "Bolivia RD 9",  "asset": "assets/Bolivia/RD/rd9.png",
-                                 "fields": [{"key": "name", "prompt": "✏️ Введите ФИО (пример: Ivanov Ivan Ivanovich)",
-                                  "text_config": {"font": "montserrat", "size": 36, "color": (0,0,0), "pos": (100, 200)}}]},
-                        "rd10":  {"label": "Bolivia RD 10",  "asset": "assets/Bolivia/RD/rd10.png",
-                                 "fields": [{"key": "name", "prompt": "✏️ Введите ФИО (пример: Ivanov Ivan Ivanovich)",
-                                  "text_config": {"font": "montserrat", "size": 36, "color": (0,0,0), "pos": (100, 200)}}]},
-                        "rd11":  {"label": "Bolivia RD 11",  "asset": "assets/Bolivia/RD/rd11.png",
-                                 "fields": [{"key": "name", "prompt": "✏️ Введите ФИО (пример: Ivanov Ivan Ivanovich)",
-                                  "text_config": {"font": "montserrat", "size": 36, "color": (0,0,0), "pos": (100, 200)}}]},
-                        "rd12": {"label": "Bolivia RD 12", "asset": "assets/Bolivia/RD/rd12.png",
-                                 "fields": [{"key": "name", "prompt": "✏️ Введите ФИО (пример: Ivanov Ivan Ivanovich)",
-                                  "text_config": {"font": "montserrat", "size": 36, "color": (0,0,0), "pos": (100, 200)}}]},
                     },
                 },
 
@@ -1343,8 +1331,8 @@ GEO_CATALOG: dict = {
                     "items": {
                         "qr_code": {
                             "label": "Bolivia QR",
-                            "asset": "assets/Bolivia/QRCode/QR_code.png",
-                            "preview": "assets/Bolivia/Preview/QRCode/QRcode_prew.png",
+                            "asset": "assets/Bolivia/QRCode/QR_code.jpg",
+                            "preview": "assets/Bolivia/Preview/QRCode/QRcode_prew.jpg",
                             "fields": [
                                 {
                                     "key": "timer",

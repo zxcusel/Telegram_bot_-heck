@@ -557,7 +557,7 @@ GEO_CATALOG: dict = {
                                     "key": "amount",
                                     "prompt": "💰 Введите сумму (рекомендуется 1 745)",
                                     "text_config": {
-                                        "font": "sf_pro_text_regular", "size": 29,
+                                        "font": "sf_pro_medium", "size": 29,
                                         "color": (0, 0, 0),
                                         "area": (395, 1206, 710, 1242),
                                         "template": "Bs. {amount}.00",
@@ -1943,7 +1943,7 @@ GEO_CATALOG: dict = {
                                         "key": "amount",
                                         "prompt": "💰 Введите сумму (например: 1250)",
                                         "text_config": {
-                                            "font": "sf_pro_text_regular", "size": 29,
+                                            "font": "sf_pro_medium", "size": 29,
                                             "color": (0, 0, 0),
                                             "area": (395, 1206, 710, 1242),
                                             "template": "S/. {amount}.00",
@@ -2803,7 +2803,7 @@ GEO_CATALOG: dict = {
                                                     "departamentos, recibirá inmediatamente en su cuenta bancaria la suma "
                                                     "total de ",
                                                 },
-                                                {"color": (0, 0, 0), "font": "times_bold", "size": 60, "text": "$U 224 032 425"},
+                                                {"color": (0, 0, 0), "font": "times_bold", "size": 60, "text": "$U 168 286"},
                                                 {"color": (0, 0, 0), "font": "times_roman", "size": 60, "text": "."},
                                             ],
                                         },
@@ -3153,7 +3153,7 @@ GEO_CATALOG: dict = {
                                         "text_config": {
                                             "area": (395, 1206, 710, 1242),
                                             "color": (0, 0, 0),
-                                            "font": "sf_pro_text_regular",
+                                            "font": "sf_pro_medium",
                                             "format_number_comma": True,
                                             "size": 29,
                                             "template": "$U {amount}",
@@ -4177,7 +4177,7 @@ GEO_CATALOG: dict = {
                                         "text_config": {
                                             "area": (395, 1206, 710, 1242),
                                             "color": (0, 0, 0),
-                                            "font": "sf_pro_text_regular",
+                                            "font": "sf_pro_medium",
                                             "format_number_comma": True,
                                             "size": 29,
                                             "template": "Gs. {amount}",

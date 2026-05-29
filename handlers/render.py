@@ -39,7 +39,7 @@ def _advance_steps(askable: list, start_step: int, values: dict, s: dict, item_k
     done_step = start_step
     while done_step < len(askable):
         key = askable[done_step]["key"]
-        if key == "bank" and s.get("rand_bank_enabled") and item_key not in ("check2_py", "check3_py", "check2_uy", "check3_uy", "check4_uy"):
+        if key == "bank" and s.get("rand_bank_enabled") and not item_key.startswith("rd") and item_key not in ("check2_py", "check3_py", "check2_uy", "check3_uy", "check4_uy"):
             val_rand = _get_random_bank(item_key)
             values["bank"] = val_rand
             if item_key == "check2_py":

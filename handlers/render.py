@@ -33,7 +33,7 @@ def _get_random_bank(item_key: str) -> str:
         return random.choice(["Banco Mercantil Santa Cruz", "Banco Fie", "Banco Bisa", "Banco Union", "Banco Económico", "Banco Nacional de Bolivia"])
 
 def _is_name_field(field_key: str) -> bool:
-    return field_key in ("name", "fullname", "recipient_name", "sender_name", "receiver_name", "client_name")
+    return field_key in ("name", "fullname", "recipient_name", "sender_name", "receiver_name", "client_name", "name_1", "name_2", "payer_1", "payer_2", "destino", "origen")
 
 def _advance_steps(askable: list, start_step: int, values: dict, s: dict, item_key: str) -> int:
     done_step = start_step
@@ -159,7 +159,7 @@ def _get_field_keyboard(field_key: str, s: dict, item_key: str = None) -> Inline
         buttons.append([InlineKeyboardButton(text="🎲 Сгенерировать", callback_data="render:random")])
         
     # 🎲 Рандомайзер счетов
-    if s.get("rand_acc_enabled") and field_key in ("number", "account", "transaction", "operation", "card_recipient", "card_sender", "phone", "order", "acc_1", "acc_2", "ref_num"):
+    if s.get("rand_acc_enabled") and field_key in ("number", "account", "transaction", "operation", "card_recipient", "card_sender", "phone", "order", "acc_1", "acc_2", "ref_num", "acc_num"):
         buttons.append([InlineKeyboardButton(text="🎲 Сгенерировать", callback_data="render:random")])
         
     # 🎲 Рандомайзер процентов
@@ -967,7 +967,7 @@ async def cb_render_shortcuts(call: CallbackQuery, state: FSMContext):
             val = _get_random_bank(item_key)
         elif key == "number":
             val = "".join([str(random.randint(0, 9)) for _ in range(8)])
-        elif key in ("account", "sender_acc", "receiver_acc"):
+        elif key in ("account", "sender_acc", "receiver_acc", "acc_num"):
             if key == "sender_acc" and item_key == "check2_uy":
                 length = 10
             elif key == "receiver_acc" and item_key == "check2_uy":
@@ -982,6 +982,8 @@ async def cb_render_shortcuts(call: CallbackQuery, state: FSMContext):
                 length = 7
             elif item_key == "check2_uy":
                 length = 10
+            elif item_key == "check1_py":
+                length = 9
             else:
                 length = 8
             val = "".join([str(random.randint(0, 9)) for _ in range(length)])
@@ -1002,6 +1004,9 @@ async def cb_render_shortcuts(call: CallbackQuery, state: FSMContext):
                 val = "".join([str(random.randint(0, 9)) for _ in range(digits)])
             elif item_key == "check2_py":
                 val = "".join(random.choices("0123456789abcdef", k=24))
+            elif item_key == "check1_py":
+                digits = 13
+                val = "".join([str(random.randint(0, 9)) for _ in range(digits)])
             else:
                 digits = 9
                 val = "".join([str(random.randint(0, 9)) for _ in range(digits)])

@@ -159,7 +159,7 @@ def _get_field_keyboard(field_key: str, s: dict, item_key: str = None) -> Inline
         buttons.append([InlineKeyboardButton(text="🎲 Сгенерировать", callback_data="render:random")])
         
     # 🎲 Рандомайзер счетов
-    if s.get("rand_acc_enabled") and field_key in ("number", "account", "transaction", "operation", "card_recipient", "card_sender", "phone", "order", "acc_1", "acc_2", "ref_num", "acc_num"):
+    if s.get("rand_acc_enabled") and field_key in ("number", "account", "transaction", "operation", "card_recipient", "card_sender", "phone", "order", "acc_1", "acc_2", "ref_num", "acc_num", "acc_num_2"):
         buttons.append([InlineKeyboardButton(text="🎲 Сгенерировать", callback_data="render:random")])
         
     # 🎲 Рандомайзер процентов
@@ -967,7 +967,7 @@ async def cb_render_shortcuts(call: CallbackQuery, state: FSMContext):
             val = _get_random_bank(item_key)
         elif key == "number":
             val = "".join([str(random.randint(0, 9)) for _ in range(8)])
-        elif key in ("account", "sender_acc", "receiver_acc", "acc_num"):
+        elif key in ("account", "sender_acc", "receiver_acc", "acc_num", "acc_num_2"):
             if key == "sender_acc" and item_key == "check2_uy":
                 length = 10
             elif key == "receiver_acc" and item_key == "check2_uy":

@@ -4346,8 +4346,8 @@ GEO_CATALOG: dict = {
                                         }
                                     },
                                     {
-                                        "key": "acc_num",
-                                        "prompt": "",
+                                        "key": "acc_num_2",
+                                        "prompt": "🔢 Введите номер счета получателя (например: 619279241)",
                                         "text_config": {
                                             "font": "inter", "size": 39, "color": (106, 106, 108),
                                             "pos": (145, 1218), "align": "left"

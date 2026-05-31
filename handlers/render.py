@@ -187,19 +187,15 @@ def _get_field_keyboard(field_key: str, s: dict, item_key: str = None) -> Inline
     if field_key == "bank" and item_key == "check2_py":
         buttons.append([
             InlineKeyboardButton(text="ATLAS", callback_data="render:set:ATLAS"),
-            InlineKeyboardButton(text="CONTINENTAL", callback_data="render:set:CONTINENTAL")
+            InlineKeyboardButton(text="SOLAR", callback_data="render:set:SOLAR")
         ])
         buttons.append([
-            InlineKeyboardButton(text="SOLAR", callback_data="render:set:SOLAR"),
-            InlineKeyboardButton(text="INTERFISA", callback_data="render:set:INTERFISA")
+            InlineKeyboardButton(text="GNB", callback_data="render:set:GNB"),
+            InlineKeyboardButton(text="familiar", callback_data="render:set:familiar")
         ])
         buttons.append([
-            InlineKeyboardButton(text="SUDAMERIS", callback_data="render:set:SUDAMERIS"),
-            InlineKeyboardButton(text="GNB", callback_data="render:set:GNB")
-        ])
-        buttons.append([
-            InlineKeyboardButton(text="familiar", callback_data="render:set:familiar"),
-            InlineKeyboardButton(text="interfisa", callback_data="render:set:interfisa")
+            InlineKeyboardButton(text="INTERFISA", callback_data="render:set:INTERFISA"),
+            InlineKeyboardButton(text="SUDAMERIS", callback_data="render:set:SUDAMERIS")
         ])
         
     if field_key == "bank" and item_key == "check3_py":

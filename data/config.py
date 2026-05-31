@@ -1319,6 +1319,167 @@ GEO_CATALOG: dict = {
                                 },
                             ],
                         },
+                        "check3_bo": {
+                            "label": "Чек 3",
+                            "asset": "assets/Bolivia/Чек/Check3.jpg",
+                            "preview": "assets/Bolivia/Preview/Чек/Check3_prew.jpg",
+                            "fields": [
+                                {
+                                    "key": "amount",
+                                    "prompt": "💰 Введите сумму выплаты",
+                                    "text_config": {
+                                        "pos": (420, 513),
+                                        "align": "center",
+                                        "font": "sf_pro_semibold",
+                                        "size": 77,
+                                        "color": (34, 31, 26),
+                                        "prefix": "Bs",
+                                        "prefix_size": 50,
+                                        "prefix_space": True,
+                                        "prefix_y_offset": 26,
+                                        "template": "{amount}.00",
+                                        "format_number_comma": True
+                                    }
+                                },
+                                {
+                                    "key": "name_1",
+                                    "prompt": "✏️ Введите Имя получателя",
+                                    "text_config": {
+                                        "pos": (95, 705),
+                                        "font": "sf_pro_semibold",
+                                        "size": 55,
+                                        "color": (34, 31, 26),
+                                        "align": "left",
+                                        "line_spacing": 1.2,
+                                        "template_eval": "lambda v: (lambda u: ' '.join(u[:2]) + ('\\n' + ' '.join(u[2:]) if len(u) > 2 else ''))(v.upper().split())"
+                                    }
+                                },
+                                {
+                                    "key": "acc_num",
+                                    "prompt": "🔢 Введите номер счета получателя",
+                                    "text_config": {
+                                        "pos": (95, 855),
+                                        "font": "sf_pro_medium",
+                                        "size": 38,
+                                        "color": (34, 31, 26),
+                                        "align": "left",
+                                        "template_eval": "lambda v: v[:4] + '*' * 5 + v[-5:] if len(v) >= 9 else v"
+                                    }
+                                },
+                                {
+                                    "key": "bank",
+                                    "prompt": "🏦 Введите название банка",
+                                    "text_config": {
+                                        "pos": (95, 913),
+                                        "font": "sf_pro_medium",
+                                        "size": 38,
+                                        "color": (34, 31, 26),
+                                        "align": "left"
+                                    }
+                                },
+                                {
+                                    "key": "date",
+                                    "prompt": "📅 Введите дату (пример: 30.05.26)",
+                                    "text_config": {
+                                        "collect_only": True
+                                    }
+                                },
+                                {
+                                    "key": "time",
+                                    "prompt": "🕐 Введите время (пример: 14:47)",
+                                    "text_config": {
+                                        "collect_only": True
+                                    }
+                                },
+                                {
+                                    "key": "datetime_display",
+                                    "prompt": "",
+                                    "text_config": {
+                                        "pos": (95, 1409),
+                                        "font": "sf_pro_semibold",
+                                        "size": 42,
+                                        "color": (34, 31, 26),
+                                        "align": "left",
+                                        "template": "{date} - {time}"
+                                    }
+                                }
+                            ]
+                        },
+                        "check4_bo": {
+                            "label": "Чек 4",
+                            "asset": "assets/Bolivia/Чек/Check4.jpg",
+                            "preview": "assets/Bolivia/Preview/Чек/Check4_prew.jpg",
+                            "fields": [
+                                {
+                                    "key": "transaction",
+                                    "prompt": "🔢 Введите Код транзакции",
+                                    "text_config": {
+                                        "pos": (961, 540),
+                                        "align": "right",
+                                        "font": "sf_pro_medium",
+                                        "size": 35,
+                                        "color": (34, 31, 26)
+                                    }
+                                },
+                                {
+                                    "key": "sender_acc",
+                                    "prompt": "🔢 Введите Счет отправителя",
+                                    "text_config": {
+                                        "pos": (961, 1006),
+                                        "align": "right",
+                                        "font": "sf_pro_medium",
+                                        "size": 35,
+                                        "color": (34, 31, 26)
+                                    }
+                                },
+                                {
+                                    "key": "sender_name",
+                                    "prompt": "👤 Введите Имя отправителя",
+                                    "text_config": {
+                                        "pos": (60, 1067),
+                                        "align": "left",
+                                        "font": "sf_pro_semibold",
+                                        "size": 35,
+                                        "color": (34, 31, 26)
+                                    }
+                                },
+                                {
+                                    "key": "date",
+                                    "prompt": "📅 Введите дату перевода (пример: 19.05.26)",
+                                    "text_config": {
+                                        "pos": (961, 1210),
+                                        "align": "right",
+                                        "font": "sf_pro_medium",
+                                        "size": 35,
+                                        "color": (34, 31, 26),
+                                        "template_eval": "lambda v: v.replace('.', '/')"
+                                    }
+                                },
+                                {
+                                    "key": "amount",
+                                    "prompt": "💰 Введите Сумму перевода",
+                                    "text_config": {
+                                        "pos": (961, 1357),
+                                        "align": "right",
+                                        "font": "sf_pro_medium",
+                                        "size": 35,
+                                        "color": (34, 31, 26),
+                                        "template": "Bs {amount}.00"
+                                    }
+                                },
+                                {
+                                    "key": "comment",
+                                    "prompt": "💬 Введите Комментарий платежа",
+                                    "text_config": {
+                                        "pos": (60, 1561),
+                                        "align": "left",
+                                        "font": "sf_pro_semibold",
+                                        "size": 35,
+                                        "color": (34, 31, 26)
+                                    }
+                                }
+                            ]
+                        },
                     },
                 },
             },

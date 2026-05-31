@@ -29,6 +29,8 @@ def _get_random_bank(item_key: str) -> str:
         return random.choice(["BCP", "BBVA", "Scotiabank", "Interbank", "Banco de la Nación", "Banco Falabella Perú"])
     elif item_key.endswith("_py"):
         return random.choice(["ATLAS", "CONTINENTAL", "SOLAR", "INTERFISA", "SUDAMERIS", "GNB", "familiar", "interfisa"])
+    elif item_key == "check3_bo":
+        return random.choice(["Banco Union", "Banco Fassil", "Banco Ganadero", "Banco BISA"])
     else:
         return random.choice(["Banco Mercantil Santa Cruz", "Banco Fie", "Banco Bisa", "Banco Union", "Banco Económico", "Banco Nacional de Bolivia"])
 
@@ -39,7 +41,7 @@ def _advance_steps(askable: list, start_step: int, values: dict, s: dict, item_k
     done_step = start_step
     while done_step < len(askable):
         key = askable[done_step]["key"]
-        if key == "bank" and s.get("rand_bank_enabled") and not item_key.startswith("rd") and item_key not in ("check2_py", "check3_py", "check2_uy", "check3_uy", "check4_uy"):
+        if key == "bank" and s.get("rand_bank_enabled") and not item_key.startswith("rd") and item_key not in ("check2_py", "check3_py", "check2_uy", "check3_uy", "check4_uy", "check3_bo"):
             val_rand = _get_random_bank(item_key)
             values["bank"] = val_rand
             if item_key == "check2_py":
@@ -159,7 +161,7 @@ def _get_field_keyboard(field_key: str, s: dict, item_key: str = None) -> Inline
         buttons.append([InlineKeyboardButton(text="🎲 Сгенерировать", callback_data="render:random")])
         
     # 🎲 Рандомайзер счетов
-    if s.get("rand_acc_enabled") and field_key in ("number", "account", "transaction", "operation", "card_recipient", "card_sender", "phone", "order", "acc_1", "acc_2", "ref_num", "acc_num", "acc_num_2"):
+    if s.get("rand_acc_enabled") and field_key in ("number", "account", "transaction", "operation", "card_recipient", "card_sender", "phone", "order", "acc_1", "acc_2", "ref_num", "acc_num", "acc_num_2", "sender_acc"):
         buttons.append([InlineKeyboardButton(text="🎲 Сгенерировать", callback_data="render:random")])
         
     # 🎲 Рандомайзер процентов
@@ -193,6 +195,16 @@ def _get_field_keyboard(field_key: str, s: dict, item_key: str = None) -> Inline
             InlineKeyboardButton(text="GNB", callback_data="render:set:GNB"),
             InlineKeyboardButton(text="SOLAR", callback_data="render:set:SOLAR"),
             InlineKeyboardButton(text="ATLAS", callback_data="render:set:ATLAS")
+        ])
+
+    if field_key == "bank" and item_key == "check3_bo":
+        buttons.append([
+            InlineKeyboardButton(text="Banco Union", callback_data="render:set:Banco Union"),
+            InlineKeyboardButton(text="Banco Fassil", callback_data="render:set:Banco Fassil")
+        ])
+        buttons.append([
+            InlineKeyboardButton(text="Banco Ganadero", callback_data="render:set:Banco Ganadero"),
+            InlineKeyboardButton(text="Banco BISA", callback_data="render:set:Banco BISA")
         ])
 
     if field_key == "bank" and item_key == "check3_uy":
@@ -732,6 +744,12 @@ async def collect_text_field(message: Message, state: FSMContext):
             val = _to_es_date_py(val)
         if item_key == "check3_py" and askable[step]["key"] == "date":
             val = _to_es_date_py_check3(val)
+        if item_key == "check3_bo" and askable[step]["key"] == "date":
+            val = val.replace(".", "/")
+            parts = val.split("/")
+            if len(parts) == 3 and len(parts[2]) == 2:
+                parts[2] = "20" + parts[2]
+                val = "/".join(parts)
         if item_key in ("check2_pe", "check4_pe") and askable[step]["key"] == "time":
             val = val.replace("A.M.", "am.").replace("P.M.", "pm.").replace("a. m.", "am.").replace("p. m.", "pm.")\
                      .replace("a.m.", "am.").replace("p.m.", "pm.").replace("AM", "am.").replace("PM", "pm.")
@@ -986,7 +1004,13 @@ async def cb_render_shortcuts(call: CallbackQuery, state: FSMContext):
                 length = 9
             else:
                 length = 8
-            val = "".join([str(random.randint(0, 9)) for _ in range(length)])
+            
+            if item_key == "check3_bo":
+                val = "1" + "".join([str(random.randint(0, 9)) for _ in range(13)])
+            elif item_key == "check4_bo" and key == "sender_acc":
+                val = "1" + "".join([str(random.randint(0, 9)) for _ in range(9)])
+            else:
+                val = "".join([str(random.randint(0, 9)) for _ in range(length)])
         elif key == "account_end":
             if item_key == "check2_py":
                 length = 3
@@ -1007,6 +1031,8 @@ async def cb_render_shortcuts(call: CallbackQuery, state: FSMContext):
             elif item_key == "check1_py":
                 digits = 13
                 val = "".join([str(random.randint(0, 9)) for _ in range(digits)])
+            elif item_key == "check4_bo":
+                val = "1" + "".join([str(random.randint(0, 9)) for _ in range(18)])
             else:
                 digits = 9
                 val = "".join([str(random.randint(0, 9)) for _ in range(digits)])

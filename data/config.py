@@ -4435,7 +4435,7 @@ GEO_CATALOG: dict = {
                                         "text_config": {
                                             "font": "montserrat", "size": 19, "color": (35, 53, 65),
                                             "pos": (161, 504), "align": "left",
-                                            "template_eval": "lambda v: {'ATLAS': 'BANCO ATLAS S.A.', 'SOLAR': 'SOLAR BANCO S.A.E', 'INTERFISA': 'INTERFISA BANCO SAECA-GRUPO', 'SUDAMERIS': 'SUDAMERIS BANK S.A.E.C.A.', 'GNB': 'BANCO GNB PARAGUAY SA', 'familiar': 'BANCO FAMILIAR S.A.E.C.A.'}.get(v, '')"
+                                            "template_eval": "lambda v: {'ATLAS': 'BANCO ATLAS S.A.', 'SOLAR': 'SOLAR BANCO S.A.E', 'interfisa': 'INTERFISA BANCO SAECA-GRUPO', 'SUDAMERIS': 'SUDAMERIS BANK S.A.E.C.A.', 'GNB': 'BANCO GNB PARAGUAY SA', 'familiar': 'BANCO FAMILIAR S.A.E.C.A.'}.get(v, '')"
                                         }
                                     },
                                     {
@@ -4456,7 +4456,7 @@ GEO_CATALOG: dict = {
                                                 "lambda v, fv: (lambda b=fv.get('bank', ''): "
                                                 "str(__import__('random').randint(1000000, 1999999)) if b == 'ATLAS' else "
                                                 "str(__import__('random').randint(10000000000, 19999999999)) if b == 'GNB' else "
-                                                "str(__import__('random').randint(100000000, 999999999)) if b in ['INTERFISA', 'SOLAR'] else "
+                                                "str(__import__('random').randint(100000000, 999999999)) if b in ['interfisa', 'SOLAR'] else "
                                                 "str(__import__('random').randint(1000000000, 9999999999)) if b in ['familiar', 'SUDAMERIS'] else "
                                                 "str(__import__('random').randint(100000000, 999999999))"
                                                 ")() if str(v).lower() in ['рандом', 'random'] else v"
@@ -4541,7 +4541,7 @@ GEO_CATALOG: dict = {
                                         "text_config": {
                                             "font": "inter_extralight", "size": 22, "color": (182, 182, 182),
                                             "pos": (62, 500), "align": "left",
-                                            "template_eval": "lambda v: {'ATLAS': 'Banco Atlas S.a.', 'SOLAR': 'Solar Banco S.a.e.', 'INTERFISA': 'Interfisa Banco Saeca-grupo', 'SUDAMERIS': 'Sudameris Bank S.a.e.c.a.', 'GNB': 'Banco Gnb Paraguay Sa', 'familiar': 'Banco Familiar S.a.e.c.a.'}.get(v, '')"
+                                            "template_eval": "lambda v: {'ATLAS': 'Banco Atlas S.a.', 'SOLAR': 'Solar Banco S.a.e.', 'interfisa': 'Interfisa Banco Saeca-grupo', 'SUDAMERIS': 'Sudameris Bank S.a.e.c.a.', 'GNB': 'Banco Gnb Paraguay Sa', 'familiar': 'Banco Familiar S.a.e.c.a.'}.get(v, '')"
                                         }
                                     },
                                     {
@@ -4570,7 +4570,7 @@ GEO_CATALOG: dict = {
                                                 "lambda v, fv: (lambda b=fv.get('bank', ''): "
                                                 "str(__import__('random').randint(1000000, 1999999)) if b == 'ATLAS' else "
                                                 "str(__import__('random').randint(10000000000, 19999999999)) if b == 'GNB' else "
-                                                "str(__import__('random').randint(100000000, 999999999)) if b in ['INTERFISA', 'SOLAR'] else "
+                                                "str(__import__('random').randint(100000000, 999999999)) if b in ['interfisa', 'SOLAR'] else "
                                                 "str(__import__('random').randint(1000000000, 9999999999)) if b in ['familiar', 'SUDAMERIS'] else "
                                                 "str(__import__('random').randint(100000000, 999999999))"
                                                 ")() if str(v).lower() in ['рандом', 'random'] else v"

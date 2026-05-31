@@ -28,7 +28,7 @@ def _get_random_bank(item_key: str) -> str:
     if item_key.endswith("_pe"):
         return random.choice(["BCP", "BBVA", "Scotiabank", "Interbank", "Banco de la Nación", "Banco Falabella Perú"])
     elif item_key.endswith("_py"):
-        return random.choice(["ATLAS", "CONTINENTAL", "SOLAR", "INTERFISA", "SUDAMERIS", "GNB", "familiar", "interfisa"])
+        return random.choice(["ATLAS", "SOLAR", "interfisa", "SUDAMERIS", "GNB", "familiar"])
     else:
         return random.choice(["Banco Mercantil Santa Cruz", "Banco Fie", "Banco Bisa", "Banco Union", "Banco Económico", "Banco Nacional de Bolivia"])
 
@@ -45,7 +45,7 @@ def _advance_steps(askable: list, start_step: int, values: dict, s: dict, item_k
             if item_key == "check2_py":
                 values["_bank_image"] = f"assets/Paraguay/Чек/bank/{val_rand}.jpg"
             if item_key == "check3_py":
-                values["_bank_image"] = f"assets/Paraguay/Чек/bank2/{val_rand}.png"
+                values["_bank_image"] = f"assets/Paraguay/Чек/bank/{val_rand}.jpg"
             done_step += 1
         else:
             break
@@ -194,7 +194,7 @@ def _get_field_keyboard(field_key: str, s: dict, item_key: str = None) -> Inline
             InlineKeyboardButton(text="familiar", callback_data="render:set:familiar")
         ])
         buttons.append([
-            InlineKeyboardButton(text="INTERFISA", callback_data="render:set:INTERFISA"),
+            InlineKeyboardButton(text="INTERFISA", callback_data="render:set:interfisa"),
             InlineKeyboardButton(text="SUDAMERIS", callback_data="render:set:SUDAMERIS")
         ])
         
@@ -208,7 +208,7 @@ def _get_field_keyboard(field_key: str, s: dict, item_key: str = None) -> Inline
             InlineKeyboardButton(text="familiar", callback_data="render:set:familiar")
         ])
         buttons.append([
-            InlineKeyboardButton(text="INTERFISA", callback_data="render:set:INTERFISA"),
+            InlineKeyboardButton(text="INTERFISA", callback_data="render:set:interfisa"),
             InlineKeyboardButton(text="SUDAMERIS", callback_data="render:set:SUDAMERIS")
         ])
 
@@ -761,7 +761,7 @@ async def collect_text_field(message: Message, state: FSMContext):
         if item_key == "check2_py" and askable[step]["key"] == "bank":
             values["_bank_image"] = f"assets/Paraguay/Чек/bank/{val}.jpg"
         if item_key == "check3_py" and askable[step]["key"] == "bank":
-            values["_bank_image"] = f"assets/Paraguay/Чек/bank2/{val}.png"
+            values["_bank_image"] = f"assets/Paraguay/Чек/bank/{val}.jpg"
         done_step = step + 1
 
         s = get_settings(message.from_user.id)
@@ -1119,7 +1119,7 @@ async def cb_render_shortcuts(call: CallbackQuery, state: FSMContext):
     if item_key == "check2_py" and askable[step]["key"] == "bank":
         values["_bank_image"] = f"assets/Paraguay/Чек/bank/{val}.jpg"
     if item_key == "check3_py" and askable[step]["key"] == "bank":
-        values["_bank_image"] = f"assets/Paraguay/Чек/bank2/{val}.png"
+        values["_bank_image"] = f"assets/Paraguay/Чек/bank/{val}.jpg"
     done_step = step + 1
 
     s = get_settings(call.from_user.id)

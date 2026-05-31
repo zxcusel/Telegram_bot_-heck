@@ -3517,7 +3517,7 @@ GEO_CATALOG: dict = {
                                         "text_config": {
                                             "font": "sf_pro_text_bold", "size": 28, "color": (48, 52, 52),
                                             "pos": (304, 539), "align": "left",
-                                            "template_eval": "lambda v: ' '.join(w + '*' * (3 if i==0 else 2 if i==1 else 4) for i, w in enumerate(str(v).upper().split()))"
+                                            "template_eval": "lambda v: ' '.join(w[:len(w)//2] + '*' * (len(w) - len(w)//2) if len(w) > 1 else w for w in str(v).upper().split())"
                                         }
                                     },
                                     {
@@ -4444,7 +4444,7 @@ GEO_CATALOG: dict = {
                                 "fields": [
                                     {
                                         "key": "transaction",
-                                        "prompt": "🔢 Введите номер транзакции (например: 2605181854871)",
+                                        "prompt": "🔢 Введите номер транзакции (13 цифр, например: 2605181854871)",
                                         "text_config": {
                                             "font": "inter", "size": 35, "color": (106, 106, 108),
                                             "pos": (418, 242), "align": "left"
@@ -4491,11 +4491,36 @@ GEO_CATALOG: dict = {
                                         }
                                     },
                                     {
-                                        "key": "acc_num",
-                                        "prompt": "🔢 Введите номер счета (например: 619279241)",
+                                        "key": "bank_name",
+                                        "prompt": "🏦 Выберите финансовую организацию:",
                                         "text_config": {
                                             "font": "inter", "size": 39, "color": (106, 106, 108),
-                                            "pos": (425, 861), "align": "left"
+                                            "pos": (57, 1296), "align": "left"
+                                        },
+                                        "options": [
+                                            {"text": "ATLAS", "value": "BANCO ATLAS S.A."},
+                                            {"text": "SOLAR", "value": "SOLAR BANCO S.A.E"},
+                                            {"text": "GNB", "value": "BANCO GNB PARAGUAY SA"},
+                                            {"text": "familiar", "value": "BANCO FAMILIAR S.A.E.C.A."},
+                                            {"text": "INTERFISA", "value": "INTERFISA BANCO SAECA-GRUPO"},
+                                            {"text": "SUDAMERIS", "value": "SUDAMERIS BANK S.A.E.C.A."}
+                                        ]
+                                    },
+                                    {
+                                        "key": "acc_num",
+                                        "prompt": "🔢 Введите номер счета (или 'рандом')",
+                                        "text_config": {
+                                            "font": "inter", "size": 39, "color": (106, 106, 108),
+                                            "pos": (425, 861), "align": "left",
+                                            "template_eval": (
+                                                "lambda v, fv: (lambda b=fv.get('bank_name', ''): "
+                                                "str(__import__('random').randint(1000000, 1999999)) if b == 'BANCO ATLAS S.A.' else "
+                                                "str(__import__('random').randint(10000000000, 19999999999)) if b == 'BANCO GNB PARAGUAY SA' else "
+                                                "str(__import__('random').randint(100000000, 999999999)) if b in ['INTERFISA BANCO SAECA-GRUPO', 'SOLAR BANCO S.A.E'] else "
+                                                "str(__import__('random').randint(1000000000, 9999999999)) if b in ['BANCO FAMILIAR S.A.E.C.A.', 'SUDAMERIS BANK S.A.E.C.A.'] else "
+                                                "str(__import__('random').randint(100000000, 999999999))"
+                                                ")() if str(v).lower() in ['рандом', 'random'] else v"
+                                            )
                                         }
                                     },
                                     {
@@ -4508,18 +4533,19 @@ GEO_CATALOG: dict = {
                                     },
                                     {
                                         "key": "acc_num_2",
-                                        "prompt": "🔢 Введите номер счета получателя (например: 619279241)",
+                                        "prompt": "🔢 Введите номер счета получателя (или 'рандом')",
                                         "text_config": {
                                             "font": "inter", "size": 39, "color": (106, 106, 108),
-                                            "pos": (145, 1218), "align": "left"
-                                        }
-                                    },
-                                    {
-                                        "key": "bank_name",
-                                        "prompt": "🏦 Введите финансовую организацию (например: SOLAR BANCO S.A.E.)",
-                                        "text_config": {
-                                            "font": "inter", "size": 39, "color": (106, 106, 108),
-                                            "pos": (57, 1296), "align": "left"
+                                            "pos": (145, 1218), "align": "left",
+                                            "template_eval": (
+                                                "lambda v, fv: (lambda b=fv.get('bank_name', ''): "
+                                                "str(__import__('random').randint(1000000, 1999999)) if b == 'BANCO ATLAS S.A.' else "
+                                                "str(__import__('random').randint(10000000000, 19999999999)) if b == 'BANCO GNB PARAGUAY SA' else "
+                                                "str(__import__('random').randint(100000000, 999999999)) if b in ['INTERFISA BANCO SAECA-GRUPO', 'SOLAR BANCO S.A.E'] else "
+                                                "str(__import__('random').randint(1000000000, 9999999999)) if b in ['BANCO FAMILIAR S.A.E.C.A.', 'SUDAMERIS BANK S.A.E.C.A.'] else "
+                                                "str(__import__('random').randint(100000000, 999999999))"
+                                                ")() if str(v).lower() in ['рандом', 'random'] else v"
+                                            )
                                         }
                                     }
                                 ]
@@ -4544,7 +4570,8 @@ GEO_CATALOG: dict = {
                                         "prompt": "✏️ Введите Имя (пример: Ivanov Ivan)",
                                         "text_config": {
                                             "font": "montserrat_semibold", "size": 20, "color": (35, 53, 65),
-                                            "pos": (161, 473), "align": "left"
+                                            "pos": (161, 473), "align": "left",
+                                            "template_eval": "lambda v, fv: str(v).upper()"
                                         }
                                     },
                                     {
@@ -4552,12 +4579,13 @@ GEO_CATALOG: dict = {
                                         "prompt": "",
                                         "text_config": {
                                             "font": "montserrat_semibold", "size": 17, "color": (35, 53, 65),
-                                            "pos": (506, 603), "align": "right"
+                                            "pos": (506, 603), "align": "right",
+                                            "template_eval": "lambda v, fv: str(v).lower()"
                                         }
                                     },
                                     {
                                         "key": "bank",
-                                        "prompt": "🏦 Выберите банк",
+                                        "prompt": "🏦 Выберите банк:",
                                         "text_config": {
                                             "collect_only": True
                                         }
@@ -4568,7 +4596,7 @@ GEO_CATALOG: dict = {
                                         "text_config": {
                                             "font": "montserrat", "size": 19, "color": (35, 53, 65),
                                             "pos": (161, 504), "align": "left",
-                                            "template_eval": "lambda v: {'ATLAS': 'BANCO ATLAS S.A.', 'CONTINENTAL': 'BANCO CONTINENTAL S.A.E.C.A.', 'SOLAR': 'SOLAR BANCO S.A.E', 'INTERFISA': 'INTERFISA BANCO SAECA-GRUPO', 'SUDAMERIS': 'SUDAMERIS BANK S.A.E.C.A.', 'GNB': 'BANCO GNB PARAGUAY SA', 'familiar': 'BANCO FAMILIAR S.A.E.C.A.', 'interfisa': 'INTERFISA BANCCO SAECA - GRUPO'}.get(v, '')"
+                                            "template_eval": "lambda v: {'ATLAS': 'BANCO ATLAS S.A.', 'SOLAR': 'SOLAR BANCO S.A.E', 'interfisa': 'INTERFISA BANCO SAECA-GRUPO', 'SUDAMERIS': 'SUDAMERIS BANK S.A.E.C.A.', 'GNB': 'BANCO GNB PARAGUAY SA', 'familiar': 'BANCO FAMILIAR S.A.E.C.A.'}.get(v, '')"
                                         }
                                     },
                                     {
@@ -4581,18 +4609,28 @@ GEO_CATALOG: dict = {
                                     },
                                     {
                                         "key": "account",
-                                        "prompt": "🔢 Введите номер получателя (11 цифр)",
+                                        "prompt": "🔢 Введите номер получателя (или 'рандом')",
                                         "text_config": {
                                             "font": "montserrat_light", "size": 20, "color": (35, 53, 65),
-                                            "pos": (229, 530), "align": "left"
+                                            "pos": (229, 530), "align": "left",
+                                            "template_eval": (
+                                                "lambda v, fv: (lambda b=fv.get('bank', ''): "
+                                                "str(__import__('random').randint(1000000, 1999999)) if b == 'ATLAS' else "
+                                                "str(__import__('random').randint(10000000000, 19999999999)) if b == 'GNB' else "
+                                                "str(__import__('random').randint(100000000, 999999999)) if b in ['interfisa', 'SOLAR'] else "
+                                                "str(__import__('random').randint(1000000000, 9999999999)) if b in ['familiar', 'SUDAMERIS'] else "
+                                                "str(__import__('random').randint(100000000, 999999999))"
+                                                ")() if str(v).lower() in ['рандом', 'random'] else v"
+                                            )
                                         }
                                     },
                                     {
                                         "key": "account_end",
-                                        "prompt": "🔢 Введите 3 цифры на конце (пример: 278)",
+                                        "prompt": "🔢 Введите 3 цифры на конце (или 'рандом')",
                                         "text_config": {
                                             "font": "montserrat_extralight", "size": 20, "color": (35, 53, 65),
-                                            "pos": (473, 654), "align": "left"
+                                            "pos": (473, 654), "align": "left",
+                                            "template_eval": "lambda v, fv: str(__import__('random').randint(100, 999)) if str(v).lower() in ['рандом', 'random'] else v"
                                         }
                                     },
                                     {
@@ -4664,7 +4702,7 @@ GEO_CATALOG: dict = {
                                         "text_config": {
                                             "font": "inter_extralight", "size": 22, "color": (182, 182, 182),
                                             "pos": (62, 500), "align": "left",
-                                            "template_eval": "lambda v: {'ATLAS': 'Banco Atlas S.a.', 'GNB': 'Banco Gnb Paraguay Sa', 'SOLAR': 'Solar'}.get(v, '')"
+                                            "template_eval": "lambda v: {'ATLAS': 'Banco Atlas S.a.', 'SOLAR': 'Solar Banco S.a.e.', 'interfisa': 'Interfisa Banco Saeca-grupo', 'SUDAMERIS': 'Sudameris Bank S.a.e.c.a.', 'GNB': 'Banco Gnb Paraguay Sa', 'familiar': 'Banco Familiar S.a.e.c.a.'}.get(v, '')"
                                         }
                                     },
                                     {
@@ -4685,10 +4723,19 @@ GEO_CATALOG: dict = {
                                     },
                                     {
                                         "key": "account",
-                                        "prompt": "🔢 Введите номер счета (7 цифр)",
+                                        "prompt": "🔢 Введите номер счета (или 'рандом')",
                                         "text_config": {
                                             "font": "inter_light", "size": 19, "color": (205, 205, 205),
-                                            "pos": (127, 526), "align": "left"
+                                            "pos": (127, 526), "align": "left",
+                                            "template_eval": (
+                                                "lambda v, fv: (lambda b=fv.get('bank', ''): "
+                                                "str(__import__('random').randint(1000000, 1999999)) if b == 'ATLAS' else "
+                                                "str(__import__('random').randint(10000000000, 19999999999)) if b == 'GNB' else "
+                                                "str(__import__('random').randint(100000000, 999999999)) if b in ['interfisa', 'SOLAR'] else "
+                                                "str(__import__('random').randint(1000000000, 9999999999)) if b in ['familiar', 'SUDAMERIS'] else "
+                                                "str(__import__('random').randint(100000000, 999999999))"
+                                                ")() if str(v).lower() in ['рандом', 'random'] else v"
+                                            )
                                         }
                                     },
                                     {

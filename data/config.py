@@ -4283,7 +4283,7 @@ GEO_CATALOG: dict = {
                                 "fields": [
                                     {
                                         "key": "transaction",
-                                        "prompt": "🔢 Введите номер транзакции (например: 2605181854871)",
+                                        "prompt": "🔢 Введите номер транзакции (13 цифр, например: 2605181854871)",
                                         "text_config": {
                                             "font": "inter", "size": 35, "color": (106, 106, 108),
                                             "pos": (418, 242), "align": "left"
@@ -4330,11 +4330,36 @@ GEO_CATALOG: dict = {
                                         }
                                     },
                                     {
-                                        "key": "acc_num",
-                                        "prompt": "🔢 Введите номер счета (например: 619279241)",
+                                        "key": "bank_name",
+                                        "prompt": "🏦 Выберите финансовую организацию:",
                                         "text_config": {
                                             "font": "inter", "size": 39, "color": (106, 106, 108),
-                                            "pos": (425, 861), "align": "left"
+                                            "pos": (57, 1296), "align": "left"
+                                        },
+                                        "options": [
+                                            {"text": "ATLAS", "value": "BANCO ATLAS S.A."},
+                                            {"text": "SOLAR", "value": "SOLAR BANCO S.A.E"},
+                                            {"text": "GNB", "value": "BANCO GNB PARAGUAY SA"},
+                                            {"text": "familiar", "value": "BANCO FAMILIAR S.A.E.C.A."},
+                                            {"text": "INTERFISA", "value": "INTERFISA BANCO SAECA-GRUPO"},
+                                            {"text": "SUDAMERIS", "value": "SUDAMERIS BANK S.A.E.C.A."}
+                                        ]
+                                    },
+                                    {
+                                        "key": "acc_num",
+                                        "prompt": "🔢 Введите номер счета (или 'рандом')",
+                                        "text_config": {
+                                            "font": "inter", "size": 39, "color": (106, 106, 108),
+                                            "pos": (425, 861), "align": "left",
+                                            "template_eval": (
+                                                "lambda v, fv: (lambda b=fv.get('bank_name', ''): "
+                                                "str(__import__('random').randint(1000000, 1999999)) if b == 'BANCO ATLAS S.A.' else "
+                                                "str(__import__('random').randint(10000000000, 19999999999)) if b == 'BANCO GNB PARAGUAY SA' else "
+                                                "str(__import__('random').randint(100000000, 999999999)) if b in ['INTERFISA BANCO SAECA-GRUPO', 'SOLAR BANCO S.A.E'] else "
+                                                "str(__import__('random').randint(1000000000, 9999999999)) if b in ['BANCO FAMILIAR S.A.E.C.A.', 'SUDAMERIS BANK S.A.E.C.A.'] else "
+                                                "str(__import__('random').randint(100000000, 999999999))"
+                                                ")() if str(v).lower() in ['рандом', 'random'] else v"
+                                            )
                                         }
                                     },
                                     {
@@ -4347,18 +4372,19 @@ GEO_CATALOG: dict = {
                                     },
                                     {
                                         "key": "acc_num_2",
-                                        "prompt": "🔢 Введите номер счета получателя (например: 619279241)",
+                                        "prompt": "🔢 Введите номер счета получателя (или 'рандом')",
                                         "text_config": {
                                             "font": "inter", "size": 39, "color": (106, 106, 108),
-                                            "pos": (145, 1218), "align": "left"
-                                        }
-                                    },
-                                    {
-                                        "key": "bank_name",
-                                        "prompt": "🏦 Введите финансовую организацию (например: SOLAR BANCO S.A.E.)",
-                                        "text_config": {
-                                            "font": "inter", "size": 39, "color": (106, 106, 108),
-                                            "pos": (57, 1296), "align": "left"
+                                            "pos": (145, 1218), "align": "left",
+                                            "template_eval": (
+                                                "lambda v, fv: (lambda b=fv.get('bank_name', ''): "
+                                                "str(__import__('random').randint(1000000, 1999999)) if b == 'BANCO ATLAS S.A.' else "
+                                                "str(__import__('random').randint(10000000000, 19999999999)) if b == 'BANCO GNB PARAGUAY SA' else "
+                                                "str(__import__('random').randint(100000000, 999999999)) if b in ['INTERFISA BANCO SAECA-GRUPO', 'SOLAR BANCO S.A.E'] else "
+                                                "str(__import__('random').randint(1000000000, 9999999999)) if b in ['BANCO FAMILIAR S.A.E.C.A.', 'SUDAMERIS BANK S.A.E.C.A.'] else "
+                                                "str(__import__('random').randint(100000000, 999999999))"
+                                                ")() if str(v).lower() in ['рандом', 'random'] else v"
+                                            )
                                         }
                                     }
                                 ]

@@ -3356,7 +3356,7 @@ GEO_CATALOG: dict = {
                                         "text_config": {
                                             "font": "sf_pro_text_bold", "size": 28, "color": (48, 52, 52),
                                             "pos": (304, 539), "align": "left",
-                                            "template_eval": "lambda v: ' '.join(w + '*' * (3 if i==0 else 2 if i==1 else 4) for i, w in enumerate(str(v).upper().split()))"
+                                            "template_eval": "lambda v: ' '.join(w[:len(w)//2] + '*' * (len(w) - len(w)//2) if len(w) > 1 else w for w in str(v).upper().split())"
                                         }
                                     },
                                     {

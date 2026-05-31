@@ -4541,7 +4541,7 @@ GEO_CATALOG: dict = {
                                         "text_config": {
                                             "font": "inter_extralight", "size": 22, "color": (182, 182, 182),
                                             "pos": (62, 500), "align": "left",
-                                            "template_eval": "lambda v: {'ATLAS': 'Banco Atlas S.a.', 'GNB': 'Banco Gnb Paraguay Sa', 'SOLAR': 'Solar'}.get(v, '')"
+                                            "template_eval": "lambda v: {'ATLAS': 'Banco Atlas S.a.', 'SOLAR': 'Solar Banco S.a.e.', 'INTERFISA': 'Interfisa Banco Saeca-grupo', 'SUDAMERIS': 'Sudameris Bank S.a.e.c.a.', 'GNB': 'Banco Gnb Paraguay Sa', 'familiar': 'Banco Familiar S.a.e.c.a.'}.get(v, '')"
                                         }
                                     },
                                     {
@@ -4562,10 +4562,19 @@ GEO_CATALOG: dict = {
                                     },
                                     {
                                         "key": "account",
-                                        "prompt": "🔢 Введите номер счета (7 цифр)",
+                                        "prompt": "🔢 Введите номер счета (или 'рандом')",
                                         "text_config": {
                                             "font": "inter_light", "size": 19, "color": (205, 205, 205),
-                                            "pos": (127, 526), "align": "left"
+                                            "pos": (127, 526), "align": "left",
+                                            "template_eval": (
+                                                "lambda v, fv: (lambda b=fv.get('bank', ''): "
+                                                "str(__import__('random').randint(1000000, 1999999)) if b == 'ATLAS' else "
+                                                "str(__import__('random').randint(10000000000, 19999999999)) if b == 'GNB' else "
+                                                "str(__import__('random').randint(100000000, 999999999)) if b in ['INTERFISA', 'SOLAR'] else "
+                                                "str(__import__('random').randint(1000000000, 9999999999)) if b in ['familiar', 'SUDAMERIS'] else "
+                                                "str(__import__('random').randint(100000000, 999999999))"
+                                                ")() if str(v).lower() in ['рандом', 'random'] else v"
+                                            )
                                         }
                                     },
                                     {

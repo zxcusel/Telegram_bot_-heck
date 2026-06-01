@@ -823,6 +823,10 @@ async def collect_text_field(message: Message, state: FSMContext):
 
         val = message.text.strip()
         
+        # Если это текстовое поле для ФИО и юзер ввел 4 слова, пытаемся его отформатировать
+        if _is_name_field(askable[step]["key"]):
+            val = _format_name(val, askable[step].get("prompt", ""), item_key)
+        
         # Применяем суффикс времени если он выбран в state
         if data.get("time_suffix") and "time" in askable[step]["key"] and item_key not in ("qr_pe", "check1_py"):
             if "M." not in val.upper():  # Если пользователь сам не написал AM/PM

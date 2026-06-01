@@ -1275,7 +1275,7 @@ GEO_CATALOG: dict = {
                                 },
                                 {
                                     "key": "order",
-                                    "prompt": "🔢 Введите номер заказа",
+                                    "prompt": "🔢 Введите Номер получателя (счет)",
                                     "text_config": {
                                         "font": "quicksand_regular",
                                         "size": 22,

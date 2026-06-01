@@ -58,9 +58,14 @@ def _format_name(full_name: str, prompt: str, item_key: str) -> str:
     if "estrada g." in p or "aro c." in p:
         return f"{name1} {name2} {surname1} {surname2[0]}."
     if "4 слова" in p:
+        name_str = f"{name1} {name2} {surname1} {surname2}"
+        if "счёт" in p:
+            import random
+            acc = "".join([str(random.randint(0, 9)) for _ in range(8)])
+            name_str = f"{acc} {name_str}"
         if "капсом" in p:
-            return f"{name1} {name2} {surname1} {surname2}".upper()
-        return f"{name1} {name2} {surname1} {surname2}"
+            return name_str.upper()
+        return name_str
         
     # 2. Общие ключевые слова
     if "фамилия имя" in p:
@@ -272,6 +277,12 @@ def _get_field_keyboard(field_key: str, s: dict, item_key: str = None) -> Inline
         buttons.append([
             InlineKeyboardButton(text="Banco Ganadero", callback_data="render:set:Banco Ganadero"),
             InlineKeyboardButton(text="Banco BISA", callback_data="render:set:Banco BISA")
+        ])
+
+    if field_key == "comment" and item_key == "check4_bo":
+        buttons.append([
+            InlineKeyboardButton(text="WhiteTrade", callback_data="render:set:WhiteTrade"),
+            InlineKeyboardButton(text="Tus ganancias!", callback_data="render:set:Tus ganancias!")
         ])
 
     if field_key == "bank" and item_key == "check3_uy":

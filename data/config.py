@@ -301,7 +301,7 @@ GEO_CATALOG: dict = {
                             "fields": [
                                 {
                                     "key": "time",
-                                    "prompt": "🕐 Введите время (пример: 10:00)",
+                                    "prompt": "🕐 Введите время (пример: 10:00) (24-часовой формат)",
                                     "text_config": {
                                         "font": "sf_pro_bold", "size": 34,
                                         "color": (82, 82, 82),
@@ -519,7 +519,7 @@ GEO_CATALOG: dict = {
                             "fields": [
                                 {
                                     "key": "time",
-                                    "prompt": "🕐 Введите время (пример: 10:00)",
+                                    "prompt": "🕐 Введите время (пример: 10:00) (24-часовой формат)",
                                     "text_config": {
                                         "font": "sf_pro_bold", "size": 32,
                                         "color": (255, 255, 255),
@@ -617,7 +617,7 @@ GEO_CATALOG: dict = {
                                 },
                                 {
                                     "key": "time", 
-                                    "prompt": "🕐 Введите время",
+                                    "prompt": "🕐 Введите время (24-часовой формат)",
                                     "text_config": {
                                         "font": "sf_pro_medium",
                                         "size": 27,
@@ -1074,7 +1074,7 @@ GEO_CATALOG: dict = {
                             "fields": [
                                 {
                                     "key": "time",
-                                    "prompt": "🕐 Введите время устройства (пример: 10:45)",
+                                    "prompt": "🕐 Введите время устройства (пример: 10:45) (24-часовой формат)",
                                     "text_config": {
                                         "font": "sf_pro_semibold", "size": 25, "color": (0, 0, 0), "pos": (75, 26)
                                     },
@@ -1247,7 +1247,7 @@ GEO_CATALOG: dict = {
                                 },
                                 {
                                     "key": "time",
-                                    "prompt": "🕐 Введите время (пример: 07:44)",
+                                    "prompt": "🕐 Введите время (пример: 07:44) (24-часовой формат)",
                                     "text_config": {
                                         "collect_only": True,
                                     },
@@ -1386,7 +1386,7 @@ GEO_CATALOG: dict = {
                                 },
                                 {
                                     "key": "time",
-                                    "prompt": "🕐 Введите время (пример: 14:47)",
+                                    "prompt": "🕐 Введите время (пример: 14:47) (24-часовой формат)",
                                     "text_config": {
                                         "collect_only": True
                                     }
@@ -1863,7 +1863,7 @@ GEO_CATALOG: dict = {
                                 "fields": [
                                     {
                                         "key": "time",
-                                        "prompt": "🕐 Введите время (пример: 10:00)",
+                                        "prompt": "🕐 Введите время (пример: 10:00) (24-часовой формат)",
                                         "text_config": {
                                             "font": "sf_pro_bold", "size": 34,
                                             "color": (82, 82, 82),
@@ -2066,7 +2066,7 @@ GEO_CATALOG: dict = {
                                 "fields": [
                                     {
                                         "key": "time",
-                                        "prompt": "🕐 Введите время (пример: 10:00)",
+                                        "prompt": "🕐 Введите время (пример: 10:00) (24-часовой формат)",
                                         "text_config": {
                                             "font": "sf_pro_bold", "size": 32,
                                             "color": (255, 255, 255),
@@ -2172,7 +2172,7 @@ GEO_CATALOG: dict = {
                                 "fields": [
                                     {
                                         "key": "time",
-                                        "prompt": "🕐 Введите время устройства (пример: 10:45)",
+                                        "prompt": "🕐 Введите время устройства (пример: 10:45) (24-часовой формат)",
                                         "text_config": {
                                             "font": "sf_pro_semibold", "size": 25, "color": (0, 0, 0), "pos": (75, 26)
                                         },
@@ -2319,7 +2319,7 @@ GEO_CATALOG: dict = {
                                     },
                                     {
                                         "key": "time",
-                                        "prompt": "🕐 Введите время (пример: 09:47)",
+                                        "prompt": "🕐 Введите время (пример: 09:47) (24-часовой формат)",
                                         "text_config": {"collect_only": True},
                                     },
                                     {
@@ -2464,7 +2464,7 @@ GEO_CATALOG: dict = {
                                     },
                                     {
                                         "key": "time",
-                                        "prompt": "🕐 Введите время (пример: 09:47)",
+                                        "prompt": "🕐 Введите время (пример: 09:47) (24-часовой формат)",
                                         "text_config": {"collect_only": True},
                                     },
                                     {
@@ -2977,7 +2977,7 @@ GEO_CATALOG: dict = {
                                 "fields": [
                                     {
                                         "key": "time",
-                                        "prompt": "🕐 Введите время (пример: 10:00)",
+                                        "prompt": "🕐 Введите время (пример: 10:00) (24-часовой формат)",
                                         "text_config": {
                                             "area": (115, 39, 243, 60),
                                             "color": (82, 82, 82),
@@ -3270,7 +3270,7 @@ GEO_CATALOG: dict = {
                                 "fields": [
                                     {
                                         "key": "time",
-                                        "prompt": "🕐 Введите время (пример: 10:00)",
+                                        "prompt": "🕐 Введите время (пример: 10:00) (24-часовой формат)",
                                         "text_config": {
                                             "area": (100, 33, 200, 67),
                                             "color": (255, 255, 255),
@@ -3368,7 +3368,7 @@ GEO_CATALOG: dict = {
                                     },
                                     {
                                         "key": "time",
-                                        "prompt": "🕐 Введите время (пример: 12:20)",
+                                        "prompt": "🕐 Введите время (пример: 12:20) (24-часовой формат)",
                                         "text_config": {
                                             "collect_only": True
                                         }
@@ -3529,7 +3529,7 @@ GEO_CATALOG: dict = {
                                     },
                                     {
                                         "key": "time",
-                                        "prompt": "🕐 Введите время (пример: 15:23)",
+                                        "prompt": "🕐 Введите время (пример: 15:23) (24-часовой формат)",
                                         "text_config": {
                                             "collect_only": True
                                         }
@@ -3560,7 +3560,7 @@ GEO_CATALOG: dict = {
                                 "fields": [
                                     {
                                         "key": "time",
-                                        "prompt": "🕐 Введите время (пример: 15:23)",
+                                        "prompt": "🕐 Введите время (пример: 15:23) (24-часовой формат)",
                                         "text_config": {
                                             "font": "sf_pro_text_bold", "size": 40, "color": (8, 8, 8),
                                             "pos": (93, 38), "align": "left"
@@ -4079,7 +4079,7 @@ GEO_CATALOG: dict = {
                                 "fields": [
                                     {
                                         "key": "time",
-                                        "prompt": "🕐 Введите время (пример: 10:00)",
+                                        "prompt": "🕐 Введите время (пример: 10:00) (24-часовой формат)",
                                         "text_config": {
                                             "area": (115, 39, 243, 60),
                                             "color": (82, 82, 82),
@@ -4372,7 +4372,7 @@ GEO_CATALOG: dict = {
                                 "fields": [
                                     {
                                         "key": "time",
-                                        "prompt": "🕐 Введите время (пример: 10:00)",
+                                        "prompt": "🕐 Введите время (пример: 10:00) (24-часовой формат)",
                                         "text_config": {
                                             "area": (100, 33, 200, 67),
                                             "color": (255, 255, 255),
@@ -4459,7 +4459,7 @@ GEO_CATALOG: dict = {
                                     },
                                     {
                                         "key": "time",
-                                        "prompt": "🕐 Введите время (пример: 16:17)",
+                                        "prompt": "🕐 Введите время (пример: 16:17) (24-часовой формат)",
                                         "text_config": {
                                             "collect_only": True
                                         }
@@ -4642,7 +4642,7 @@ GEO_CATALOG: dict = {
                                     },
                                     {
                                         "key": "time",
-                                        "prompt": "🕐 Введите время (пример: 14:39)",
+                                        "prompt": "🕐 Введите время (пример: 14:39) (24-часовой формат)",
                                         "text_config": {
                                             "collect_only": True
                                         }
@@ -4748,7 +4748,7 @@ GEO_CATALOG: dict = {
                                     },
                                     {
                                         "key": "time",
-                                        "prompt": "🕐 Введите время (пример: 13:23)",
+                                        "prompt": "🕐 Введите время (пример: 13:23) (24-часовой формат)",
                                         "text_config": {
                                             "font": "sf_pro_text_regular", "size": 22, "color": (255, 255, 255),
                                             "pos": (63, 621), "align": "left",

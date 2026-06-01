@@ -35,29 +35,55 @@ def _get_random_bank(item_key: str) -> str:
 def _is_name_field(field_key: str) -> bool:
     return field_key in ("name", "fullname", "recipient_name", "sender_name", "receiver_name", "client_name", "name_1", "name_2", "payer_1", "payer_2", "destino", "origen")
 
-def _format_name_for_item(full_name: str, item_key: str) -> str:
-    """Форматирует ФИО из name.json (Фамилия1 Фамилия2 Имя1 Имя2) под нужный шаблон."""
+def _format_name(full_name: str, prompt: str, item_key: str) -> str:
+    """Форматирует ФИО из name.json (Фамилия1 Фамилия2 Имя1 Имя2) под нужный шаблон на основе текста prompt."""
     parts = full_name.split()
     if len(parts) != 4:
         return full_name
         
     surname1, surname2, name1, name2 = parts
+    p = " ".join(prompt.lower().split()) # Нормализуем пробелы
     
-    if item_key in ("rd1_py", "rd2_py", "rd4_py", "check2_py"):
-        # Фамилия Имя
-        return f"{surname1} {name1}"
-    elif item_key in ("rd3_py", "rd5_py", "rd6_py"):
-        # ФИО (пример: Nilda Mamani Apaza / Ivan Ivanov Ivanovich)
+    # 1. Поиск точных примеров в тексте prompt
+    if "ivan ivanov ivanovich" in p:
         return f"{name1} {surname1} {surname2}"
-    elif item_key == "rd7_py":
-        # ФИО (пример: Ivanov Ivan Ivanovich)
+    if "ivanov ivan ivanovich" in p:
         return f"{surname1} {name1} {name2}"
-    elif item_key == "check3_py":
-        # Имя (отправителя/получателя)
-        return f"{name1} {surname1}"
-    elif item_key in ("check1_py", "rocket1_py"):
-        # Полное ФИО
+    if "nilda mamani apaza" in p:
+        return f"{name1} {surname1} {surname2}"
+    if "ivanov ivan" in p:
+        return f"{surname1} {name1}"
+    if "estrada garcia" in p:
         return f"{name1} {name2} {surname1} {surname2}"
+    if "estrada g." in p or "aro c." in p:
+        return f"{name1} {name2} {surname1} {surname2[0]}."
+    if "4 слова" in p:
+        if "капсом" in p:
+            return f"{name1} {name2} {surname1} {surname2}".upper()
+        return f"{name1} {name2} {surname1} {surname2}"
+        
+    # 2. Общие ключевые слова
+    if "фамилия имя" in p:
+        return f"{surname1} {name1}"
+    if "имя фамилия" in p:
+        return f"{name1} {surname1}"
+        
+    # 3. Эвристика по регионам и ключевым словам
+    # Для Парагвая
+    if item_key.endswith("_py"):
+        if "фио" in p and ("отправителя" in p or "получателя" in p or "пользователя" in p):
+            return f"{name1} {name2} {surname1} {surname2}"
+        elif "имя" in p:
+            return f"{name1} {surname1}"
+            
+    # Общая логика
+    if "фио" in p:
+        if "капсом" in p:
+            return f"{name1} {name2} {surname1} {surname2}".upper()
+        return f"{name1} {name2} {surname1} {surname2}"
+        
+    if "имя" in p:
+        return f"{name1} {surname1}"
         
     return full_name
 
@@ -1097,7 +1123,8 @@ async def cb_render_shortcuts(call: CallbackQuery, state: FSMContext):
         from data.db import get_and_blacklist_random_name
         try:
             val = get_and_blacklist_random_name()
-            val = _format_name_for_item(val, item_key)
+            prompt = askable[step]["prompt"]
+            val = _format_name(val, prompt, item_key)
         except ValueError:
             try:
                 await call.answer("❌ В списке name.json не осталось доступных имен!", show_alert=True)

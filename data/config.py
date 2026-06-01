@@ -1285,7 +1285,7 @@ GEO_CATALOG: dict = {
                                 },
                                 {
                                     "key": "destino",
-                                    "prompt": "👤 DESTINO — счёт + ФИО капсом (4 слова)\nПример: 72781074 DIEGO EDGAR ABASTO CACERES",
+                                    "prompt": "👤 DESTINO (Получатель) — счёт + ФИО капсом (4 слова)\nПример: 72781074 DIEGO EDGAR ABASTO CACERES",
                                     "text_config": {
                                         "font": "quicksand_regular",
                                         "size": 22,
@@ -1302,7 +1302,7 @@ GEO_CATALOG: dict = {
                                 },
                                 {
                                     "key": "origen",
-                                    "prompt": "👤 ORIGEN — счёт + ФИО капсом (4 слова)\nПример: 63395815 PEDRO JUAN GARCIA LOPEZ",
+                                    "prompt": "👤 ORIGEN (Отправитель) — счёт + ФИО капсом (4 слова)\nПример: 63395815 PEDRO JUAN GARCIA LOPEZ",
                                     "text_config": {
                                         "font": "quicksand_regular",
                                         "size": 22,

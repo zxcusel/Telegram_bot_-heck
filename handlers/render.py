@@ -35,6 +35,32 @@ def _get_random_bank(item_key: str) -> str:
 def _is_name_field(field_key: str) -> bool:
     return field_key in ("name", "fullname", "recipient_name", "sender_name", "receiver_name", "client_name", "name_1", "name_2", "payer_1", "payer_2", "destino", "origen")
 
+def _format_name_for_item(full_name: str, item_key: str) -> str:
+    """Форматирует ФИО из name.json (Фамилия1 Фамилия2 Имя1 Имя2) под нужный шаблон."""
+    parts = full_name.split()
+    if len(parts) != 4:
+        return full_name
+        
+    surname1, surname2, name1, name2 = parts
+    
+    if item_key in ("rd1_py", "rd2_py", "rd4_py", "check2_py"):
+        # Фамилия Имя
+        return f"{surname1} {name1}"
+    elif item_key in ("rd3_py", "rd5_py", "rd6_py"):
+        # ФИО (пример: Nilda Mamani Apaza / Ivan Ivanov Ivanovich)
+        return f"{name1} {surname1} {surname2}"
+    elif item_key == "rd7_py":
+        # ФИО (пример: Ivanov Ivan Ivanovich)
+        return f"{surname1} {name1} {name2}"
+    elif item_key == "check3_py":
+        # Имя (отправителя/получателя)
+        return f"{name1} {surname1}"
+    elif item_key in ("check1_py", "rocket1_py"):
+        # Полное ФИО
+        return f"{name1} {name2} {surname1} {surname2}"
+        
+    return full_name
+
 def _advance_steps(askable: list, start_step: int, values: dict, s: dict, item_key: str) -> int:
     done_step = start_step
     while done_step < len(askable):
@@ -1071,6 +1097,7 @@ async def cb_render_shortcuts(call: CallbackQuery, state: FSMContext):
         from data.db import get_and_blacklist_random_name
         try:
             val = get_and_blacklist_random_name()
+            val = _format_name_for_item(val, item_key)
         except ValueError:
             try:
                 await call.answer("❌ В списке name.json не осталось доступных имен!", show_alert=True)

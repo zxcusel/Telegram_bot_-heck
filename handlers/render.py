@@ -29,6 +29,8 @@ def _get_random_bank(item_key: str) -> str:
         return random.choice(["BCP", "BBVA", "Scotiabank", "Interbank", "Banco de la Nación", "Banco Falabella Perú"])
     elif item_key.endswith("_py"):
         return random.choice(["ATLAS", "CONTINENTAL", "SOLAR", "INTERFISA", "SUDAMERIS", "GNB", "familiar", "interfisa"])
+    elif item_key.endswith("_uy"):
+        return random.choice(["Itaú", "Santander", "BBVA", "Scotiabank", "Oca blue"])
     else:
         return random.choice(["Banco Mercantil Santa Cruz", "Banco Fie", "Banco Bisa", "Banco Union", "Banco Económico", "Banco Nacional de Bolivia"])
 
@@ -92,9 +94,31 @@ def _format_name(full_name: str, prompt: str, item_key: str) -> str:
         
     return full_name
 
+def _format_date_for_item(val: str, item_key: str) -> str:
+    if item_key == "check_pe": return _to_es_date(val)
+    if item_key in ("check2_pe", "check4_pe"): return _to_es_date2(val)
+    if item_key == "check3_pe": return _to_es_date3(val)
+    if item_key == "fire_check": return _to_es_date_fire(val)
+    if item_key == "check1_uy": return _to_es_date_uy(val)
+    if item_key == "check2_uy": return val.replace(".", "/")
+    if item_key == "check2_py": return _to_es_date_py(val)
+    if item_key == "check3_py": return _to_es_date_py_check3(val)
+    if item_key == "check3_bo":
+        val = val.replace(".", "/")
+        parts = val.split("/")
+        if len(parts) == 3 and len(parts[2]) == 2:
+            parts[2] = "20" + parts[2]
+            val = "/".join(parts)
+        return val
+    return val
+
 def _advance_steps(askable: list, start_step: int, values: dict, s: dict, item_key: str) -> int:
     done_step = start_step
     while done_step < len(askable):
+        if s.get("pinned_date") and "date" in askable[done_step]["key"]:
+            values[askable[done_step]["key"]] = _format_date_for_item(s["pinned_date"], item_key)
+            done_step += 1
+            continue
         key = askable[done_step]["key"]
         if key == "bank" and s.get("rand_bank_enabled") and not item_key.startswith("rd") and item_key not in ("check2_py", "check3_py", "check2_uy", "check3_uy", "check4_uy", "check3_bo"):
             val_rand = _get_random_bank(item_key)
@@ -216,7 +240,7 @@ def _get_field_keyboard(field_key: str, s: dict, item_key: str = None) -> Inline
         buttons.append([InlineKeyboardButton(text="🎲 Сгенерировать", callback_data="render:random")])
         
     # 🎲 Рандомайзер счетов
-    if s.get("rand_acc_enabled") and field_key in ("number", "account", "transaction", "operation", "card_recipient", "card_sender", "phone", "order", "acc_1", "acc_2", "ref_num", "acc_num", "acc_num_2", "sender_acc"):
+    if s.get("rand_acc_enabled") and field_key in ("number", "account", "transaction", "operation", "card_recipient", "card_sender", "phone", "order", "acc_1", "acc_2", "ref_num", "acc_num", "acc_num_2", "sender_acc", "sender_num", "receiver_num", "receiver_acc", "account_end"):
         buttons.append([InlineKeyboardButton(text="🎲 Сгенерировать", callback_data="render:random")])
         
     # 🎲 Рандомайзер процентов
@@ -279,7 +303,7 @@ def _get_field_keyboard(field_key: str, s: dict, item_key: str = None) -> Inline
             InlineKeyboardButton(text="Banco BISA", callback_data="render:set:Banco BISA")
         ])
 
-    if field_key == "comment" and item_key == "check4_bo":
+    if field_key == "comment":
         buttons.append([
             InlineKeyboardButton(text="WhiteTrade", callback_data="render:set:WhiteTrade"),
             InlineKeyboardButton(text="Tus ganancias!", callback_data="render:set:Tus ganancias!")
@@ -324,7 +348,18 @@ def _get_field_keyboard(field_key: str, s: dict, item_key: str = None) -> Inline
         buttons.append([InlineKeyboardButton(text=f"🏦 {s['pinned_bank']}", callback_data="render:pin_bank")])
         
     # 🕒 AM/PM
-    if "time" in field_key and item_key not in ("rd6", "rd7", "qr_pe", "check1_py"):
+    def _is_24h(ik, fk):
+        for g in GEO_CATALOG.values():
+            for c in g.get("catalog", {}).values():
+                for sc in c.get("sections", {}).values():
+                    items = sc.get("items", {})
+                    if ik in items:
+                        for f in items[ik].get("fields", []):
+                            if f["key"] == fk:
+                                return "(24-часовой формат)" in f.get("prompt", "")
+        return False
+
+    if "time" in field_key and item_key not in ("rd6", "rd7", "qr_pe", "check1_py") and not _is_24h(item_key, field_key):
         row = []
         am_label = "☀️ A.M."
         pm_label = "🌙 P.M."
@@ -805,29 +840,9 @@ async def collect_text_field(message: Message, state: FSMContext):
         if item_key == "check3_pe" and "time" in askable[step]["key"]:
             val = val.replace(".", "").upper()
 
-        # Конвертация даты в испанский формат для чеков Перу
-        if item_key == "check_pe" and askable[step]["key"] == "date":
-            val = _to_es_date(val)
-        if item_key in ("check2_pe", "check4_pe") and askable[step]["key"] == "date":
-            val = _to_es_date2(val)
-        if item_key == "check3_pe" and askable[step]["key"] == "date":
-            val = _to_es_date3(val)
-        if item_key == "fire_check" and askable[step]["key"] == "date":
-            val = _to_es_date_fire(val)
-        if item_key == "check1_uy" and askable[step]["key"] == "date":
-            val = _to_es_date_uy(val)
-        if item_key == "check2_uy" and askable[step]["key"] == "date":
-            val = val.replace(".", "/")
-        if item_key == "check2_py" and askable[step]["key"] == "date":
-            val = _to_es_date_py(val)
-        if item_key == "check3_py" and askable[step]["key"] == "date":
-            val = _to_es_date_py_check3(val)
-        if item_key == "check3_bo" and askable[step]["key"] == "date":
-            val = val.replace(".", "/")
-            parts = val.split("/")
-            if len(parts) == 3 and len(parts[2]) == 2:
-                parts[2] = "20" + parts[2]
-                val = "/".join(parts)
+        # Автоматический подгон даты для чеков
+        if "date" in askable[step]["key"]:
+            val = _format_date_for_item(val, item_key)
         if item_key in ("check2_pe", "check4_pe") and askable[step]["key"] == "time":
             val = val.replace("A.M.", "am.").replace("P.M.", "pm.").replace("a. m.", "am.").replace("p. m.", "pm.")\
                      .replace("a.m.", "am.").replace("p.m.", "pm.").replace("AM", "am.").replace("PM", "pm.")

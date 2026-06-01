@@ -3651,7 +3651,7 @@ GEO_CATALOG: dict = {
                                     },
                                     {
                                         "key": "account",
-                                        "prompt": "💳 Сумма списания",
+                                        "prompt": "💳 Счет списания",
                                         "text_config": {
                                             "font": "sf_pro_medium", "size": 28, "color": (106, 115, 126),
                                             "pos": (835, 590), "align": "right",

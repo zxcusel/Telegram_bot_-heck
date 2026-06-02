@@ -678,7 +678,10 @@ async def cb_item_selected(call: CallbackQuery, state: FSMContext):
             caption_text = f"Выберите режим заполнения для <b>{lbl}</b>:"
             
             try:
-                await call.message.delete()
+                if call.message.caption and "✅ Готово!" in call.message.caption:
+                    pass
+                else:
+                    await call.message.delete()
             except Exception:
                 pass
                 
@@ -768,7 +771,10 @@ async def cb_item_selected(call: CallbackQuery, state: FSMContext):
     kb = _get_field_keyboard(askable[start_step]["key"], s_temp, item_key)
 
     try:
-        await call.message.delete()
+        if call.message.caption and "✅ Готово!" in call.message.caption:
+            pass
+        else:
+            await call.message.delete()
     except Exception:
         pass
 

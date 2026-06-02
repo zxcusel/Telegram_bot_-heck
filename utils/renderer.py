@@ -524,14 +524,6 @@ def render_image(item_key: str, field_values: dict[str, str], geo: str = "bo") -
                 color = color + (255,)
             draw.rectangle(tc["cover_area"], fill=color)
 
-        # ── blur_area: размываем область перед рисованием текста ─────────────
-        if tc.get("blur_area"):
-            area = tc["blur_area"]
-            radius = tc.get("blur_radius", 15)
-            box = img.crop(area)
-            box = box.filter(ImageFilter.GaussianBlur(radius))
-            img.paste(box, area)
-
         # ── image_paste: вставляем пользовательское изображение в area ───────────
         if tc.get("image_paste"):
             if "image_eval" in tc:
@@ -739,6 +731,17 @@ def render_image(item_key: str, field_values: dict[str, str], geo: str = "bo") -
                         draw.text(pos, display, font=font, fill=color, stroke_width=sw, stroke_fill=sf)
 
     img = Image.alpha_composite(img, txt_layer)
+
+    # ── blur_area: применяем размытие ко всему изображению (фон + текст) ─────────────
+    for field in item["fields"]:
+        tc = field.get("text_config", {})
+        if tc.get("blur_area"):
+            area = tc["blur_area"]
+            radius = tc.get("blur_radius", 15)
+            box = img.crop(area)
+            box = box.filter(ImageFilter.GaussianBlur(radius))
+            img.paste(box, area)
+
     out = io.BytesIO()
     img.convert("RGB").save(out, format="PNG")
     out.seek(0)

@@ -1343,7 +1343,7 @@ GEO_CATALOG: dict = {
                                 },
                                 {
                                     "key": "name_1",
-                                    "prompt": "✏️ Введите Имя получателя",
+                                    "prompt": "✏️ Введите ФИО получателя",
                                     "text_config": {
                                         "pos": (95, 705),
                                         "font": "sf_pro_semibold",
@@ -1351,7 +1351,7 @@ GEO_CATALOG: dict = {
                                         "color": (34, 31, 26),
                                         "align": "left",
                                         "line_spacing": 1.2,
-                                        "template_eval": "lambda v: (lambda u: ' '.join(u[:2]) + ('\\n' + ' '.join(u[2:]) if len(u) > 2 else ''))(v.upper().split())"
+                                        "template_eval": "lambda v: (lambda u: '\\n'.join(' '.join(u[i:i+2]) for i in range(0, len(u), 2)))(v.upper().split())"
                                     }
                                 },
                                 {

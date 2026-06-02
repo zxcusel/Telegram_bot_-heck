@@ -733,14 +733,15 @@ def render_image(item_key: str, field_values: dict[str, str], geo: str = "bo") -
     img = Image.alpha_composite(img, txt_layer)
 
     # ── blur_area: применяем размытие ко всему изображению (фон + текст) ─────────────
-    for field in item["fields"]:
-        tc = field.get("text_config", {})
-        if tc.get("blur_area"):
-            area = tc["blur_area"]
-            radius = tc.get("blur_radius", 15)
-            box = img.crop(area)
-            box = box.filter(ImageFilter.GaussianBlur(radius))
-            img.paste(box, area)
+    if field_values.get("_blur_mode", "with_blur") != "no_blur":
+        for field in item["fields"]:
+            tc = field.get("text_config", {})
+            if tc.get("blur_area"):
+                area = tc["blur_area"]
+                radius = tc.get("blur_radius", 15)
+                box = img.crop(area)
+                box = box.filter(ImageFilter.GaussianBlur(radius))
+                img.paste(box, area)
 
     out = io.BytesIO()
     img.convert("RGB").save(out, format="PNG")

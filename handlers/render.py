@@ -654,6 +654,24 @@ async def cb_item_selected(call: CallbackQuery, state: FSMContext):
     parts    = call.data.split(":")
     geo      = parts[1] if len(parts) > 2 else "bo"
     item_key = parts[2] if len(parts) > 2 else parts[1]
+    
+    if item_key == "fire_check":
+        if len(parts) < 4:
+            from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+            kb = InlineKeyboardMarkup(inline_keyboard=[
+                [
+                    InlineKeyboardButton(text="🌫 С блюром", callback_data=f"item:{geo}:{item_key}:with_blur"),
+                    InlineKeyboardButton(text="👁 Без блюра", callback_data=f"item:{geo}:{item_key}:no_blur"),
+                ],
+                [InlineKeyboardButton(text="🔙 Отмена", callback_data="cancel")]
+            ])
+            await call.message.edit_text("Выберите режим заполнения для <b>Чек 2</b>:", parse_mode="HTML", reply_markup=kb)
+            await call.answer()
+            return
+        blur_mode = parts[3]
+    else:
+        blur_mode = "no_blur"
+
     await state.update_data(current_geo=geo)
     item = _find_item(item_key, geo)
 
@@ -661,7 +679,14 @@ async def cb_item_selected(call: CallbackQuery, state: FSMContext):
         await call.answer("❌ Шаблон не найден.", show_alert=True)
         return
 
-    askable = _askable_fields(item["fields"])
+    import copy
+    askable = copy.deepcopy(_askable_fields(item["fields"]))
+    
+    if item_key == "fire_check" and blur_mode == "with_blur":
+        for f in askable:
+            if f["key"] in ("destino", "origen"):
+                f["prompt"] = f["prompt"].split("\n")[0] + "\n(Бот сам сгенерирует рандомный счёт, введите только 4 слова ФИО)"
+
     log.open_template(call.from_user.id, item.get("label", item_key), call.from_user.username)
 
     if not askable:
@@ -677,7 +702,7 @@ async def cb_item_selected(call: CallbackQuery, state: FSMContext):
     s_temp = s.copy()
     s_temp["perc_sign"] = "+"
 
-    auto_values = {}
+    auto_values = {"_blur_mode": blur_mode}
     try:
         start_step = _advance_steps(askable, 0, auto_values, s, item_key)
     except ValueError:

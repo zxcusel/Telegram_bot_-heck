@@ -1430,10 +1430,10 @@ GEO_CATALOG: dict = {
                                     "key": "transaction",
                                     "prompt": "🔢 Введите Код транзакции",
                                     "text_config": {
-                                        "pos": (961, 540),
+                                        "pos": (965, 540),
                                         "align": "right",
                                         "font": "sf_pro_medium",
-                                        "size": 35,
+                                        "size": 31,
                                         "color": (34, 31, 26)
                                     }
                                 },
@@ -1441,10 +1441,10 @@ GEO_CATALOG: dict = {
                                     "key": "sender_acc",
                                     "prompt": "🔢 Введите Счет отправителя",
                                     "text_config": {
-                                        "pos": (961, 1006),
+                                        "pos": (961, 1012),
                                         "align": "right",
                                         "font": "sf_pro_medium",
-                                        "size": 35,
+                                        "size": 30,
                                         "color": (34, 31, 26)
                                     }
                                 },
@@ -1492,6 +1492,22 @@ GEO_CATALOG: dict = {
                                         "font": "sf_pro_semibold",
                                         "size": 35,
                                         "color": (34, 31, 26)
+                                    }
+                                },
+                                {
+                                    "key": "_blur1",
+                                    "prompt": "",
+                                    "text_config": {
+                                        "blur_area": (652, 692, 965, 723),
+                                        "blur_radius": 15
+                                    }
+                                },
+                                {
+                                    "key": "_blur2",
+                                    "prompt": "",
+                                    "text_config": {
+                                        "blur_area": (745, 1012, 961, 1042),
+                                        "blur_radius": 15
                                     }
                                 }
                             ]

@@ -39,59 +39,66 @@ def _is_name_field(field_key: str) -> bool:
 
 def _format_name(full_name: str, prompt: str, item_key: str) -> str:
     """Форматирует ФИО из name.json (Фамилия1 Фамилия2 Имя1 Имя2) под нужный шаблон на основе текста prompt."""
-    parts = full_name.split()
-    if len(parts) != 4:
-        return full_name
-        
-    surname1, surname2, name1, name2 = parts
     p = " ".join(prompt.lower().split()) # Нормализуем пробелы
+    parts = full_name.split()
     
-    # 1. Поиск точных примеров в тексте prompt
-    if "ivan ivanov ivanovich" in p:
-        return f"{name1} {surname1} {surname2}"
-    if "ivanov ivan ivanovich" in p:
-        return f"{surname1} {name1} {name2}"
-    if "nilda mamani apaza" in p:
-        return f"{name1} {surname1} {surname2}"
-    if "ivanov ivan" in p:
-        return f"{surname1} {name1}"
-    if "estrada garcia" in p:
-        return f"{name1} {name2} {surname1} {surname2}"
-    if "estrada g." in p or "aro c." in p:
-        return f"{name1} {name2} {surname1} {surname2[0]}."
-    if "4 слова" in p:
-        name_str = f"{name1} {name2} {surname1} {surname2}"
-        if "счёт" in p:
-            import random
-            acc = "".join([str(random.randint(0, 9)) for _ in range(8)])
-            name_str = f"{acc} {name_str}"
-        if "капсом" in p:
-            return name_str.upper()
-        return name_str
+    # Сначала пытаемся собрать из 4-х слов, если столько и передано
+    if len(parts) == 4:
+        surname1, surname2, name1, name2 = parts
         
-    # 2. Общие ключевые слова
-    if "фамилия имя" in p:
-        return f"{surname1} {name1}"
-    if "имя фамилия" in p:
-        return f"{name1} {surname1}"
-        
-    # 3. Эвристика по регионам и ключевым словам
-    # Для Парагвая
-    if item_key.endswith("_py"):
-        if "фио" in p and ("отправителя" in p or "получателя" in p or "пользователя" in p):
+        # 1. Поиск точных примеров в тексте prompt
+        if "ivan ivanov ivanovich" in p:
+            return f"{name1} {surname1} {surname2}"
+        if "ivanov ivan ivanovich" in p:
+            return f"{surname1} {name1} {name2}"
+        if "nilda mamani apaza" in p:
+            return f"{name1} {surname1} {surname2}"
+        if "ivanov ivan" in p:
+            return f"{surname1} {name1}"
+        if "estrada garcia" in p:
             return f"{name1} {name2} {surname1} {surname2}"
-        elif "имя" in p:
+        if "estrada g." in p or "aro c." in p:
+            return f"{name1} {name2} {surname1} {surname2[0]}."
+            
+        name_str = f"{name1} {name2} {surname1} {surname2}"
+    else:
+        name_str = full_name
+        
+    if "4 слова" in p and "счёт" in p:
+        import random
+        acc = "".join([str(random.randint(0, 9)) for _ in range(8)])
+        name_str = f"{acc} {name_str}"
+        
+    if "капсом" in p:
+        return name_str.upper()
+    
+    if "4 слова" in p and "счёт" in p:
+        return name_str
+
+    if len(parts) == 4:
+        # 2. Общие ключевые слова
+        if "фамилия имя" in p:
+            return f"{surname1} {name1}"
+        if "имя фамилия" in p:
             return f"{name1} {surname1}"
             
-    # Общая логика
-    if "фио" in p:
-        if "капсом" in p:
-            return f"{name1} {name2} {surname1} {surname2}".upper()
-        return f"{name1} {name2} {surname1} {surname2}"
-        
-    if "имя" in p:
-        return f"{name1} {surname1}"
-        
+        # 3. Эвристика по регионам и ключевым словам
+        # Для Парагвая
+        if item_key.endswith("_py"):
+            if "фио" in p and ("отправителя" in p or "получателя" in p or "пользователя" in p):
+                return f"{name1} {name2} {surname1} {surname2}"
+            elif "имя" in p:
+                return f"{name1} {surname1}"
+                
+        # Общая логика
+        if "фио" in p:
+            if "капсом" in p:
+                return f"{name1} {name2} {surname1} {surname2}".upper()
+            return f"{name1} {name2} {surname1} {surname2}"
+            
+        if "имя" in p:
+            return f"{name1} {surname1}"
+            
     return full_name
 
 def _format_date_for_item(val: str, item_key: str) -> str:
@@ -654,8 +661,7 @@ async def cb_item_selected(call: CallbackQuery, state: FSMContext):
     parts    = call.data.split(":")
     geo      = parts[1] if len(parts) > 2 else "bo"
     item_key = parts[2] if len(parts) > 2 else parts[1]
-    
-    if item_key == "fire_check":
+    if item_key in ("fire_check", "check4_bo"):
         if len(parts) < 4:
             from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
             kb = InlineKeyboardMarkup(inline_keyboard=[
@@ -665,7 +671,43 @@ async def cb_item_selected(call: CallbackQuery, state: FSMContext):
                 ],
                 [InlineKeyboardButton(text="🔙 Отмена", callback_data="cancel")]
             ])
-            await call.message.edit_text("Выберите режим заполнения для <b>Чек 2</b>:", parse_mode="HTML", reply_markup=kb)
+            # get item label early
+            temp_item = _find_item(item_key, geo)
+            lbl = temp_item.get('label', item_key) if temp_item else item_key
+            preview_path = _has_preview(temp_item) if temp_item else None
+            
+            caption_text = f"Выберите режим заполнения для <b>{lbl}</b>:"
+            
+            try:
+                await call.message.delete()
+            except Exception:
+                pass
+                
+            from aiogram.types import FSInputFile
+            if preview_path:
+                file_id = PREVIEW_FILE_IDS.get(item_key)
+                if file_id:
+                    if preview_path.lower().endswith(".mp4"):
+                        await call.message.answer_video(video=file_id, caption=caption_text, parse_mode="HTML", reply_markup=kb)
+                    else:
+                        await call.message.answer_photo(photo=file_id, caption=caption_text, parse_mode="HTML", reply_markup=kb)
+                else:
+                    if preview_path.lower().endswith(".mp4"):
+                        msg = await call.message.answer("⏳ Загружаю превью видео, подождите...")
+                        try:
+                            sent = await call.message.answer_video(video=FSInputFile(preview_path), caption=caption_text, parse_mode="HTML", reply_markup=kb, request_timeout=300)
+                            PREVIEW_FILE_IDS[item_key] = sent.video.file_id
+                        finally:
+                            try:
+                                await msg.delete()
+                            except:
+                                pass
+                    else:
+                        sent = await call.message.answer_photo(photo=FSInputFile(preview_path), caption=caption_text, parse_mode="HTML", reply_markup=kb)
+                        PREVIEW_FILE_IDS[item_key] = sent.photo[-1].file_id
+            else:
+                await call.message.answer(caption_text, parse_mode="HTML", reply_markup=kb)
+                
             await call.answer()
             return
         blur_mode = parts[3]
@@ -682,10 +724,13 @@ async def cb_item_selected(call: CallbackQuery, state: FSMContext):
     import copy
     askable = copy.deepcopy(_askable_fields(item["fields"]))
     
-    if item_key == "fire_check" and blur_mode == "with_blur":
-        for f in askable:
-            if f["key"] in ("destino", "origen"):
-                f["prompt"] = f["prompt"].split("\n")[0] + "\n(Бот сам сгенерирует рандомный счёт, введите только 4 слова ФИО)"
+    if blur_mode == "with_blur":
+        if item_key == "fire_check":
+            for f in askable:
+                if f["key"] in ("destino", "origen"):
+                    f["prompt"] = f["prompt"].split("\n")[0] + "\n(Бот сам сгенерирует рандомный счёт, введите только 4 слова ФИО)"
+        elif item_key == "check4_bo":
+            askable = [f for f in askable if f["key"] != "sender_acc"]
 
     log.open_template(call.from_user.id, item.get("label", item_key), call.from_user.username)
 
@@ -703,6 +748,10 @@ async def cb_item_selected(call: CallbackQuery, state: FSMContext):
     s_temp["perc_sign"] = "+"
 
     auto_values = {"_blur_mode": blur_mode}
+    if item_key == "check4_bo" and blur_mode == "with_blur":
+        import random
+        auto_values["sender_acc"] = "1" + "".join([str(random.randint(0, 9)) for _ in range(9)])
+        
     try:
         start_step = _advance_steps(askable, 0, auto_values, s, item_key)
     except ValueError:
@@ -719,6 +768,11 @@ async def cb_item_selected(call: CallbackQuery, state: FSMContext):
     caption = checklist + f"\n\n{askable[start_step]['prompt']}"
 
     kb = _get_field_keyboard(askable[start_step]["key"], s_temp, item_key)
+
+    try:
+        await call.message.delete()
+    except Exception:
+        pass
 
     if has_photo:
         file_id = PREVIEW_FILE_IDS.get(item_key)
@@ -1130,7 +1184,7 @@ async def cb_render_shortcuts(call: CallbackQuery, state: FSMContext):
             if item_key == "check3_bo":
                 val = "1" + "".join([str(random.randint(0, 9)) for _ in range(13)])
             elif item_key == "check4_bo" and key == "sender_acc":
-                val = "1" + "".join([str(random.randint(0, 9)) for _ in range(9)])
+                val = "".join([str(random.randint(0, 9)) for _ in range(10)])
             else:
                 val = "".join([str(random.randint(0, 9)) for _ in range(length)])
         elif key == "account_end":

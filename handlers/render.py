@@ -663,7 +663,6 @@ async def cb_item_selected(call: CallbackQuery, state: FSMContext):
     item_key = parts[2] if len(parts) > 2 else parts[1]
     if item_key in ("fire_check", "check4_bo"):
         if len(parts) < 4:
-            from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
             kb = InlineKeyboardMarkup(inline_keyboard=[
                 [
                     InlineKeyboardButton(text="🌫 С блюром", callback_data=f"item:{geo}:{item_key}:with_blur"),
@@ -683,7 +682,6 @@ async def cb_item_selected(call: CallbackQuery, state: FSMContext):
             except Exception:
                 pass
                 
-            from aiogram.types import FSInputFile
             if preview_path:
                 file_id = PREVIEW_FILE_IDS.get(item_key)
                 if file_id:

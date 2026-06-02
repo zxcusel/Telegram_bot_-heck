@@ -81,6 +81,7 @@ GEO_LABELS: dict[str, str] = {
     "pe": "🇵🇪 Peru",
     "uy": "🇺🇾 Uruguay",
     "py": "🇵🇾 Paraguay",
+    "ma": "🇲🇦 Morocco",
 }
 
 # Каталог: верхний уровень — геолокация, затем категории.
@@ -4877,6 +4878,27 @@ GEO_CATALOG: dict = {
             "fire": { "label": "🔥 Paraguay FIRE", "sections": {} },
         },
     },
+    
+    # ════════════════════════════════════════════════════════
+    # Morocco 🇲🇦 — шаблоны, относящиеся к Марокко
+    # ════════════════════════════════════════════════════════
+    "ma": {
+        "label": "🇲🇦 Morocco",
+        "catalog": {
+            "rd": {
+                "label": "📸 Morocco RD",
+                "sections": {}
+            },
+            "fd": {
+                "label": "📁 Morocco FD",
+                "sections": {}
+            },
+            "check": {
+                "label": "🧾 Morocco Check",
+                "sections": {}
+            }
+        }
+    }
 }
 
 # Обратная совместимость — Bolivia как CATALOG по умолчанию.

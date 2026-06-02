@@ -1433,7 +1433,7 @@ GEO_CATALOG: dict = {
                                         "pos": (965, 540),
                                         "align": "right",
                                         "font": "sf_pro_medium",
-                                        "size": 31,
+                                        "size": 35,
                                         "color": (34, 31, 26)
                                     }
                                 },
@@ -1444,7 +1444,7 @@ GEO_CATALOG: dict = {
                                         "pos": (961, 1012),
                                         "align": "right",
                                         "font": "sf_pro_medium",
-                                        "size": 30,
+                                        "size": 35,
                                         "color": (34, 31, 26)
                                     }
                                 },

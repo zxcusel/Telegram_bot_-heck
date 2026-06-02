@@ -1317,6 +1317,22 @@ GEO_CATALOG: dict = {
                                         ),
                                     },
                                 },
+                                {
+                                    "key": "_blur1",
+                                    "prompt": "",
+                                    "text_config": {
+                                        "blur_area": (82, 677, 175, 697),
+                                        "blur_radius": 15
+                                    }
+                                },
+                                {
+                                    "key": "_blur2",
+                                    "prompt": "",
+                                    "text_config": {
+                                        "blur_area": (82, 798, 175, 818),
+                                        "blur_radius": 15
+                                    }
+                                },
                             ],
                         },
                         "check3_bo": {

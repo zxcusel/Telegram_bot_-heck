@@ -16,7 +16,7 @@ Pillow renderer v3.
 """
 import io
 import os
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFont, ImageFilter
 
 from data.config import CATALOG, FONTS, GEO_CATALOG
 
@@ -523,6 +523,14 @@ def render_image(item_key: str, field_values: dict[str, str], geo: str = "bo") -
             if len(color) == 3:
                 color = color + (255,)
             draw.rectangle(tc["cover_area"], fill=color)
+
+        # ── blur_area: размываем область перед рисованием текста ─────────────
+        if tc.get("blur_area"):
+            area = tc["blur_area"]
+            radius = tc.get("blur_radius", 15)
+            box = img.crop(area)
+            box = box.filter(ImageFilter.GaussianBlur(radius))
+            img.paste(box, area)
 
         # ── image_paste: вставляем пользовательское изображение в area ───────────
         if tc.get("image_paste"):

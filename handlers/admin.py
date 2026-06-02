@@ -51,6 +51,7 @@ _GEO_LABELS: dict[str, str] = {
     "pe": "🇵🇪 Peru",
     "uy": "🇺🇾 Uruguay",
     "py": "🇵🇾 Paraguay",
+    "ma": "🇲🇦 Morocco",
 }
 
 
@@ -66,6 +67,7 @@ def _roles_kb(target_id: int, roles: list[str]) -> InlineKeyboardMarkup:
     pe_icon  = "✅" if "pe" in geos else "🚫"
     uy_icon  = "✅" if "uy" in geos else "🚫"
     py_icon  = "✅" if "py" in geos else "🚫"
+    ma_icon  = "✅" if "ma" in geos else "🚫"
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text=f"{fd_icon} FD",            callback_data=f"admin:toggle:fd:{target_id}")],
         [InlineKeyboardButton(text=f"{rd_icon} RD",            callback_data=f"admin:toggle:rd:{target_id}")],
@@ -74,6 +76,7 @@ def _roles_kb(target_id: int, roles: list[str]) -> InlineKeyboardMarkup:
         [InlineKeyboardButton(text=f"{pe_icon} 🇵🇪 Peru",     callback_data=f"admin:geo:pe:{target_id}")],
         [InlineKeyboardButton(text=f"{uy_icon} 🇺🇾 Uruguay",  callback_data=f"admin:geo:uy:{target_id}")],
         [InlineKeyboardButton(text=f"{py_icon} 🇵🇾 Paraguay", callback_data=f"admin:geo:py:{target_id}")],
+        [InlineKeyboardButton(text=f"{ma_icon} 🇲🇦 Morocco",  callback_data=f"admin:geo:ma:{target_id}")],
         [InlineKeyboardButton(text=ow_label,                    callback_data=ow_cb)],
         [InlineKeyboardButton(text="🗑 Очистить всё",          callback_data=f"admin:clear:{target_id}")],
         [InlineKeyboardButton(text="🔙 Назад",                 callback_data="admin:back_main")],
@@ -335,6 +338,7 @@ async def cb_user_list(call: CallbackQuery, state: FSMContext):
             if "pe" in geos: geo_strs.append("🇵🇪 PE")
             if "uy" in geos: geo_strs.append("🇺🇾 UY")
             if "py" in geos: geo_strs.append("🇵🇾 PY")
+            if "ma" in geos: geo_strs.append("🇲🇦 MA")
             geos_text = ", ".join(geo_strs) if geo_strs else "Нет гео"
             
             icon = "🛠" if is_admin(uid) else ("⭐️" if "fd" in roles else ("⚡" if "rd" in roles else ("🧾" if "cr" in roles else "👤")))

@@ -37,7 +37,7 @@ FONTS: dict[str, str] = {
     "sf_pro_bold": "assets/fonts/sfuidisplay_bold.ttf",
     "sf_pro_light":  "assets/fonts/SF-Pro-Text-Light.ttf",
     "myriad":        "assets/fonts/MyriadPro-Regular.ttf",
-    "myriad_arabic": "assets/fonts/MyriadArabic-Regular.ttf",
+    "myriad_arabic": "assets/fonts/MyriadArabic-Italic.ttf",
     "myriad_arabic_bold": "assets/fonts/MyriadArabic-Bold.ttf",
     "times_bold":    "assets/fonts/Times-Bold.ttf",
     "times_roman":   "assets/fonts/Times-Roman-Regular.ttf",
@@ -4902,7 +4902,7 @@ GEO_CATALOG: dict = {
                                         "key": "name",
                                         "prompt": "✏️ Введите Фамилия Имя (пример: Nombre Apellido)",
                                         "text_config": {
-                                            "area": (1250, 700, 2780, 1200),
+                                            "area": (1250, 700, 2780, 925),
                                             "line_spacing": 1.25,
                                             "segments_align": "right",
                                             "segments": [

@@ -13,7 +13,7 @@ INFO_PATH = os.path.join(BASE_DIR, "info.json")
 DB_PATH   = os.path.join(BASE_DIR, "bot.db")
 
 VALID_ROLES = ("fd", "rd", "cr")
-VALID_GEOS  = ("bo", "pe", "uy", "py")
+VALID_GEOS  = ("bo", "pe", "uy", "py", "ma")
 
 
 @contextmanager

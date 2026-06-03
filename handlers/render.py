@@ -65,15 +65,14 @@ def _format_name(full_name: str, prompt: str, item_key: str) -> str:
         name_str = full_name
         
     if "4 слова" in p and "счёт" in p:
-        import random
-        acc = "".join([str(random.randint(0, 9)) for _ in range(8)])
-        name_str = f"{acc} {name_str}"
+        import re
+        if not re.match(r'^\d+', name_str):
+            import random
+            acc = "".join([str(random.randint(0, 9)) for _ in range(8)])
+            name_str = f"{acc} {name_str}"
         
-    if "капсом" in p:
+    if "капсом" in p or item_key == "fire_check":
         return name_str.upper()
-    
-    if "4 слова" in p and "счёт" in p:
-        return name_str
 
     if len(parts) == 4:
         # 2. Общие ключевые слова

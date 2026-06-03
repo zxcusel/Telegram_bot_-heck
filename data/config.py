@@ -1152,7 +1152,7 @@ GEO_CATALOG: dict = {
                         "check_doc": {
                             "label": "Чек 1",
                             "asset": "assets/Bolivia/Чек/Check1.jpg",
-                            "preview": "assets/preview/Check_prew.png",
+                            "preview": "assets/preview/Check1_prew.png",
                             "fields": [
                                 {
                                     "key": "amount",

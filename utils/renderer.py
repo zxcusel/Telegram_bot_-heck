@@ -326,6 +326,13 @@ def _draw_segments(draw, segments: list[dict], area: tuple,
             for tok, font, color in line:
                 draw.text((x, y + global_max_ascent), tok, font=font, fill=color, anchor="ls")
                 x += font.getlength(tok)
+        elif align == "center_rtl":
+            line_w = sum(f.getlength(t) for t, f, _ in line if f)
+            x = float(x1) + (max_w + line_w) / 2
+            for tok, font, color in line:
+                tok_w = font.getlength(tok)
+                draw.text((x - tok_w, y + global_max_ascent), tok, font=font, fill=color, anchor="ls")
+                x -= tok_w
         else:
             x = float(x1)
             for tok, font, color in line:

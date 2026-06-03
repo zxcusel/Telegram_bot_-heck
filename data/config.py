@@ -4909,7 +4909,7 @@ GEO_CATALOG: dict = {
                                                  "font": "myriad_arabic_italic", "size": 45, "color": (255, 255, 255)},
                                                 {"text": "{name}",
                                                  "font": "myriad_arabic_italic", "size": 45, "color": (255, 255, 255),
-                                                 "template_eval": "lambda v, **kw: v.replace(' ', '\u00A0')"},
+                                                 "template_eval": "lambda name='', **kw: name.replace(' ', '\u00A0')"},
                                                 {"text": " عن مبلغ ",
                                                  "font": "myriad_arabic_italic", "size": 45, "color": (255, 255, 255)},
                                                 {"text": "د.م. 37,485.00",

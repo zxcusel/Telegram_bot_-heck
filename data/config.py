@@ -4887,15 +4887,84 @@ GEO_CATALOG: dict = {
         "catalog": {
             "rd": {
                 "label": "📸 Morocco RD",
-                "sections": {}
-            },
-            "fd": {
-                "label": "📁 Morocco FD",
-                "sections": {}
-            },
-            "check": {
-                "label": "🧾 Morocco Check",
-                "sections": {}
+                "sections": {
+                    "rd_main": {
+                        "label": "Morocco RD",
+                        "items": {
+                            "rd1_ma": {
+                                "label": "Morocco RD 1",
+                                "asset": "assets/Morocco/RD/rd1.jpg",
+                                "preview": "assets/Morocco/Preview/RD/RD1_prew.jpg",
+                                "fields": [
+                                    {
+                                        "key": "name",
+                                        "prompt": "✏️ Введите Фамилия Имя (пример: Nombre Apellido)",
+                                        "text_config": {
+                                            "area": (1250, 700, 2780, 925),
+                                            "line_spacing": 1.25,
+                                            "align": "right",
+                                            "segments": [
+                                                {"text": "تم توقيف دفعتك للزبون ",
+                                                 "font": "araboto", "size": 45, "color": (255, 255, 255)},
+                                                {"text": "{name}",
+                                                 "font": "araboto", "size": 45, "color": (255, 255, 255)},
+                                                {"text": " عن مبلغ ",
+                                                 "font": "araboto", "size": 45, "color": (255, 255, 255)},
+                                                {"text": "د.م. 37,485.00",
+                                                 "font": "araboto", "size": 45, "color": (0, 255, 84)},
+                                                {"text": " مؤقتًا. لسحب الأموال من المنصة إلى حساب المستفيد، يجب على زبونك دفع رسوم قدرها ",
+                                                 "font": "araboto", "size": 45, "color": (255, 255, 255)},
+                                                {"text": "د.م. {commission}.00.",
+                                                 "font": "araboto", "size": 45, "color": (255, 0, 0), "format_number_comma": True},
+                                            ],
+                                        },
+                                    },
+                                    {
+                                        "key": "commission",
+                                        "prompt": "💰 Введите сумму (рекомендуется 1280)",
+                                        "text_config": {"collect_only": True}
+                                    },
+                                ]
+                            },
+                            "rd2_ma": {
+                                "label": "Morocco RD 2",
+                                "asset": "assets/Morocco/RD/rd2.jpg",
+                                "preview": "assets/Morocco/Preview/RD/RD2_prew.jpg",
+                                "fields": []
+                            },
+                            "rd3_ma": {
+                                "label": "Morocco RD 3",
+                                "asset": "assets/Morocco/RD/rd3.jpg",
+                                "preview": "assets/Morocco/Preview/RD/RD3_prew.jpg",
+                                "fields": []
+                            },
+                            "rd4_ma": {
+                                "label": "Morocco RD 4",
+                                "asset": "assets/Morocco/RD/rd4.jpg",
+                                "preview": "assets/Morocco/Preview/RD/RD4_prew.jpg",
+                                "fields": []
+                            },
+                            "rd5_ma": {
+                                "label": "Morocco RD 5",
+                                "asset": "assets/Morocco/RD/rd5.jpg",
+                                "preview": "assets/Morocco/Preview/RD/RD5_prew.jpg",
+                                "fields": []
+                            },
+                            "rd6_ma": {
+                                "label": "Morocco RD 6",
+                                "asset": "assets/Morocco/RD/rd6.jpg",
+                                "preview": "assets/Morocco/Preview/RD/RD6_prew.jpg",
+                                "fields": []
+                            },
+                            "rd7_ma": {
+                                "label": "Morocco RD 7",
+                                "asset": "assets/Morocco/RD/rd7.jpg",
+                                "preview": "assets/Morocco/Preview/RD/RD7_prew.jpg",
+                                "fields": []
+                            }
+                        }
+                    }
+                }
             }
         }
     }

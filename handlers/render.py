@@ -661,57 +661,10 @@ async def cb_item_selected(call: CallbackQuery, state: FSMContext):
     parts    = call.data.split(":")
     geo      = parts[1] if len(parts) > 2 else "bo"
     item_key = parts[2] if len(parts) > 2 else parts[1]
+
+    s = get_settings(call.from_user.id)
     if item_key in ("fire_check", "check4_bo"):
-        if len(parts) < 4:
-            kb = InlineKeyboardMarkup(inline_keyboard=[
-                [
-                    InlineKeyboardButton(text="🌫 С блюром", callback_data=f"item:{geo}:{item_key}:with_blur"),
-                    InlineKeyboardButton(text="👁 Без блюра", callback_data=f"item:{geo}:{item_key}:no_blur"),
-                ],
-                [InlineKeyboardButton(text="🔙 Отмена", callback_data="cancel")]
-            ])
-            # get item label early
-            temp_item = _find_item(item_key, geo)
-            lbl = temp_item.get('label', item_key) if temp_item else item_key
-            preview_path = _has_preview(temp_item) if temp_item else None
-            
-            caption_text = f"Выберите режим заполнения для <b>{lbl}</b>:"
-            
-            try:
-                if call.message.caption and "✅ Готово!" in call.message.caption:
-                    pass
-                else:
-                    await call.message.delete()
-            except Exception:
-                pass
-                
-            if preview_path:
-                file_id = PREVIEW_FILE_IDS.get(item_key)
-                if file_id:
-                    if preview_path.lower().endswith(".mp4"):
-                        await call.message.answer_video(video=file_id, caption=caption_text, parse_mode="HTML", reply_markup=kb)
-                    else:
-                        await call.message.answer_photo(photo=file_id, caption=caption_text, parse_mode="HTML", reply_markup=kb)
-                else:
-                    if preview_path.lower().endswith(".mp4"):
-                        msg = await call.message.answer("⏳ Загружаю превью видео, подождите...")
-                        try:
-                            sent = await call.message.answer_video(video=FSInputFile(preview_path), caption=caption_text, parse_mode="HTML", reply_markup=kb, request_timeout=300)
-                            PREVIEW_FILE_IDS[item_key] = sent.video.file_id
-                        finally:
-                            try:
-                                await msg.delete()
-                            except:
-                                pass
-                    else:
-                        sent = await call.message.answer_photo(photo=FSInputFile(preview_path), caption=caption_text, parse_mode="HTML", reply_markup=kb)
-                        PREVIEW_FILE_IDS[item_key] = sent.photo[-1].file_id
-            else:
-                await call.message.answer(caption_text, parse_mode="HTML", reply_markup=kb)
-                
-            await call.answer()
-            return
-        blur_mode = parts[3]
+        blur_mode = "with_blur" if s.get("blur_enabled", 1) else "no_blur"
     else:
         blur_mode = "no_blur"
 

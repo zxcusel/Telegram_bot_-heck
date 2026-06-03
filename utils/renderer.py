@@ -277,7 +277,6 @@ def _draw_segments(draw, segments: list[dict], area: tuple,
     for tok, font, color in tokens:
         if tok == "\n":
             flush()
-            lines.append([])   # blank line
             continue
         # skip leading spaces on a new line
         if tok == " " and not cur_line:

@@ -1451,7 +1451,7 @@ GEO_CATALOG: dict = {
                                 },
                                 {
                                     "key": "sender_name",
-                                    "prompt": "👤 Введите Имя отправителя",
+                                    "prompt": "👤 Введите Имя получателя",
                                     "text_config": {
                                         "pos": (60, 1067),
                                         "align": "left",

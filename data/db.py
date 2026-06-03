@@ -105,21 +105,21 @@ def init_db():
         con.execute("""
             CREATE TABLE IF NOT EXISTS geos (
                 user_id  INTEGER NOT NULL,
-                geo      TEXT    NOT NULL CHECK(geo IN ('bo','pe','uy','py')),
+                geo      TEXT    NOT NULL CHECK(geo IN ('bo','pe','uy','py','ma')),
                 added_at TEXT    DEFAULT (datetime('now')),
                 PRIMARY KEY (user_id, geo)
             )
         """)
         
-        # Авто-миграция для старой таблицы geos, где разрешены только bo и pe
+        # Авто-миграция для старой таблицы geos
         schema_geos = con.execute("SELECT sql FROM sqlite_master WHERE type='table' AND name='geos'").fetchone()
-        if schema_geos and "'uy'" not in schema_geos[0]:
+        if schema_geos and "'ma'" not in schema_geos[0]:
             try:
                 con.execute("PRAGMA foreign_keys=OFF")
                 con.execute("""
                     CREATE TABLE geos_new (
                         user_id  INTEGER NOT NULL,
-                        geo      TEXT    NOT NULL CHECK(geo IN ('bo','pe','uy','py')),
+                        geo      TEXT    NOT NULL CHECK(geo IN ('bo','pe','uy','py','ma')),
                         added_at TEXT    DEFAULT (datetime('now')),
                         PRIMARY KEY (user_id, geo)
                     )

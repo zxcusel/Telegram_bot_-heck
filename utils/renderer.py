@@ -315,19 +315,24 @@ def _draw_segments(draw, segments: list[dict], area: tuple,
             break
             
         if align == "right":
-            # measure total line width, then draw from right edge
-            line_w = sum(f.getlength(t) for t, f, _ in line if f)
-            x = float(x2) - line_w
+            # draw from right edge to left for RTL support
+            x = float(x2)
+            for tok, font, color in line:
+                tok_w = font.getlength(tok)
+                draw.text((x - tok_w, y + global_max_ascent), tok, font=font, fill=color, anchor="ls")
+                x -= tok_w
         elif align == "center":
             line_w = sum(f.getlength(t) for t, f, _ in line if f)
             x = float(x1) + (max_w - line_w) / 2
+            for tok, font, color in line:
+                draw.text((x, y + global_max_ascent), tok, font=font, fill=color, anchor="ls")
+                x += font.getlength(tok)
         else:
             x = float(x1)
-            
-        for tok, font, color in line:
-            # Используем anchor="ls" (left, baseline) для выравнивания шрифтов
-            draw.text((x, y + global_max_ascent), tok, font=font, fill=color, anchor="ls")
-            x += font.getlength(tok)
+            for tok, font, color in line:
+                # Используем anchor="ls" (left, baseline) для выравнивания шрифтов
+                draw.text((x, y + global_max_ascent), tok, font=font, fill=color, anchor="ls")
+                x += font.getlength(tok)
         y += lh
 
 

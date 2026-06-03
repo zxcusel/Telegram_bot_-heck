@@ -1152,7 +1152,7 @@ GEO_CATALOG: dict = {
                         "check_doc": {
                             "label": "Чек 1",
                             "asset": "assets/Bolivia/Чек/Check1.jpg",
-                            "preview": "assets/preview/Check_prew.png",
+                            "preview": "assets/preview/Check1_prew.png",
                             "fields": [
                                 {
                                     "key": "amount",
@@ -1451,7 +1451,7 @@ GEO_CATALOG: dict = {
                                 },
                                 {
                                     "key": "sender_name",
-                                    "prompt": "👤 Введите Имя отправителя",
+                                    "prompt": "👤 Введите Имя получателя",
                                     "text_config": {
                                         "pos": (60, 1067),
                                         "align": "left",

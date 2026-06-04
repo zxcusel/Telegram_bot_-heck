@@ -4902,7 +4902,7 @@ GEO_CATALOG: dict = {
                                         "key": "name",
                                         "prompt": "✏️ Введите Фамилия Имя (пример: Nombre Apellido)",
                                         "text_config": {
-                                            "area": (815, 660, 3215, 1200),
+                                            "area": (1228, 693, 2771, 914),
                                             "line_spacing": 1.45,
                                             "segments_align": "center_rtl",
                                             "segments": [

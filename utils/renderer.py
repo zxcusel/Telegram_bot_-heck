@@ -289,20 +289,33 @@ def _draw_segments(draw, segments: list[dict], area: tuple,
         lines.append(cur_line)
         cur_line, cur_w = [], 0.0
 
-    for tok, font, color in tokens:
+    for idx, (tok, font, color) in enumerate(tokens):
         if tok == "\n":
             flush()
             continue
         # skip leading spaces on a new line
         if tok == " " and not cur_line:
             continue
-        w = font.getlength(tok)
-        if cur_w + w > max_w + 0.5 and cur_line:
-            flush()
-            if tok.strip():
-                cur_line.append((tok, font, color))
-                cur_w = w
+
+        # Calculate width of the glued token group (consecutive non-space tokens)
+        group_w = 0.0
+        if tok != " ":
+            for next_tok, next_font, _ in tokens[idx:]:
+                if next_tok in (" ", "\n"):
+                    break
+                group_w += next_font.getlength(next_tok)
         else:
+            group_w = font.getlength(tok)
+
+        if cur_w + group_w > max_w + 0.5 and cur_line:
+            flush()
+            if tok == " ":
+                continue
+            w = font.getlength(tok)
+            cur_line.append((tok, font, color))
+            cur_w = w
+        else:
+            w = font.getlength(tok)
             cur_line.append((tok, font, color))
             cur_w += w
     flush()

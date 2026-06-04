@@ -28,10 +28,6 @@ PT_TO_PX = 1.0   # Photoshop 72 dpi → 1 pt = 1 px
 
 def _process_arabic(text: str) -> str:
     """Reshapes and applies BiDi algorithm to Arabic text for proper cursive rendering in PIL."""
-    from PIL import features
-    if features.check("raqm"):
-        return text
-
     if any(u"\u0600" <= c <= u"\u06FF" for c in text):
         import arabic_reshaper
         from bidi.algorithm import get_display
@@ -255,7 +251,7 @@ def _draw_segments(draw, segments: list[dict], area: tuple,
         except (KeyError, ValueError):
             pass
         resolved.append({
-            "text":  raw,
+            "text":  _process_arabic(raw),
             "font":  _load_font(seg.get("font", "montserrat"), seg.get("size", 20)),
             "color": seg.get("color", (0, 0, 0)),
         })
@@ -271,7 +267,7 @@ def _draw_segments(draw, segments: list[dict], area: tuple,
             words = part.split(" ")
             for j, w in enumerate(words):
                 if w:
-                    tokens.append((_process_arabic(w), seg["font"], seg["color"]))
+                    tokens.append((w, seg["font"], seg["color"]))
                 if j < len(words) - 1:
                     # preserve inter-word space, carry font of left word
                     tokens.append((" ", seg["font"], seg["color"]))
@@ -289,33 +285,20 @@ def _draw_segments(draw, segments: list[dict], area: tuple,
         lines.append(cur_line)
         cur_line, cur_w = [], 0.0
 
-    for idx, (tok, font, color) in enumerate(tokens):
+    for tok, font, color in tokens:
         if tok == "\n":
             flush()
             continue
         # skip leading spaces on a new line
         if tok == " " and not cur_line:
             continue
-
-        # Calculate width of the glued token group (consecutive non-space tokens)
-        group_w = 0.0
-        if tok != " ":
-            for next_tok, next_font, _ in tokens[idx:]:
-                if next_tok in (" ", "\n"):
-                    break
-                group_w += next_font.getlength(next_tok)
-        else:
-            group_w = font.getlength(tok)
-
-        if cur_w + group_w > max_w + 0.5 and cur_line:
+        w = font.getlength(tok)
+        if cur_w + w > max_w + 0.5 and cur_line:
             flush()
-            if tok == " ":
-                continue
-            w = font.getlength(tok)
-            cur_line.append((tok, font, color))
-            cur_w = w
+            if tok.strip():
+                cur_line.append((tok, font, color))
+                cur_w = w
         else:
-            w = font.getlength(tok)
             cur_line.append((tok, font, color))
             cur_w += w
     flush()

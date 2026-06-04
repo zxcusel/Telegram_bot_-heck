@@ -4902,21 +4902,21 @@ GEO_CATALOG: dict = {
                                         "key": "name",
                                         "prompt": "✏️ Введите Фамилия Имя (пример: Nombre Apellido)",
                                         "text_config": {
-                                            "area": (1228, 693, 2771, 914),
-                                            "line_spacing": 1.15,
+                                            "area": (815, 660, 3215, 1200),
+                                            "line_spacing": 1.45,
                                             "segments_align": "center_rtl",
                                             "segments": [
-                                                {"text": "تم توقيف دفعتك للزبون ", "font": "araboto", "size": 65, "color": (255, 255, 255)},
-                                                {"text": "{name}", "font": "araboto", "size": 65, "color": (255, 255, 255),
+                                                {"text": "تم توقيف دفعتك للزبون ", "font": "araboto", "size": 50, "color": (255, 255, 255)},
+                                                {"text": "{name}", "font": "araboto", "size": 50, "color": (255, 255, 255),
                                                  "template_eval": "lambda name='', **kw: name.replace(' ', '\u00A0')"},
-                                                {"text": " عن\u00A0مبلغ\u00A0", "font": "araboto", "size": 65, "color": (255, 255, 255)},
-                                                {"text": "د.م.\u00A0", "font": "araboto", "size": 65, "color": (0, 255, 84)},
-                                                {"text": "37,485.00\u00A0", "font": "myriad_arabic_bold", "size": 65, "color": (0, 255, 84)},
-                                                {"text": "مؤقتًا.\n", "font": "araboto", "size": 65, "color": (255, 255, 255)},
-                                                {"text": "لسحب الأموال من المنصة إلى حساب المستفيد، يجب على زبونك دفع ", "font": "araboto", "size": 65, "color": (255, 255, 255)},
-                                                {"text": "رسوم\u00A0قدرها\u00A0", "font": "araboto", "size": 65, "color": (255, 255, 255)},
-                                                {"text": "د.م.\u00A0", "font": "araboto", "size": 65, "color": (255, 0, 0)},
-                                                {"text": "{commission}.00", "font": "myriad_arabic_bold", "size": 65, "color": (255, 0, 0), "format_number_comma": True}
+                                                {"text": " مؤقتًا. ", "font": "araboto", "size": 50, "color": (255, 255, 255)},
+                                                {"text": "37,485.00", "font": "myriad_arabic_bold", "size": 50, "color": (0, 255, 84)},
+                                                {"text": " د.م. ", "font": "araboto", "size": 50, "color": (0, 255, 84)},
+                                                {"text": " عن مبلغ\n", "font": "araboto", "size": 50, "color": (255, 255, 255)},
+                                                {"text": "لسحب الأموال من المنصة إلى حساب المستفيد، يجب على زبونك دفع ", "font": "araboto", "size": 50, "color": (255, 255, 255)},
+                                                {"text": "رسوم قدرها\n", "font": "araboto", "size": 50, "color": (255, 255, 255)},
+                                                {"text": "{commission}.00", "font": "myriad_arabic_bold", "size": 50, "color": (255, 0, 0), "format_number_comma": True},
+                                                {"text": " د.م. ", "font": "araboto", "size": 50, "color": (255, 0, 0)}
                                             ],
                                         },
                                     },
@@ -4931,45 +4931,7 @@ GEO_CATALOG: dict = {
                                 "label": "Morocco RD 2",
                                 "asset": "assets/Morocco/RD/rd2.jpg",
                                 "preview": "assets/Morocco/Preview/RD/RD2_prew.jpg",
-                                "fields": [
-                                    {
-                                        "key": "name",
-                                        "prompt": "✏️ Введите Фамилия Имя",
-                                        "text_config": {
-                                            "area": (1000, 1426, 3021, 1500),
-                                            "segments_align": "right",
-                                            "segments": [
-                                                {"text": "حساب بنكي للزبون\u00A0", "font": "araboto", "size": 30, "color": (57, 62, 67)},
-                                                {"text": "{name}", "font": "araboto", "size": 30, "color": (57, 62, 67),
-                                                 "template_eval": "lambda name='', **kw: name.replace(' ', '\u00A0')"},
-                                                {"text": ".", "font": "araboto", "size": 30, "color": (57, 62, 67)}
-                                            ]
-                                        }
-                                    },
-                                    {
-                                        "key": "amount",
-                                        "prompt": "💰 Введите сумму",
-                                        "text_config": {"collect_only": True}
-                                    },
-                                    {
-                                        "key": "_body",
-                                        "prompt": "",
-                                        "text_config": {
-                                            "area": (2253, 532, 2980, 644),
-                                            "segments_align": "right",
-                                            "line_spacing": 1.2,
-                                            "segments": [
-                                                {"text": "من الضروري دفع رسوم لتحويل\n", "font": "araboto", "size": 44, "color": (255, 255, 255)},
-                                                {"text": "USDT\u00A0", "font": "myriad_arabic_bold", "size": 44, "color": (136, 255, 164)},
-                                                {"text": "إلى\u00A0", "font": "araboto", "size": 44, "color": (255, 255, 255)},
-                                                {"text": "MAD.\n", "font": "myriad_arabic_bold", "size": 44, "color": (254, 68, 92)},
-                                                {"text": "مقدار الرسوم:\u00A0", "font": "araboto", "size": 44, "color": (255, 255, 255)},
-                                                {"text": "د.م.\u00A0", "font": "araboto", "size": 44, "color": (255, 255, 255)},
-                                                {"text": "{amount}", "font": "myriad_arabic_bold", "size": 44, "color": (255, 13, 13), "format_number_comma": True}
-                                            ]
-                                        }
-                                    }
-                                ]
+                                "fields": []
                             },
                             "rd3_ma": {
                                 "label": "Morocco RD 3",

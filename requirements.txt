@@ -1,2 +1,4 @@
 aiogram>=3.27.0
 Pillow>=12.2.0
+arabic-reshaper>=3.0.0
+python-bidi>=0.4.2

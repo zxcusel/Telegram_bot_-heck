@@ -26,6 +26,17 @@ PT_TO_PX = 1.0   # Photoshop 72 dpi → 1 pt = 1 px
 
 # ─────────────────────────────── helpers ─────────────────────────────────────
 
+def _process_arabic(text: str) -> str:
+    """Reshapes and applies BiDi algorithm to Arabic text for proper cursive rendering in PIL."""
+    if any(u"\u0600" <= c <= u"\u06FF" for c in text):
+        import arabic_reshaper
+        from bidi.algorithm import get_display
+        reshaped = arabic_reshaper.reshape(text)
+        bidi_text = get_display(reshaped)
+        # Use non-breaking spaces to prevent tokenization from splitting Arabic words
+        return bidi_text.replace(" ", "\u00A0").replace("\xa0", "\u00A0")
+    return text
+
 def _find_item(item_key: str, geo: str = "bo") -> dict | None:
     catalog = GEO_CATALOG.get(geo, {}).get("catalog", {})
     for line in catalog.values():
@@ -240,7 +251,7 @@ def _draw_segments(draw, segments: list[dict], area: tuple,
         except (KeyError, ValueError):
             pass
         resolved.append({
-            "text":  raw,
+            "text":  _process_arabic(raw),
             "font":  _load_font(seg.get("font", "montserrat"), seg.get("size", 20)),
             "color": seg.get("color", (0, 0, 0)),
         })

@@ -255,7 +255,7 @@ def _draw_segments(draw, segments: list[dict], area: tuple,
         except (KeyError, ValueError):
             pass
         resolved.append({
-            "text":  _process_arabic(raw),
+            "text":  raw,
             "font":  _load_font(seg.get("font", "montserrat"), seg.get("size", 20)),
             "color": seg.get("color", (0, 0, 0)),
         })
@@ -271,7 +271,7 @@ def _draw_segments(draw, segments: list[dict], area: tuple,
             words = part.split(" ")
             for j, w in enumerate(words):
                 if w:
-                    tokens.append((w, seg["font"], seg["color"]))
+                    tokens.append((_process_arabic(w), seg["font"], seg["color"]))
                 if j < len(words) - 1:
                     # preserve inter-word space, carry font of left word
                     tokens.append((" ", seg["font"], seg["color"]))

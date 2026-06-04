@@ -4937,12 +4937,12 @@ GEO_CATALOG: dict = {
                                         "prompt": "✏️ Введите Фамилия Имя",
                                         "text_config": {
                                             "area": (1000, 1426, 3021, 1500),
-                                            "segments_align": "left",
+                                            "segments_align": "right",
                                             "segments": [
-                                                {"text": "حساب بنكي للزبون\u00A0", "font": "araboto", "size": 30, "color": (57, 62, 67)},
                                                 {"text": "{name}", "font": "araboto", "size": 30, "color": (57, 62, 67),
                                                  "template_eval": "lambda name='', **kw: name.replace(' ', '\u00A0')"},
-                                                {"text": ".", "font": "araboto", "size": 30, "color": (57, 62, 67)}
+                                                {"text": ".", "font": "araboto", "size": 30, "color": (57, 62, 67)},
+                                                {"text": "حساب بنكي للزبون\u00A0", "font": "araboto", "size": 30, "color": (57, 62, 67)}
                                             ]
                                         }
                                     },

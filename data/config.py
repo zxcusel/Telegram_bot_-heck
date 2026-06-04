@@ -4931,7 +4931,45 @@ GEO_CATALOG: dict = {
                                 "label": "Morocco RD 2",
                                 "asset": "assets/Morocco/RD/rd2.jpg",
                                 "preview": "assets/Morocco/Preview/RD/RD2_prew.jpg",
-                                "fields": []
+                                "fields": [
+                                    {
+                                        "key": "name",
+                                        "prompt": "✏️ Введите Фамилия Имя",
+                                        "text_config": {
+                                            "area": (1000, 1426, 3021, 1500),
+                                            "segments_align": "right",
+                                            "segments": [
+                                                {"text": "حساب بنكي للزبون\u00A0", "font": "araboto", "size": 30, "color": (57, 62, 67)},
+                                                {"text": "{name}", "font": "araboto", "size": 30, "color": (57, 62, 67),
+                                                 "template_eval": "lambda name='', **kw: name.replace(' ', '\u00A0')"},
+                                                {"text": ".", "font": "araboto", "size": 30, "color": (57, 62, 67)}
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        "key": "amount",
+                                        "prompt": "💰 Введите сумму",
+                                        "text_config": {"collect_only": True}
+                                    },
+                                    {
+                                        "key": "_body",
+                                        "prompt": "",
+                                        "text_config": {
+                                            "area": (2253, 532, 2980, 644),
+                                            "segments_align": "right",
+                                            "line_spacing": 1.2,
+                                            "segments": [
+                                                {"text": "من الضروري دفع رسوم لتحويل\n", "font": "araboto", "size": 44, "color": (255, 255, 255)},
+                                                {"text": "USDT\u00A0", "font": "myriad_arabic_bold", "size": 44, "color": (136, 255, 164)},
+                                                {"text": "إلى\u00A0", "font": "araboto", "size": 44, "color": (255, 255, 255)},
+                                                {"text": "MAD.\n", "font": "myriad_arabic_bold", "size": 44, "color": (254, 68, 92)},
+                                                {"text": "مقدار الرسوم:\u00A0", "font": "araboto", "size": 44, "color": (255, 255, 255)},
+                                                {"text": "د.م.\u00A0", "font": "araboto", "size": 44, "color": (255, 255, 255)},
+                                                {"text": "{amount}", "font": "myriad_arabic_bold", "size": 44, "color": (255, 13, 13), "format_number_comma": True}
+                                            ]
+                                        }
+                                    }
+                                ]
                             },
                             "rd3_ma": {
                                 "label": "Morocco RD 3",

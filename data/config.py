@@ -4902,21 +4902,21 @@ GEO_CATALOG: dict = {
                                         "key": "name",
                                         "prompt": "✏️ Введите Фамилия Имя (пример: Nombre Apellido)",
                                         "text_config": {
-                                            "area": (1228, 693, 2771, 930),
+                                            "area": (1228, 693, 2771, 914),
                                             "line_spacing": 1.15,
                                             "segments_align": "center_rtl",
                                             "segments": [
-                                                {"text": "تم توقيف دفعتك للزبون\n", "font": "araboto", "size": 65, "color": (255, 255, 255)},
+                                                {"text": "تم توقيف دفعتك للزبون ", "font": "araboto", "size": 65, "color": (255, 255, 255)},
                                                 {"text": "{name}", "font": "araboto", "size": 65, "color": (255, 255, 255),
                                                  "template_eval": "lambda name='', **kw: name.replace(' ', '\u00A0')"},
                                                 {"text": " عن\u00A0مبلغ\u00A0", "font": "araboto", "size": 65, "color": (255, 255, 255)},
                                                 {"text": "د.م.\u00A0", "font": "araboto", "size": 65, "color": (0, 255, 84)},
                                                 {"text": "37,485.00\u00A0", "font": "myriad_arabic_bold", "size": 65, "color": (0, 255, 84)},
                                                 {"text": "مؤقتًا.\n", "font": "araboto", "size": 65, "color": (255, 255, 255)},
-                                                {"text": "لسحب الأموال من المنصة إلى حساب المستفيد، يجب على زبونك دفع ", "font": "araboto", "size": 42, "color": (255, 255, 255)},
-                                                {"text": "رسوم\u00A0قدرها\u00A0", "font": "araboto", "size": 42, "color": (255, 255, 255)},
-                                                {"text": "د.م.\u00A0", "font": "araboto", "size": 42, "color": (255, 0, 0)},
-                                                {"text": "{commission}.00", "font": "myriad_arabic_bold", "size": 42, "color": (255, 0, 0), "format_number_comma": True}
+                                                {"text": "لسحب الأموال من المنصة إلى حساب المستفيد، يجب على زبونك دفع ", "font": "araboto", "size": 65, "color": (255, 255, 255)},
+                                                {"text": "رسوم\u00A0قدرها\u00A0", "font": "araboto", "size": 65, "color": (255, 255, 255)},
+                                                {"text": "د.م.\u00A0", "font": "araboto", "size": 65, "color": (255, 0, 0)},
+                                                {"text": "{commission}.00", "font": "myriad_arabic_bold", "size": 65, "color": (255, 0, 0), "format_number_comma": True}
                                             ],
                                         },
                                     },

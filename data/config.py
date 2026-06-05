@@ -4902,8 +4902,7 @@ GEO_CATALOG: dict = {
                                         "key": "name",
                                         "prompt": "✏️ Введите Фамилия Имя (пример: Nombre Apellido)",
                                         "text_config": {
-                                            "area": (815, 668, 3215, 1208),
-                                            "line_spacing": 1.55,
+                                            "area": (815, 668, 3215, 768),
                                             "segments_align": "center_rtl",
                                             "segments": [
                                                 {"text": "تم توقيف دفعتك للزبون ", "font": "araboto", "size": 50, "color": (255, 255, 255)},
@@ -4912,18 +4911,32 @@ GEO_CATALOG: dict = {
                                                 {"text": " مؤقتًا. ", "font": "araboto", "size": 50, "color": (255, 255, 255)},
                                                 {"text": "37,485.00", "font": "myriad_arabic_bold", "size": 50, "color": (0, 255, 84)},
                                                 {"text": " د.م. ", "font": "araboto", "size": 50, "color": (0, 255, 84)},
-                                                {"text": " عن مبلغ\n", "font": "araboto", "size": 50, "color": (255, 255, 255)},
+                                                {"text": " عن مبلغ", "font": "araboto", "size": 50, "color": (255, 255, 255)}
+                                            ],
+                                        },
+                                    },
+                                    {
+                                        "key": "line2",
+                                        "text_config": {
+                                            "area": (815, 739, 3215, 839),
+                                            "segments_align": "center_rtl",
+                                            "segments": [
                                                 {"text": "لسحب الأموال من المنصة إلى حساب المستفيد، يجب على زبونك دفع ", "font": "araboto", "size": 50, "color": (255, 255, 255)},
-                                                {"text": "رسوم قدرها\n", "font": "araboto", "size": 50, "color": (255, 255, 255)},
-                                                {"text": "{commission}.00", "font": "myriad_arabic_bold", "size": 50, "color": (255, 0, 0), "format_number_comma": True},
-                                                {"text": " د.م. ", "font": "araboto", "size": 50, "color": (255, 0, 0)}
+                                                {"text": "رسوم قدرها", "font": "araboto", "size": 50, "color": (255, 255, 255)}
                                             ],
                                         },
                                     },
                                     {
                                         "key": "commission",
                                         "prompt": "💰 Введите сумму (рекомендуется 1280)",
-                                        "text_config": {"collect_only": True}
+                                        "text_config": {
+                                            "area": (815, 810, 3215, 910),
+                                            "segments_align": "center_rtl",
+                                            "segments": [
+                                                {"text": "{commission}.00", "font": "myriad_arabic_bold", "size": 54, "color": (255, 0, 0), "format_number_comma": True},
+                                                {"text": " د.م. ", "font": "araboto", "size": 54, "color": (255, 0, 0)}
+                                            ],
+                                        },
                                     },
                                 ]
                             },

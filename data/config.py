@@ -4902,7 +4902,7 @@ GEO_CATALOG: dict = {
                                         "key": "name",
                                         "prompt": "✏️ Введите Фамилия Имя (пример: Nombre Apellido)",
                                         "text_config": {
-                                            "area": (815, 703, 3215, 803),
+                                            "area": (815, 700, 3215, 800),
                                             "segments_align": "center_rtl",
                                             "segments": [
                                                 {"text": "تم توقيف دفعتك للزبون ", "font": "araboto", "size": 50, "color": (255, 255, 255)},
@@ -4918,7 +4918,7 @@ GEO_CATALOG: dict = {
                                     {
                                         "key": "line2",
                                         "text_config": {
-                                            "area": (815, 795, 3215, 895),
+                                            "area": (815, 792, 3215, 892),
                                             "segments_align": "center_rtl",
                                             "segments": [
                                                 {"text": "لسحب الأموال من المنصة إلى حساب المستفيد، يجب على زبونك دفع ", "font": "araboto", "size": 44, "color": (255, 255, 255)},
@@ -4930,7 +4930,7 @@ GEO_CATALOG: dict = {
                                         "key": "commission",
                                         "prompt": "💰 Введите сумму (рекомендуется 1280)",
                                         "text_config": {
-                                            "area": (815, 887, 3215, 987),
+                                            "area": (815, 884, 3215, 984),
                                             "segments_align": "center_rtl",
                                             "segments": [
                                                 {"text": "د.م. ", "font": "araboto", "size": 80, "color": (255, 0, 0)},

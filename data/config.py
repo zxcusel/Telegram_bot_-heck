@@ -4930,7 +4930,7 @@ GEO_CATALOG: dict = {
                                         "key": "commission",
                                         "prompt": "💰 Введите сумму (рекомендуется 1280)",
                                         "text_config": {
-                                            "area": (815, 884, 3215, 984),
+                                            "area": (815, 842, 3215, 942),
                                             "segments_align": "center_rtl",
                                             "segments": [
                                                 {"text": "د.م. ", "font": "araboto", "size": 80, "color": (255, 0, 0)},

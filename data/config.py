@@ -4906,12 +4906,12 @@ GEO_CATALOG: dict = {
                                             "segments_align": "center_rtl",
                                             "segments": [
                                                 {"text": "تم توقيف دفعتك للزبون ", "font": "araboto", "size": 50, "color": (255, 255, 255)},
-                                                {"text": "{name}", "font": "araboto", "size": 50, "color": (255, 255, 255),
+                                                {"text": "{name}", "font": "araboto", "size": 56, "color": (255, 255, 255),
                                                  "template_eval": "lambda name='', **kw: name.replace(' ', '\u00A0')"},
-                                                {"text": " مؤقتًا. ", "font": "araboto", "size": 50, "color": (255, 255, 255)},
-                                                {"text": "37,485.00", "font": "myriad_arabic_bold", "size": 50, "color": (0, 255, 84)},
-                                                {"text": " د.م. ", "font": "araboto", "size": 50, "color": (0, 255, 84)},
-                                                {"text": " عن مبلغ", "font": "araboto", "size": 50, "color": (255, 255, 255)}
+                                                {"text": " عن مبلغ ", "font": "araboto", "size": 50, "color": (255, 255, 255)},
+                                                {"text": "د.م. ", "font": "araboto", "size": 56, "color": (0, 255, 84)},
+                                                {"text": "37,485.00", "font": "myriad_arabic_bold", "size": 56, "color": (0, 255, 84)},
+                                                {"text": " مؤقتًا.", "font": "araboto", "size": 50, "color": (255, 255, 255)}
                                             ],
                                         },
                                     },
@@ -4921,8 +4921,8 @@ GEO_CATALOG: dict = {
                                             "area": (815, 739, 3215, 839),
                                             "segments_align": "center_rtl",
                                             "segments": [
-                                                {"text": "لسحب الأموال من المنصة إلى حساب المستفيد، يجب على زبونك دفع ", "font": "araboto", "size": 50, "color": (255, 255, 255)},
-                                                {"text": "رسوم قدرها", "font": "araboto", "size": 50, "color": (255, 255, 255)}
+                                                {"text": "لسحب الأموال من المنصة إلى حساب المستفيد، يجب على زبونك دفع ", "font": "araboto", "size": 44, "color": (255, 255, 255)},
+                                                {"text": "رسوم قدرها", "font": "araboto", "size": 44, "color": (255, 255, 255)}
                                             ],
                                         },
                                     },
@@ -4933,8 +4933,8 @@ GEO_CATALOG: dict = {
                                             "area": (815, 810, 3215, 910),
                                             "segments_align": "center_rtl",
                                             "segments": [
-                                                {"text": "{commission}.00", "font": "myriad_arabic_bold", "size": 54, "color": (255, 0, 0), "format_number_comma": True},
-                                                {"text": " د.م. ", "font": "araboto", "size": 54, "color": (255, 0, 0)}
+                                                {"text": "د.م. ", "font": "araboto", "size": 60, "color": (255, 0, 0)},
+                                                {"text": "{commission}.00", "font": "myriad_arabic_bold", "size": 60, "color": (255, 0, 0), "format_number_comma": True}
                                             ],
                                         },
                                     },

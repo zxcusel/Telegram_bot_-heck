@@ -29,6 +29,9 @@ PT_TO_PX = 1.0   # Photoshop 72 dpi → 1 pt = 1 px
 def _process_arabic(text: str) -> str:
     """Reshapes and applies BiDi algorithm to Arabic text for proper cursive rendering in PIL."""
     if any(u"\u0600" <= c <= u"\u06FF" for c in text):
+        from PIL import features
+        if features.check("raqm"):
+            return text
         import arabic_reshaper
         from bidi.algorithm import get_display
         reshaped = arabic_reshaper.reshape(text)

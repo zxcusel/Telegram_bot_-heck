@@ -4902,8 +4902,8 @@ GEO_CATALOG: dict = {
                                         "key": "name",
                                         "prompt": "✏️ Введите Фамилия Имя (пример: Nombre Apellido)",
                                         "text_config": {
-                                            "area": (815, 660, 3215, 1200),
-                                            "line_spacing": 1.45,
+                                            "area": (815, 668, 3215, 1208),
+                                            "line_spacing": 1.55,
                                             "segments_align": "center_rtl",
                                             "segments": [
                                                 {"text": "تم توقيف دفعتك للزبون ", "font": "araboto", "size": 50, "color": (255, 255, 255)},

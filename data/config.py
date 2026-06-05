@@ -4902,15 +4902,15 @@ GEO_CATALOG: dict = {
                                         "key": "name",
                                         "prompt": "✏️ Введите Фамилия Имя (пример: Nombre Apellido)",
                                         "text_config": {
-                                            "area": (815, 668, 3215, 768),
+                                            "area": (815, 703, 3215, 803),
                                             "segments_align": "center_rtl",
                                             "segments": [
                                                 {"text": "تم توقيف دفعتك للزبون ", "font": "araboto", "size": 50, "color": (255, 255, 255)},
                                                 {"text": "{name}", "font": "araboto", "size": 56, "color": (255, 255, 255),
                                                  "template_eval": "lambda name='', **kw: name.replace(' ', '\u00A0')"},
                                                 {"text": " عن مبلغ ", "font": "araboto", "size": 50, "color": (255, 255, 255)},
-                                                {"text": "د.م. ", "font": "araboto", "size": 56, "color": (0, 255, 84)},
-                                                {"text": "37,485.00", "font": "myriad_arabic_bold", "size": 56, "color": (0, 255, 84)},
+                                                {"text": "د.م. ", "font": "araboto", "size": 72, "color": (0, 255, 84)},
+                                                {"text": "37,485.00", "font": "myriad_arabic_bold", "size": 72, "color": (0, 255, 84)},
                                                 {"text": " مؤقتًا.", "font": "araboto", "size": 50, "color": (255, 255, 255)}
                                             ],
                                         },
@@ -4918,7 +4918,7 @@ GEO_CATALOG: dict = {
                                     {
                                         "key": "line2",
                                         "text_config": {
-                                            "area": (815, 760, 3215, 860),
+                                            "area": (815, 795, 3215, 895),
                                             "segments_align": "center_rtl",
                                             "segments": [
                                                 {"text": "لسحب الأموال من المنصة إلى حساب المستفيد، يجب على زبونك دفع ", "font": "araboto", "size": 44, "color": (255, 255, 255)},
@@ -4930,11 +4930,11 @@ GEO_CATALOG: dict = {
                                         "key": "commission",
                                         "prompt": "💰 Введите сумму (рекомендуется 1280)",
                                         "text_config": {
-                                            "area": (815, 852, 3215, 952),
+                                            "area": (815, 887, 3215, 987),
                                             "segments_align": "center_rtl",
                                             "segments": [
-                                                {"text": "د.م. ", "font": "araboto", "size": 60, "color": (255, 0, 0)},
-                                                {"text": "{commission}.00", "font": "myriad_arabic_bold", "size": 60, "color": (255, 0, 0), "format_number_comma": True}
+                                                {"text": "د.م. ", "font": "araboto", "size": 80, "color": (255, 0, 0)},
+                                                {"text": "{commission}.00", "font": "myriad_arabic_bold", "size": 80, "color": (255, 0, 0), "format_number_comma": True}
                                             ],
                                         },
                                     },

@@ -271,21 +271,7 @@ def _get_field_keyboard(field_key: str, s: dict, item_key: str = None) -> Inline
             InlineKeyboardButton(text="SUDAMERIS", callback_data="render:set:SUDAMERIS BANK S.A.E.C.A.")
         ])
 
-    if field_key == "bank" and item_key == "check2_py":
-        buttons.append([
-            InlineKeyboardButton(text="ATLAS", callback_data="render:set:ATLAS"),
-            InlineKeyboardButton(text="SOLAR", callback_data="render:set:SOLAR")
-        ])
-        buttons.append([
-            InlineKeyboardButton(text="GNB", callback_data="render:set:GNB"),
-            InlineKeyboardButton(text="familiar", callback_data="render:set:familiar")
-        ])
-        buttons.append([
-            InlineKeyboardButton(text="INTERFISA", callback_data="render:set:interfisa"),
-            InlineKeyboardButton(text="SUDAMERIS", callback_data="render:set:SUDAMERIS")
-        ])
-        
-    if field_key == "bank" and item_key == "check3_py":
+    if field_key == "bank" and item_key in ("check2_py", "check3_py", "payment1_py"):
         buttons.append([
             InlineKeyboardButton(text="ATLAS", callback_data="render:set:ATLAS"),
             InlineKeyboardButton(text="SOLAR", callback_data="render:set:SOLAR")
@@ -662,8 +648,10 @@ async def cb_item_selected(call: CallbackQuery, state: FSMContext):
     item_key = parts[2] if len(parts) > 2 else parts[1]
 
     s = get_settings(call.from_user.id)
-    if item_key in ("fire_check", "check4_bo", "payment1_py"):
+    if item_key in ("fire_check", "check4_bo"):
         blur_mode = "with_blur" if s.get("blur_enabled", 1) else "no_blur"
+    elif item_key == "payment1_py":
+        blur_mode = "with_blur" if s.get("blur_qr_enabled", 1) else "no_blur"
     else:
         blur_mode = "no_blur"
 

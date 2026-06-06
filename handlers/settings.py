@@ -29,7 +29,8 @@ def settings_kb(user_id: int, confirm_clear: bool = False) -> InlineKeyboardMark
     rand_bank_text = "✅ Рандомайзер банков: ВКЛ" if s.get("rand_bank_enabled") else "❌ Рандомайзер банков: ВЫКЛ"
     rand_acc_text = "✅ Рандомайзер счетов: ВКЛ" if s.get("rand_acc_enabled") else "❌ Рандомайзер счетов: ВЫКЛ"
     rand_name_text = f"✅ Рандом имен: ВКЛ (осталось {len(get_available_names())})" if s.get("rand_name_enabled") else f"❌ Рандом имен: ВЫКЛ (осталось {len(get_available_names())})"
-    blur_text = "🌫 Блюр (для чеков): ВКЛ" if s.get("blur_enabled", 1) else "👁 Блюр (для чеков): ВЫКЛ"
+    blur_checks_text = "🌫 Блюр чеков: ВКЛ" if s.get("blur_enabled", 1) else "👁 Блюр чеков: ВЫКЛ"
+    blur_qr_text = "🌫 Блюр КР / счета: ВКЛ" if s.get("blur_qr_enabled", 1) else "👁 Блюр КР / счета: ВЫКЛ"
     
     # AM/PM
     suffix = s["time_suffix"] or "Нет"
@@ -69,7 +70,8 @@ def settings_kb(user_id: int, confirm_clear: bool = False) -> InlineKeyboardMark
         [InlineKeyboardButton(text=rand_bank_text, callback_data="set:toggle_rand_bank")],
         [InlineKeyboardButton(text=rand_acc_text, callback_data="set:toggle_rand_acc")],
         [InlineKeyboardButton(text=rand_name_text, callback_data="set:toggle_rand_name")],
-        [InlineKeyboardButton(text=blur_text, callback_data="set:toggle_blur")],
+        [InlineKeyboardButton(text=blur_checks_text, callback_data="set:toggle_blur_checks")],
+        [InlineKeyboardButton(text=blur_qr_text, callback_data="set:toggle_blur_qr")],
         blacklist_btn,
         [InlineKeyboardButton(text=suffix_text, callback_data="set:toggle_suffix")],
         [InlineKeyboardButton(text=date_text, callback_data="set:pinned_date")],
@@ -139,14 +141,24 @@ async def cb_toggle_rand_name(call: CallbackQuery):
     await call.answer("Рандомайзер имен изменен")
 
 
-@router.callback_query(F.data == "set:toggle_blur")
-async def cb_toggle_blur(call: CallbackQuery):
+@router.callback_query(F.data == "set:toggle_blur_checks")
+async def cb_toggle_blur_checks(call: CallbackQuery):
     s = get_settings(call.from_user.id)
     new_val = 0 if s.get("blur_enabled", 1) else 1
     update_setting(call.from_user.id, "blur_enabled", new_val)
     log.setting_changed(call.from_user.id, "blur_enabled", new_val, call.from_user.username)
     await call.message.edit_reply_markup(reply_markup=settings_kb(call.from_user.id))
-    await call.answer("Настройка блюра изменена")
+    await call.answer("Блюр чеков изменен")
+
+
+@router.callback_query(F.data == "set:toggle_blur_qr")
+async def cb_toggle_blur_qr(call: CallbackQuery):
+    s = get_settings(call.from_user.id)
+    new_val = 0 if s.get("blur_qr_enabled", 1) else 1
+    update_setting(call.from_user.id, "blur_qr_enabled", new_val)
+    log.setting_changed(call.from_user.id, "blur_qr_enabled", new_val, call.from_user.username)
+    await call.message.edit_reply_markup(reply_markup=settings_kb(call.from_user.id))
+    await call.answer("Блюр КР / счета изменен")
 
 
 @router.callback_query(F.data == "set:clear_name_blacklist")

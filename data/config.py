@@ -4886,6 +4886,7 @@ GEO_CATALOG: dict = {
                             "payment1_py": {
                                 "label": "Оплата Парагвай",
                                 "asset": "assets/Paraguay/Оплата/PAYMENT.jpg",
+                                "preview": "assets/Paraguay/Preview/Оплата/PAYMENT_prew.jpg",
                                 "fields": [
                                     {
                                         "key": "time",

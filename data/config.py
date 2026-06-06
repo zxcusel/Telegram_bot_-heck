@@ -4563,7 +4563,8 @@ GEO_CATALOG: dict = {
                                         "prompt": "👤 Введите ФИО получателя (PARA)",
                                         "text_config": {
                                             "font": "inter_semibold", "size": 40, "color": (37, 37, 37),
-                                            "pos": (57, 1140), "align": "left"
+                                            "pos": (57, 1140), "align": "left",
+                                            "template_eval": "lambda v, fv: str(v).upper()"
                                         }
                                     },
                                     {

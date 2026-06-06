@@ -4896,7 +4896,7 @@ GEO_CATALOG: dict = {
                                             "align": "center",
                                             "color": (41, 41, 41),
                                             "font": "montserrat_bold",
-                                            "size": 72
+                                            "size": 76
                                         }
                                     },
                                     {
@@ -4907,7 +4907,7 @@ GEO_CATALOG: dict = {
                                             "align": "left",
                                             "color": (19, 20, 21),
                                             "font": "montserrat_medium",
-                                            "size": 64
+                                            "size": 66
                                         }
                                     },
                                     {
@@ -4918,7 +4918,7 @@ GEO_CATALOG: dict = {
                                             "align": "left",
                                             "color": (19, 20, 21),
                                             "font": "montserrat_medium",
-                                            "size": 64
+                                            "size": 66
                                         }
                                     },
                                     {
@@ -4929,7 +4929,7 @@ GEO_CATALOG: dict = {
                                             "align": "left",
                                             "color": (19, 20, 21),
                                             "font": "montserrat_medium",
-                                            "size": 64,
+                                            "size": 66,
                                             "blur_area": (308, 1662, 795, 1722),
                                             "blur_radius": 15
                                         }

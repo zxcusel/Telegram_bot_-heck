@@ -4892,7 +4892,7 @@ GEO_CATALOG: dict = {
                                         "key": "time",
                                         "prompt": "🕐 Введите время (пример: 10:00)",
                                         "text_config": {
-                                            "pos": (635, 646),
+                                            "pos": (640, 646),
                                             "align": "center",
                                             "color": (41, 41, 41),
                                             "font": "montserrat_bold",

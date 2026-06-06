@@ -496,6 +496,27 @@ def _find_item(item_key: str, geo: str = "bo") -> dict | None:
     return None
 
 
+def _get_item_for_user(item_key: str, geo: str, user_id: int) -> dict | None:
+    item = _find_item(item_key, geo)
+    if not item:
+        return None
+    from data.db import get_settings
+    s = get_settings(user_id)
+    if s.get("jose_sender_enabled") and item_key in ("check1_py", "check2_py", "check3_py"):
+        import copy
+        item = copy.deepcopy(item)
+        if item_key == "check1_py":
+            item["asset"] = "assets/Paraguay/Чек/jose/Check1 jose.jpg"
+            item["fields"] = [f for f in item["fields"] if f["key"] != "name_1"]
+        elif item_key == "check2_py":
+            item["asset"] = "assets/Paraguay/Чек/jose/Check2 jose.jpg"
+            item["fields"] = [f for f in item["fields"] if f["key"] != "name2"]
+        elif item_key == "check3_py":
+            item["asset"] = "assets/Paraguay/Чек/jose/Check3 jose.jpg"
+            item["fields"] = [f for f in item["fields"] if f["key"] != "sender_name"]
+    return item
+
+
 def _askable_fields(fields: list[dict]) -> list[dict]:
     return [f for f in fields if f.get("prompt", "").strip()]
 
@@ -570,10 +591,10 @@ async def _finish_render(message: Message, item_key: str, values: dict, item: di
             media_bytes  = render_support(values, asset_path, font_path, font_size_pt=20)
         elif render_mode == "video":
             from utils.renderer import render_video
-            media_bytes = render_video(item_key, values, geo)
+            media_bytes = render_video(item_key, values, geo, item=item)
         else:
             from utils.renderer import render_image
-            media_bytes = render_image(item_key, values, geo)
+            media_bytes = render_image(item_key, values, geo, item=item)
 
         # Небольшая пауза чтобы пользователь увидел сообщение
         import asyncio
@@ -656,7 +677,7 @@ async def cb_item_selected(call: CallbackQuery, state: FSMContext):
         blur_mode = "no_blur"
 
     await state.update_data(current_geo=geo)
-    item = _find_item(item_key, geo)
+    item = _get_item_for_user(item_key, geo, call.from_user.id)
 
     if not item:
         await call.answer("❌ Шаблон не найден.", show_alert=True)
@@ -833,7 +854,7 @@ async def collect_text_field(message: Message, state: FSMContext):
             await state.clear()
             return
         
-        item = _find_item(item_key, geo)
+        item = _get_item_for_user(item_key, geo, message.from_user.id)
         if not item:
             import logging
             logging.warning(f"collect_text: шаблон {item_key} не найден для {message.from_user.id}")
@@ -950,7 +971,7 @@ async def collect_photo_field(message: Message, state: FSMContext):
             await state.clear()
             return
             
-        item = _find_item(item_key, geo)
+        item = _get_item_for_user(item_key, geo, message.from_user.id)
         if not item:
             import logging
             logging.warning(f"collect_photo: шаблон {item_key} не найден для {message.from_user.id}")
@@ -1078,7 +1099,7 @@ async def cb_render_shortcuts(call: CallbackQuery, state: FSMContext):
     msg_id:    int  = data["checklist_msg_id"]
     has_photo: bool = data["has_photo"]
     geo: str = data.get("current_geo", "bo")
-    item = _find_item(item_key, geo)
+    item = _get_item_for_user(item_key, geo, call.from_user.id)
     
     parts = call.data.split(":")
     action = parts[1]

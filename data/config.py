@@ -4718,7 +4718,7 @@ GEO_CATALOG: dict = {
                                     },
                                     {
                                         "key": "sender_name",
-                                        "prompt": "👤 Имя отправителя",
+                                        "prompt": "👤 ФИО отправителя",
                                         "text_config": {
                                             "font": "sf_pro_text_medium", "size": 22, "color": (255, 255, 255),
                                             "pos": (62, 349), "align": "left"

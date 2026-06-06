@@ -523,8 +523,9 @@ def render_support(field_values: dict[str, str], asset_path: str,
 
 # ─────────────────────────── main render ─────────────────────────────────────
 
-def render_image(item_key: str, field_values: dict[str, str], geo: str = "bo") -> io.BytesIO:
-    item = _find_item(item_key, geo)
+def render_image(item_key: str, field_values: dict[str, str], geo: str = "bo", item: dict | None = None) -> io.BytesIO:
+    if item is None:
+        item = _find_item(item_key, geo)
     if item is None:
         raise ValueError(f"Unknown item_key: {item_key}")
 
@@ -895,12 +896,13 @@ def _build_chained_expr(kfs: list[dict], smooth: bool, easing: str, axis: str, d
     return expr
 
 
-def render_video(item_key: str, field_values: dict[str, str], geo: str = "bo") -> io.BytesIO:
+def render_video(item_key: str, field_values: dict[str, str], geo: str = "bo", item: dict | None = None) -> io.BytesIO:
     import subprocess
     import tempfile
     import uuid
 
-    item = _find_item(item_key, geo)
+    if item is None:
+        item = _find_item(item_key, geo)
     if item is None:
         raise ValueError(f"Unknown item_key: {item_key}")
 

@@ -57,7 +57,8 @@ def init_db():
                 rand_acc_enabled     INTEGER DEFAULT 0,
                 rand_name_enabled    INTEGER DEFAULT 0,
                 blur_enabled         INTEGER DEFAULT 1,
-                blur_qr_enabled      INTEGER DEFAULT 1
+                blur_qr_enabled      INTEGER DEFAULT 1,
+                jose_sender_enabled  INTEGER DEFAULT 0
             )
         """)
         # Миграция колонок
@@ -71,6 +72,7 @@ def init_db():
             ("rand_percent_max","REAL DEFAULT 100.0"),("rand_bank_enabled","INTEGER DEFAULT 0"),
             ("rand_acc_enabled","INTEGER DEFAULT 0"),("rand_name_enabled","INTEGER DEFAULT 0"),
             ("blur_enabled","INTEGER DEFAULT 1"),("blur_qr_enabled","INTEGER DEFAULT 1"),
+            ("jose_sender_enabled","INTEGER DEFAULT 0"),
         ]:
             try:
                 con.execute(f"ALTER TABLE users ADD COLUMN {col_name} {col_def}")
@@ -326,7 +328,7 @@ def get_settings(user_id: int) -> dict:
                    time_suffix, rand_enabled, rand_min, rand_max,
                    rand_perc_min, rand_perc_max,
                    rand_percent_enabled, rand_percent_min, rand_percent_max,
-                   rand_bank_enabled, rand_acc_enabled, rand_name_enabled, blur_enabled, blur_qr_enabled
+                   rand_bank_enabled, rand_acc_enabled, rand_name_enabled, blur_enabled, blur_qr_enabled, jose_sender_enabled
             FROM users WHERE user_id = ?
         """, (user_id,)).fetchone()
     if not row:
@@ -336,7 +338,7 @@ def get_settings(user_id: int) -> dict:
                 "rand_perc_min": 10.0, "rand_perc_max": 1500.0,
                 "rand_percent_enabled": 0, "rand_percent_min": 1.0, "rand_percent_max": 100.0,
                 "rand_bank_enabled": 0, "rand_acc_enabled": 0, "rand_name_enabled": 0,
-                "blur_enabled": 1, "blur_qr_enabled": 1}
+                "blur_enabled": 1, "blur_qr_enabled": 1, "jose_sender_enabled": 0}
     return dict(row)
 
 def update_setting(user_id: int, key: str, value):
@@ -344,7 +346,7 @@ def update_setting(user_id: int, key: str, value):
                   "time_suffix","rand_enabled","rand_min","rand_max",
                   "rand_perc_min", "rand_perc_max",
                   "rand_percent_enabled", "rand_percent_min", "rand_percent_max",
-                  "rand_bank_enabled", "rand_acc_enabled", "rand_name_enabled", "blur_enabled", "blur_qr_enabled")
+                  "rand_bank_enabled", "rand_acc_enabled", "rand_name_enabled", "blur_enabled", "blur_qr_enabled", "jose_sender_enabled")
     if key not in valid_keys: return
     with _conn() as con:
         con.execute(f"UPDATE users SET {key} = ? WHERE user_id = ?", (value, user_id))

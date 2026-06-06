@@ -4892,7 +4892,7 @@ GEO_CATALOG: dict = {
                                         "key": "time",
                                         "prompt": "🕐 Введите время (пример: 10:00)",
                                         "text_config": {
-                                            "pos": (645, 665),
+                                            "pos": (635, 646),
                                             "align": "center",
                                             "color": (41, 41, 41),
                                             "font": "montserrat_bold",
@@ -4903,7 +4903,7 @@ GEO_CATALOG: dict = {
                                         "key": "bank",
                                         "prompt": "🏦 Введите название банка (пример: ATLAS)",
                                         "text_config": {
-                                            "pos": (312, 1184),
+                                            "pos": (307, 1187),
                                             "align": "left",
                                             "color": (19, 20, 21),
                                             "font": "montserrat_medium",
@@ -4914,7 +4914,7 @@ GEO_CATALOG: dict = {
                                         "key": "fullname",
                                         "prompt": "✏️ Введите ФИО (пример: Ivanov Ivan Ivanovich)",
                                         "text_config": {
-                                            "pos": (306, 1418),
+                                            "pos": (306, 1420),
                                             "align": "left",
                                             "color": (19, 20, 21),
                                             "font": "montserrat_medium",
@@ -4925,12 +4925,12 @@ GEO_CATALOG: dict = {
                                         "key": "account",
                                         "prompt": "🔢 Введите Номер счета (11 символов, нач. с 922)",
                                         "text_config": {
-                                            "pos": (312, 1664),
+                                            "pos": (312, 1667),
                                             "align": "left",
                                             "color": (19, 20, 21),
                                             "font": "montserrat_medium",
                                             "size": 64,
-                                            "blur_area": (308, 1659, 795, 1719),
+                                            "blur_area": (308, 1662, 795, 1722),
                                             "blur_radius": 15
                                         }
                                     }

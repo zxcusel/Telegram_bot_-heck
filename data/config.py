@@ -4601,8 +4601,8 @@ GEO_CATALOG: dict = {
                                         }
                                     },
                                     {
-                                        "key": "name",
-                                        "prompt": "✏️ Введите Имя (пример: Ivanov Ivan)",
+                                        "key": "name1",
+                                        "prompt": "✏️ Введите ФИО получателя",
                                         "text_config": {
                                             "font": "montserrat_semibold", "size": 20, "color": (35, 53, 65),
                                             "pos": (161, 473), "align": "left",
@@ -4610,8 +4610,8 @@ GEO_CATALOG: dict = {
                                         }
                                     },
                                     {
-                                        "key": "name",
-                                        "prompt": "",
+                                        "key": "name2",
+                                        "prompt": "✏️ Введите ФИО отправителя",
                                         "text_config": {
                                             "font": "montserrat_semibold", "size": 17, "color": (35, 53, 65),
                                             "pos": (506, 603), "align": "right",
@@ -4620,7 +4620,7 @@ GEO_CATALOG: dict = {
                                     },
                                     {
                                         "key": "bank",
-                                        "prompt": "🏦 Выберите банк:",
+                                        "prompt": "🏦 Выберите банк",
                                         "text_config": {
                                             "collect_only": True
                                         }
@@ -4644,7 +4644,7 @@ GEO_CATALOG: dict = {
                                     },
                                     {
                                         "key": "account",
-                                        "prompt": "🔢 Введите номер получателя (или 'рандом')",
+                                        "prompt": "🔢 Введите номер счета получателя",
                                         "text_config": {
                                             "font": "montserrat_light", "size": 20, "color": (35, 53, 65),
                                             "pos": (229, 530), "align": "left",
@@ -4661,7 +4661,7 @@ GEO_CATALOG: dict = {
                                     },
                                     {
                                         "key": "account_end",
-                                        "prompt": "🔢 Введите 3 цифры на конце (или 'рандом')",
+                                        "prompt": "🔢 Введите последние 3 цифры счета отправителя",
                                         "text_config": {
                                             "font": "montserrat_extralight", "size": 20, "color": (35, 53, 65),
                                             "pos": (473, 654), "align": "left",

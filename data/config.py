@@ -4877,6 +4877,68 @@ GEO_CATALOG: dict = {
                     }
                 }
             },
+            "payment": {
+                "label": "💳 Оплата",
+                "sections": {
+                    "payment_main": {
+                        "label": "Оплата",
+                        "items": {
+                            "payment1_py": {
+                                "label": "Оплата Парагвай",
+                                "asset": "assets/Paraguay/Оплата/PAYMENT.jpg",
+                                "fields": [
+                                    {
+                                        "key": "time",
+                                        "prompt": "🕐 Введите время (пример: 10:00)",
+                                        "text_config": {
+                                            "pos": (645, 665),
+                                            "align": "center",
+                                            "color": (41, 41, 41),
+                                            "font": "montserrat_bold",
+                                            "size": 40
+                                        }
+                                    },
+                                    {
+                                        "key": "bank",
+                                        "prompt": "🏦 Введите название банка (пример: ATLAS)",
+                                        "text_config": {
+                                            "pos": (312, 1203),
+                                            "align": "left",
+                                            "color": (19, 20, 21),
+                                            "font": "montserrat_medium",
+                                            "size": 34
+                                        }
+                                    },
+                                    {
+                                        "key": "fullname",
+                                        "prompt": "✏️ Введите ФИО (пример: Ivanov Ivan Ivanovich)",
+                                        "text_config": {
+                                            "pos": (312, 1434),
+                                            "align": "left",
+                                            "color": (19, 20, 21),
+                                            "font": "montserrat_medium",
+                                            "size": 34
+                                        }
+                                    },
+                                    {
+                                        "key": "account",
+                                        "prompt": "🔢 Введите Номер счета (11 символов, нач. с 922)",
+                                        "text_config": {
+                                            "pos": (312, 1683),
+                                            "align": "left",
+                                            "color": (19, 20, 21),
+                                            "font": "montserrat_medium",
+                                            "size": 34,
+                                            "blur_area": (308, 1678, 795, 1738),
+                                            "blur_radius": 15
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                }
+            },
             "fire": { "label": "🔥 Paraguay FIRE", "sections": {} },
         },
     },

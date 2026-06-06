@@ -4903,7 +4903,7 @@ GEO_CATALOG: dict = {
                                         "key": "bank",
                                         "prompt": "🏦 Введите название банка (пример: ATLAS)",
                                         "text_config": {
-                                            "pos": (312, 1203),
+                                            "pos": (312, 1184),
                                             "align": "left",
                                             "color": (19, 20, 21),
                                             "font": "montserrat_medium",
@@ -4914,7 +4914,7 @@ GEO_CATALOG: dict = {
                                         "key": "fullname",
                                         "prompt": "✏️ Введите ФИО (пример: Ivanov Ivan Ivanovich)",
                                         "text_config": {
-                                            "pos": (312, 1434),
+                                            "pos": (306, 1418),
                                             "align": "left",
                                             "color": (19, 20, 21),
                                             "font": "montserrat_medium",
@@ -4925,12 +4925,12 @@ GEO_CATALOG: dict = {
                                         "key": "account",
                                         "prompt": "🔢 Введите Номер счета (11 символов, нач. с 922)",
                                         "text_config": {
-                                            "pos": (312, 1683),
+                                            "pos": (312, 1664),
                                             "align": "left",
                                             "color": (19, 20, 21),
                                             "font": "montserrat_medium",
                                             "size": 64,
-                                            "blur_area": (308, 1678, 795, 1738),
+                                            "blur_area": (308, 1659, 795, 1719),
                                             "blur_radius": 15
                                         }
                                     }

@@ -1426,7 +1426,7 @@ GEO_CATALOG: dict = {
                                     "key": "_blur1",
                                     "prompt": "",
                                     "text_config": {
-                                        "blur_area": (90, 860, 300, 900)
+                                        "blur_area": (90, 872, 300, 912)
                                     }
                                 },
                                 {

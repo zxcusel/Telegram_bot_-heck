@@ -1423,17 +1423,17 @@ GEO_CATALOG: dict = {
                                     }
                                 },
                                 {
-                                    "key": "_blur1",
-                                    "prompt": "",
-                                    "text_config": {
-                                        "blur_area": (90, 860, 300, 922)
-                                    }
-                                },
-                                {
                                     "key": "_blur2",
                                     "prompt": "",
                                     "text_config": {
                                         "blur_area_eval": "lambda fv: {'Banco Union': (90, 916, 330, 956), 'Banco Fassil': (90, 916, 328, 956), 'Banco Ganadero': (90, 916, 406, 956), 'Banco BISA': (90, 916, 312, 956)}.get(fv.get('bank', ''), None)"
+                                    }
+                                },
+                                {
+                                    "key": "_blur1",
+                                    "prompt": "",
+                                    "text_config": {
+                                        "blur_area": (90, 860, 300, 922)
                                     }
                                 }
                             ]

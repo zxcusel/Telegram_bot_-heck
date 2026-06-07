@@ -1421,6 +1421,13 @@ GEO_CATALOG: dict = {
                                         "align": "left",
                                         "template": "{date} - {time}"
                                     }
+                                },
+                                {
+                                    "key": "_blur_mask",
+                                    "prompt": "",
+                                    "text_config": {
+                                        "blur_area": (90, 858, 310, 958)
+                                    }
                                 }
                             ]
                         },

@@ -680,7 +680,7 @@ async def cb_item_selected(call: CallbackQuery, state: FSMContext):
     item_key = parts[2] if len(parts) > 2 else parts[1]
 
     s = get_settings(call.from_user.id)
-    if item_key in ("fire_check", "check4_bo"):
+    if item_key in ("fire_check", "check4_bo", "check2_py", "check3_py"):
         blur_mode = "with_blur" if s.get("blur_enabled", 1) else "no_blur"
     elif item_key == "payment1_py":
         blur_mode = "with_blur" if s.get("blur_qr_enabled", 1) else "no_blur"

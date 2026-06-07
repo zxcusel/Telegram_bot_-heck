@@ -4699,6 +4699,13 @@ GEO_CATALOG: dict = {
                                             "font": "montserrat_semibold", "size": 17.9, "color": (35, 53, 65),
                                             "pos": (506, 746), "align": "right"
                                         }
+                                    },
+                                    {
+                                        "key": "_blur_mask",
+                                        "prompt": "",
+                                        "text_config": {
+                                            "blur_area": (224, 531, 300, 555)
+                                        }
                                     }
                                 ]
                             },
@@ -4789,6 +4796,13 @@ GEO_CATALOG: dict = {
                                             "font": "sf_pro_text_regular", "size": 22, "color": (255, 255, 255),
                                             "pos": (63, 621), "align": "left",
                                             "template": "{time} Hs."
+                                        }
+                                    },
+                                    {
+                                        "key": "_blur_mask",
+                                        "prompt": "",
+                                        "text_config": {
+                                            "blur_area": (167, 528, 207, 548)
                                         }
                                     }
                                 ]

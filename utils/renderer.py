@@ -762,8 +762,14 @@ def render_image(item_key: str, field_values: dict[str, str], geo: str = "bo", i
     if field_values.get("_blur_mode", "with_blur") != "no_blur":
         for field in item["fields"]:
             tc = field.get("text_config", {})
-            if tc.get("blur_area"):
-                area = tc["blur_area"]
+            area = tc.get("blur_area")
+            if "blur_area_eval" in tc:
+                try:
+                    fn = eval(tc["blur_area_eval"])
+                    area = fn(field_values)
+                except Exception as e:
+                    pass
+            if area:
                 radius = tc.get("blur_radius", 15)
                 box = img.crop(area)
                 box = box.filter(ImageFilter.GaussianBlur(radius))

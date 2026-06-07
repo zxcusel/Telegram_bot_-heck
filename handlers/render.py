@@ -28,6 +28,8 @@ def _get_random_bank(item_key: str) -> str:
     if item_key.endswith("_pe"):
         return random.choice(["BCP", "BBVA", "Scotiabank", "Interbank", "Banco de la Nación", "Banco Falabella Perú"])
     elif item_key.endswith("_py"):
+        if item_key == "check3_py":
+            return random.choice(["ATLAS", "SOLAR", "GNB"])
         return random.choice(["ATLAS", "CONTINENTAL", "SOLAR", "INTERFISA", "SUDAMERIS", "GNB", "familiar", "interfisa"])
     elif item_key.endswith("_uy"):
         return random.choice(["Itaú", "Santander", "BBVA", "Scotiabank", "Oca blue"])
@@ -132,7 +134,7 @@ def _advance_steps(askable: list, start_step: int, values: dict, s: dict, item_k
             if item_key == "check2_py":
                 values["_bank_image"] = f"assets/Paraguay/Чек/bank/{val_rand}.jpg"
             if item_key == "check3_py":
-                values["_bank_image"] = f"assets/Paraguay/Чек/bank/{val_rand}.jpg"
+                values["_bank_image"] = f"assets/Paraguay/Чек/bank2/{val_rand}.png"
             done_step += 1
         else:
             break
@@ -271,7 +273,7 @@ def _get_field_keyboard(field_key: str, s: dict, item_key: str = None) -> Inline
             InlineKeyboardButton(text="SUDAMERIS", callback_data="render:set:SUDAMERIS BANK S.A.E.C.A.")
         ])
 
-    if field_key == "bank" and item_key in ("check2_py", "check3_py", "payment1_py"):
+    if field_key == "bank" and item_key in ("check2_py", "payment1_py"):
         buttons.append([
             InlineKeyboardButton(text="ATLAS", callback_data="render:set:ATLAS"),
             InlineKeyboardButton(text="SOLAR", callback_data="render:set:SOLAR")
@@ -283,6 +285,15 @@ def _get_field_keyboard(field_key: str, s: dict, item_key: str = None) -> Inline
         buttons.append([
             InlineKeyboardButton(text="INTERFISA", callback_data="render:set:interfisa"),
             InlineKeyboardButton(text="SUDAMERIS", callback_data="render:set:SUDAMERIS")
+        ])
+
+    if field_key == "bank" and item_key == "check3_py":
+        buttons.append([
+            InlineKeyboardButton(text="ATLAS", callback_data="render:set:ATLAS"),
+            InlineKeyboardButton(text="SOLAR", callback_data="render:set:SOLAR")
+        ])
+        buttons.append([
+            InlineKeyboardButton(text="GNB", callback_data="render:set:GNB")
         ])
 
     if field_key == "bank" and item_key == "check3_bo":
@@ -913,7 +924,7 @@ async def collect_text_field(message: Message, state: FSMContext):
         if item_key == "check2_py" and askable[step]["key"] == "bank":
             values["_bank_image"] = f"assets/Paraguay/Чек/bank/{val}.jpg"
         if item_key == "check3_py" and askable[step]["key"] == "bank":
-            values["_bank_image"] = f"assets/Paraguay/Чек/bank/{val}.jpg"
+            values["_bank_image"] = f"assets/Paraguay/Чек/bank2/{val}.png"
         done_step = step + 1
 
         s = get_settings(message.from_user.id)
@@ -1283,7 +1294,7 @@ async def cb_render_shortcuts(call: CallbackQuery, state: FSMContext):
     if item_key == "check2_py" and askable[step]["key"] == "bank":
         values["_bank_image"] = f"assets/Paraguay/Чек/bank/{val}.jpg"
     if item_key == "check3_py" and askable[step]["key"] == "bank":
-        values["_bank_image"] = f"assets/Paraguay/Чек/bank/{val}.jpg"
+        values["_bank_image"] = f"assets/Paraguay/Чек/bank2/{val}.png"
     done_step = step + 1
 
     s = get_settings(call.from_user.id)

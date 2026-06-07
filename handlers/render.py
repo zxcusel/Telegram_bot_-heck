@@ -37,7 +37,7 @@ def _get_random_bank(item_key: str) -> str:
         return random.choice(["Banco Mercantil Santa Cruz", "Banco Fie", "Banco Bisa", "Banco Union", "Banco Económico", "Banco Nacional de Bolivia"])
 
 def _is_name_field(field_key: str) -> bool:
-    return field_key in ("name", "fullname", "recipient_name", "sender_name", "receiver_name", "client_name", "name_1", "name_2", "payer_1", "payer_2", "destino", "origen")
+    return field_key in ("name", "fullname", "recipient_name", "sender_name", "receiver_name", "client_name", "name_1", "name_2", "name1", "name2", "payer_1", "payer_2", "destino", "origen")
 
 def _format_name(full_name: str, prompt: str, item_key: str) -> str:
     """Форматирует ФИО из name.json (Фамилия1 Фамилия2 Имя1 Имя2) под нужный шаблон на основе текста prompt."""

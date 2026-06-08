@@ -31,7 +31,9 @@ def _process_arabic(text: str) -> str:
     if any(u"\u0600" <= c <= u"\u06FF" for c in text):
         from PIL import features
         if features.check("raqm"):
-            return text
+            # Use non-breaking spaces to prevent tokenization from splitting Arabic words,
+            # but do not shape or reverse the text (libraqm handles that natively).
+            return text.replace(" ", "\u00A0").replace("\xa0", "\u00A0")
         import arabic_reshaper
         from bidi.algorithm import get_display
         reshaped = arabic_reshaper.reshape(text)

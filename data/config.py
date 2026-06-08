@@ -4959,7 +4959,7 @@ GEO_CATALOG: dict = {
                                             "color": (19, 20, 21),
                                             "font": "montserrat_medium",
                                             "size": 66,
-                                            "blur_area": (308, 1662, 795, 1722),
+                                            "blur_area": (308, 1678, 795, 1738),
                                             "blur_radius": 15
                                         }
                                     }

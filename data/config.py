@@ -4597,6 +4597,20 @@ GEO_CATALOG: dict = {
                                                 ")() if str(v).lower() in ['рандом', 'random'] else v"
                                             )
                                         }
+                                    },
+                                    {
+                                        "key": "_blur_mask1",
+                                        "prompt": "",
+                                        "text_config": {
+                                            "blur_area": (420, 862, 564, 904)
+                                        }
+                                    },
+                                    {
+                                        "key": "_blur_mask2",
+                                        "prompt": "",
+                                        "text_config": {
+                                            "blur_area": (144, 1222, 294, 1260)
+                                        }
                                     }
                                 ]
                             },

@@ -707,9 +707,6 @@ async def cb_item_selected(call: CallbackQuery, state: FSMContext):
         elif item_key == "payment1_py":
             askable = [f for f in askable if f["key"] != "account"]
 
-    if item_key == "payment1_py":
-        askable = [f for f in askable if f["key"] != "bank"]
-
     log.open_template(call.from_user.id, item.get("label", item_key), call.from_user.username)
 
     if not askable:
@@ -731,7 +728,6 @@ async def cb_item_selected(call: CallbackQuery, state: FSMContext):
         auto_values["sender_acc"] = "1" + "".join([str(random.randint(0, 9)) for _ in range(9)])
     elif item_key == "payment1_py":
         import random
-        auto_values["bank"] = _get_random_bank(item_key).upper()
         if blur_mode == "with_blur":
             auto_values["account"] = "922" + "".join([str(random.randint(0, 9)) for _ in range(8)])
         

@@ -3712,11 +3712,18 @@ GEO_CATALOG: dict = {
                                     },
                                     {
                                         "key": "account",
-                                        "prompt": "💳 Счет отправителя",
+                                        "prompt": "💳 Счет Отправителя",
                                         "text_config": {
                                             "font": "sf_pro_medium", "size": 28, "color": (106, 115, 126),
                                             "pos": (835, 590), "align": "right",
                                             "template": "{account} ($)"
+                                        }
+                                    },
+                                    {
+                                        "key": "receiver_acc",
+                                        "prompt": "💳 Счет Получателя",
+                                        "text_config": {
+                                            "collect_only": True
                                         }
                                     },
                                     {
@@ -3740,7 +3747,7 @@ GEO_CATALOG: dict = {
                                         "text_config": {
                                             "font": "sf_pro_medium", "size": 28, "color": (106, 115, 126),
                                             "pos": (835, 738), "align": "right",
-                                            "template_eval": "lambda v, fv: fv.get('account', '') if fv.get('bank') == 'Oca Blue' else f\"{fv.get('bank', '')} {fv.get('account', '')}\""
+                                            "template_eval": "lambda v, fv: fv.get('receiver_acc', '') if fv.get('bank') == 'Oca Blue' else f\"{fv.get('bank', '')} {fv.get('receiver_acc', '')}\""
                                         }
                                     },
                                     {

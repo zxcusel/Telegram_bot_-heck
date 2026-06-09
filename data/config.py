@@ -3535,7 +3535,8 @@ GEO_CATALOG: dict = {
                                         "text_config": {
                                             "font": "sf_pro_text_bold", "size": 24, "color": (8, 8, 8),
                                             "pos": (725, 870), "align": "right",
-                                            "template": "UYU {amount}.0"
+                                            "template": "UYU {amount},00",
+                                            "format_number_dot": True
                                         }
                                     },
                                     {
@@ -3576,7 +3577,8 @@ GEO_CATALOG: dict = {
                                         "text_config": {
                                             "font": "sf_pro_text_bold", "size": 28, "color": (48, 52, 52),
                                             "pos": (304, 539), "align": "left",
-                                            "template_eval": "lambda v: ' '.join(w[:len(w)//2] + '*' * (len(w) - len(w)//2) if len(w) > 1 else w for w in str(v).upper().split())"
+                                            "max_width": 404,
+                                            "template_eval": "lambda v: str(v).upper() if '*' in str(v) else ' '.join(w[:len(w)//2] + '*' * (len(w) - len(w)//2) if len(w) > 1 else w for w in str(v).upper().split())"
                                         }
                                     },
                                     {

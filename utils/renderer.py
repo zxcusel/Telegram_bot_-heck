@@ -636,6 +636,14 @@ def render_image(item_key: str, field_values: dict[str, str], geo: str = "bo", i
         if not display:
             continue
 
+        # Dynamic font scaling if max_width is specified
+        max_w = tc.get("max_width")
+        if max_w:
+            size = tc.get("size", 32)
+            while font.getlength(display) > max_w and size > 8:
+                size -= 1
+                font = _load_font(tc.get("font", "montserrat"), size)
+
         if "color_eval" in tc:
             try:
                 fn = eval(tc["color_eval"])

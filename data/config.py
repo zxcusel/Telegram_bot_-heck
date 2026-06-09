@@ -3793,7 +3793,7 @@ GEO_CATALOG: dict = {
                                         }
                                     },
                                     {
-                                        "key": "_amount_2",
+                                        "key": "amount",
                                         "prompt": "",
                                         "text_config": {
                                             "font": "sf_pro", "size": 37, "color": (35, 53, 65),

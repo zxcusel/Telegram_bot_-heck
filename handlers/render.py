@@ -513,7 +513,7 @@ def _get_item_for_user(item_key: str, geo: str, user_id: int) -> dict | None:
         return None
     from data.db import get_settings
     s = get_settings(user_id)
-    if s.get("jose_sender_enabled") and item_key in ("check1_py", "check2_py", "check3_py"):
+    if s.get("jose_sender_enabled") and item_key in ("check1_py", "check2_py", "check3_py", "check1_uy", "check4_uy"):
         import copy
         item = copy.deepcopy(item)
         if item_key == "check1_py":
@@ -525,6 +525,12 @@ def _get_item_for_user(item_key: str, geo: str, user_id: int) -> dict | None:
         elif item_key == "check3_py":
             item["asset"] = "assets/Paraguay/Чек/jose/Check3 jose.jpg"
             item["fields"] = [f for f in item["fields"] if f["key"] != "sender_name"]
+        elif item_key == "check1_uy":
+            item["asset"] = "assets/Uruguay/Чек/jose/Check1.jpg"
+            item["fields"] = [f for f in item["fields"] if f["key"] not in ("payer_2", "acc_2")]
+        elif item_key == "check4_uy":
+            item["asset"] = "assets/Uruguay/Чек/jose/Check4.jpg"
+            item["fields"] = [f for f in item["fields"] if f["key"] not in ("sender_name", "account")]
     return item
 
 
@@ -680,7 +686,7 @@ async def cb_item_selected(call: CallbackQuery, state: FSMContext):
     item_key = parts[2] if len(parts) > 2 else parts[1]
 
     s = get_settings(call.from_user.id)
-    if item_key in ("fire_check", "check4_bo", "check1_py", "check2_py", "check3_py", "check3_bo"):
+    if item_key in ("fire_check", "check4_bo", "check1_py", "check2_py", "check3_py", "check3_bo", "check1_uy", "check2_uy", "check4_uy"):
         blur_mode = "with_blur" if s.get("blur_enabled", 1) else "no_blur"
     elif item_key == "payment1_py":
         blur_mode = "with_blur" if s.get("blur_qr_enabled", 1) else "no_blur"
@@ -1160,7 +1166,7 @@ async def cb_render_shortcuts(call: CallbackQuery, state: FSMContext):
                 length = 10
             elif item_key == "check1_py":
                 length = 9
-            elif item_key == "check4_uy" and key == "account":
+            elif item_key == "check4_uy" and key in ("account", "receiver_acc"):
                 length = 7
             else:
                 length = 8

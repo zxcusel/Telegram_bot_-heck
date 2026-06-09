@@ -3508,6 +3508,22 @@ GEO_CATALOG: dict = {
                                             "template": "$ {amount},00",
                                             "format_number_dot": True
                                         }
+                                    },
+                                    {
+                                        "key": "_blur_1",
+                                        "prompt": "",
+                                        "text_config": {
+                                            "blur_area": (418, 486, 496, 506),
+                                            "blur_radius": 15
+                                        }
+                                    },
+                                    {
+                                        "key": "_blur_2",
+                                        "prompt": "",
+                                        "text_config": {
+                                            "blur_area": (418, 345, 496, 364),
+                                            "blur_radius": 15
+                                        }
                                     }
                                 ]
                             },
@@ -3610,6 +3626,22 @@ GEO_CATALOG: dict = {
                                         "text_config": {
                                             "font": "sf_pro_text_bold", "size": 24, "color": (8, 8, 8),
                                             "pos": (725, 795), "align": "right"
+                                        }
+                                    },
+                                    {
+                                        "key": "_blur_1",
+                                        "prompt": "",
+                                        "text_config": {
+                                            "blur_area": (352, 354, 459, 384),
+                                            "blur_radius": 15
+                                        }
+                                    },
+                                    {
+                                        "key": "_blur_2",
+                                        "prompt": "",
+                                        "text_config": {
+                                            "blur_area": (351, 455, 423, 482),
+                                            "blur_radius": 15
                                         }
                                     }
                                 ]
@@ -3808,6 +3840,22 @@ GEO_CATALOG: dict = {
                                         "text_config": {
                                             "font": "sf_pro", "size": 37, "color": (35, 53, 65),
                                             "pos": (835, 1442), "align": "right"
+                                        }
+                                    },
+                                    {
+                                        "key": "_blur_1",
+                                        "prompt": "",
+                                        "text_config": {
+                                            "blur_area": (666, 594, 737, 622),
+                                            "blur_radius": 15
+                                        }
+                                    },
+                                    {
+                                        "key": "_blur_2",
+                                        "prompt": "",
+                                        "text_config": {
+                                            "blur_area": (707, 742, 783, 769),
+                                            "blur_radius": 15
                                         }
                                     }
                                 ]

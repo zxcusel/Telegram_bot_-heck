@@ -1168,12 +1168,23 @@ GEO_CATALOG: dict = {
                                 },
                                 {
                                     "key": "fullname",
-                                    "prompt": "✏️ Введите ФИО (пример: Ivan Ivanov Ivanovich)",
+                                    "prompt": "✏️ Введите ФИО получателя (пример: Ivan Ivanov Ivanovich)",
                                     "text_config": {
                                         "font": "sfui_medium",
                                         "size": 25,
                                         "color": (37, 34, 41),
                                         "pos": (49, 258),
+                                    },
+                                },
+                                {
+                                    "key": "sender_name",
+                                    "prompt": "👤 Введите ФИО отправителя",
+                                    "text_config": {
+                                        "font": "sfui_medium",
+                                        "size": 20,
+                                        "color": (35, 32, 41),
+                                        "pos": (530, 606),
+                                        "align": "right",
                                     },
                                 },
                                 {

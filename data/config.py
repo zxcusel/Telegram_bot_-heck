@@ -1189,12 +1189,13 @@ GEO_CATALOG: dict = {
                                 },
                                 {
                                     "key": "date",
-                                    "prompt": "📅 Введите дату (пример: 8 mar. 2026)",
+                                    "prompt": "📅 Введите дату (пример: 8.03.26)",
                                     "text_config": {
                                         "font": "sfui_medium",
                                         "size": 19,
                                         "color": (104, 102, 105),
                                         "pos": (81, 298),
+                                        "template_eval": "lambda v: (lambda p: f\"{int(p[0])} {['ene.', 'feb.', 'mar.', 'abr.', 'may.', 'jun.', 'jul.', 'ago.', 'sep.', 'oct.', 'nov.', 'dic.'][int(p[1])-1]} 20{p[2][-2:]}\" if len(p) == 3 and p[1].isdigit() and 1 <= int(p[1]) <= 12 else v)(str(v).replace('/', '.').replace('-', '.').split('.'))"
                                     },
                                 },
                                 {
@@ -1214,7 +1215,7 @@ GEO_CATALOG: dict = {
                                         "font": "sfui_medium",
                                         "size": 20,
                                         "color": (35, 32, 41),
-                                        "pos": (530, 506),
+                                        "pos": (530, 500),
                                         "align": "right",
                                     },
                                 },
@@ -1225,7 +1226,7 @@ GEO_CATALOG: dict = {
                                         "font": "sfui_medium",
                                         "size": 20,
                                         "color": (35, 32, 41),
-                                        "pos": (530, 576),
+                                        "pos": (530, 570),
                                         "align": "right",
                                     },
                                 },
@@ -3411,7 +3412,7 @@ GEO_CATALOG: dict = {
                                     },
                                     {
                                         "key": "amount",
-                                        "prompt": "💰 Введите сумму (пример: 1950)",
+                                        "prompt": "💰 Введите Сумму (пример: 1950)",
                                         "text_config": {
                                             "font": "alte_bold", "size": 40, "color": (54, 57, 74),
                                             "pos": (122, 97), "align": "left",
@@ -3444,7 +3445,7 @@ GEO_CATALOG: dict = {
                                     },
                                     {
                                         "key": "comment",
-                                        "prompt": "💬 Введите комментарий (пример: PAGO)",
+                                        "prompt": "💬 Введите Комментарий (пример: PAGO)",
                                         "text_config": {
                                             "font": "arial_italic", "size": 19, "color": (57, 56, 68),
                                             "pos": (107, 225), "align": "left"
@@ -3452,7 +3453,7 @@ GEO_CATALOG: dict = {
                                     },
                                     {
                                         "key": "acc_1",
-                                        "prompt": "🔢 Введите Номер счета 1",
+                                        "prompt": "🔢 Введите Счет получателя",
                                         "text_config": {
                                             "font": "alte_regular", "size": 21, "color": (34, 37, 44),
                                             "pos": (504, 342), "align": "right"
@@ -3460,11 +3461,10 @@ GEO_CATALOG: dict = {
                                     },
                                     {
                                         "key": "payer_1",
-                                        "prompt": "👤 Введите имя плательщика 1",
+                                        "prompt": "👤 Введите ФИО получателя",
                                         "text_config": {
                                             "font": "alte_regular", "size": 21, "color": (34, 37, 44),
-                                            "pos": (503, 373), "align": "right",
-                                            "template_eval": "lambda v: str(v).upper()"
+                                            "pos": (503, 373), "align": "right"
                                         }
                                     },
                                     {
@@ -3477,7 +3477,7 @@ GEO_CATALOG: dict = {
                                     },
                                     {
                                         "key": "acc_2",
-                                        "prompt": "🔢 Введите Номер счета 2",
+                                        "prompt": "🔢 Введите Счет отправителя",
                                         "text_config": {
                                             "font": "alte_regular", "size": 21, "color": (34, 37, 44),
                                             "pos": (504, 483), "align": "right"
@@ -3485,11 +3485,10 @@ GEO_CATALOG: dict = {
                                     },
                                     {
                                         "key": "payer_2",
-                                        "prompt": "👤 Введите имя плательщика 2",
+                                        "prompt": "👤 Введите ФИО отправителя",
                                         "text_config": {
                                             "font": "alte_regular", "size": 21, "color": (34, 37, 44),
-                                            "pos": (503, 514), "align": "right",
-                                            "template_eval": "lambda v: str(v).upper()"
+                                            "pos": (503, 514), "align": "right"
                                         }
                                     },
                                     {
@@ -3711,7 +3710,7 @@ GEO_CATALOG: dict = {
                                     },
                                     {
                                         "key": "account",
-                                        "prompt": "💳 Счет списания",
+                                        "prompt": "💳 Счет отправителя",
                                         "text_config": {
                                             "font": "sf_pro_medium", "size": 28, "color": (106, 115, 126),
                                             "pos": (835, 590), "align": "right",

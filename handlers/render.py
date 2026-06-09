@@ -1160,6 +1160,8 @@ async def cb_render_shortcuts(call: CallbackQuery, state: FSMContext):
                 length = 10
             elif item_key == "check1_py":
                 length = 9
+            elif item_key == "check4_uy" and key == "account":
+                length = 7
             else:
                 length = 8
             

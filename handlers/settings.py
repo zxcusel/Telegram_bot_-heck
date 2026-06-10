@@ -20,6 +20,8 @@ class SettingStates(StatesGroup):
     wait_pinned_date = State()
     wait_pinned_name = State()
     wait_pinned_bank = State()
+    wait_rocket_min = State()
+    wait_rocket_max = State()
 
 def settings_kb(user_id: int, confirm_clear: bool = False) -> InlineKeyboardMarkup:
     s = get_settings(user_id)
@@ -67,6 +69,11 @@ def settings_kb(user_id: int, confirm_clear: bool = False) -> InlineKeyboardMark
         [
             InlineKeyboardButton(text=f"Min: {s.get('rand_percent_min', 1.0)}", callback_data="set:percent_min"),
             InlineKeyboardButton(text=f"Max: {s.get('rand_percent_max', 100.0)}", callback_data="set:percent_max")
+        ],
+        [InlineKeyboardButton(text="🚀 Ракетки: диапазон X", callback_data="set:noop")],
+        [
+            InlineKeyboardButton(text=f"Min X: {s.get('rand_rocket_min', 10)}", callback_data="set:rocket_min"),
+            InlineKeyboardButton(text=f"Max X: {s.get('rand_rocket_max', 1000)}", callback_data="set:rocket_max")
         ],
         [InlineKeyboardButton(text=rand_bank_text, callback_data="set:toggle_rand_bank")],
         [InlineKeyboardButton(text=rand_acc_text, callback_data="set:toggle_rand_acc")],
@@ -234,6 +241,24 @@ async def cb_set_percent_max(call: CallbackQuery, state: FSMContext):
     await state.set_state(SettingStates.wait_percent_max)
     await state.update_data(settings_msg_id=call.message.message_id)
     await call.message.edit_text("⌨️ Введите максимальный процент для рандомайзера (например, 100.0):", reply_markup=cancel_kb("set:cancel"))
+    await call.answer()
+
+@router.callback_query(F.data == "set:rocket_min")
+async def cb_set_rocket_min(call: CallbackQuery, state: FSMContext):
+    await state.set_state(SettingStates.wait_rocket_min)
+    await state.update_data(settings_msg_id=call.message.message_id)
+    await call.message.edit_text("⌨️ Введите минимальное число X для ракеток:", reply_markup=cancel_kb("set:cancel"))
+    await call.answer()
+
+@router.callback_query(F.data == "set:rocket_max")
+async def cb_set_rocket_max(call: CallbackQuery, state: FSMContext):
+    await state.set_state(SettingStates.wait_rocket_max)
+    await state.update_data(settings_msg_id=call.message.message_id)
+    await call.message.edit_text("⌨️ Введите максимальное число X для ракеток:", reply_markup=cancel_kb("set:cancel"))
+    await call.answer()
+
+@router.callback_query(F.data == "set:noop")
+async def cb_noop(call: CallbackQuery):
     await call.answer()
 
 @router.callback_query(F.data == "set:pinned_date")
@@ -437,3 +462,41 @@ async def process_pinned_bank(message: Message, state: FSMContext):
             reply_markup=settings_kb(message.from_user.id), parse_mode="HTML"
         )
     await state.clear()
+
+@router.message(SettingStates.wait_rocket_min, F.text)
+async def process_rocket_min(message: Message, state: FSMContext):
+    data = await state.get_data()
+    msg_id = data.get("settings_msg_id")
+    try:
+        val = int(message.text.strip().replace(" ", ""))
+        update_setting(message.from_user.id, "rand_rocket_min", val)
+        log.setting_changed(message.from_user.id, "rand_rocket_min", val, message.from_user.username)
+        await message.delete()
+        if msg_id:
+            await message.bot.edit_message_text(
+                chat_id=message.chat.id, message_id=msg_id,
+                text=f"✅ Минимальный X для ракеток установлен: {val}\n\n⚙️ <b>Настройки пользователя</b>",
+                reply_markup=settings_kb(message.from_user.id), parse_mode="HTML"
+            )
+        await state.clear()
+    except Exception:
+        await message.answer("❌ Введите целое число.")
+
+@router.message(SettingStates.wait_rocket_max, F.text)
+async def process_rocket_max(message: Message, state: FSMContext):
+    data = await state.get_data()
+    msg_id = data.get("settings_msg_id")
+    try:
+        val = int(message.text.strip().replace(" ", ""))
+        update_setting(message.from_user.id, "rand_rocket_max", val)
+        log.setting_changed(message.from_user.id, "rand_rocket_max", val, message.from_user.username)
+        await message.delete()
+        if msg_id:
+            await message.bot.edit_message_text(
+                chat_id=message.chat.id, message_id=msg_id,
+                text=f"✅ Максимальный X для ракеток установлен: {val}\n\n⚙️ <b>Настройки пользователя</b>",
+                reply_markup=settings_kb(message.from_user.id), parse_mode="HTML"
+            )
+        await state.clear()
+    except Exception:
+        await message.answer("❌ Введите целое число.")

@@ -719,6 +719,11 @@ async def cb_item_selected(call: CallbackQuery, state: FSMContext):
         elif item_key == "payment1_py":
             askable = [f for f in askable if f["key"] != "account"]
 
+    # Auto-generate x_amount for rocket templates if present
+    has_x_amount = any(f["key"] == "x_amount" for f in askable)
+    if has_x_amount:
+        askable = [f for f in askable if f["key"] != "x_amount"]
+
     log.open_template(call.from_user.id, item.get("label", item_key), call.from_user.username)
 
     if not askable:
@@ -735,6 +740,14 @@ async def cb_item_selected(call: CallbackQuery, state: FSMContext):
     s_temp["perc_sign"] = "+"
 
     auto_values = {"_blur_mode": blur_mode}
+    if has_x_amount:
+        import random
+        r_min = s.get("rand_rocket_min", 10)
+        r_max = s.get("rand_rocket_max", 1000)
+        if r_min > r_max:
+            r_min, r_max = r_max, r_min
+        auto_values["x_amount"] = str(random.randint(r_min, r_max))
+
     if item_key == "check4_bo" and blur_mode == "with_blur":
         import random
         auto_values["sender_acc"] = "1" + "".join([str(random.randint(0, 9)) for _ in range(9)])
@@ -1146,6 +1159,12 @@ async def cb_render_shortcuts(call: CallbackQuery, state: FSMContext):
         key = askable[step]["key"]
         if key in ("sum", "amount", "commission"):
             val = str(random.randint(s["rand_min"], s["rand_max"]))
+        elif key == "x_amount":
+            r_min = s.get("rand_rocket_min", 10)
+            r_max = s.get("rand_rocket_max", 1000)
+            if r_min > r_max:
+                r_min, r_max = r_max, r_min
+            val = str(random.randint(r_min, r_max))
         elif key == "percentage":
             val_float = random.uniform(s.get("rand_percent_min", 1.0), s.get("rand_percent_max", 100.0))
             sign = data.get("perc_sign", "+")

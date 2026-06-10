@@ -513,7 +513,7 @@ def _get_item_for_user(item_key: str, geo: str, user_id: int) -> dict | None:
         return None
     from data.db import get_settings
     s = get_settings(user_id)
-    if s.get("jose_sender_enabled") and item_key in ("check1_py", "check2_py", "check3_py", "check1_uy", "check4_uy"):
+    if s.get("jose_sender_enabled") and item_key in ("check1_py", "check2_py", "check3_py", "check1_uy", "check4_uy", "check_doc", "fire_check"):
         import copy
         item = copy.deepcopy(item)
         if item_key == "check1_py":
@@ -531,6 +531,12 @@ def _get_item_for_user(item_key: str, geo: str, user_id: int) -> dict | None:
         elif item_key == "check4_uy":
             item["asset"] = "assets/Uruguay/Чек/jose/Check4.jpg"
             item["fields"] = [f for f in item["fields"] if f["key"] not in ("sender_name", "account")]
+        elif item_key == "check_doc":
+            item["asset"] = "assets/Bolivia/Чек/jose/Check1.jpg"
+            item["fields"] = [f for f in item["fields"] if f["key"] != "sender_name"]
+        elif item_key == "fire_check":
+            item["asset"] = "assets/Bolivia/Чек/jose/Check2.jpg"
+            item["fields"] = [f for f in item["fields"] if f["key"] != "origen"]
     return item
 
 

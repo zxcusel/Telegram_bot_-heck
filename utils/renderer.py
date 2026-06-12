@@ -16,9 +16,10 @@ Pillow renderer v3.
 """
 import io
 import os
+import re
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 
-from data.config import CATALOG, FONTS, GEO_CATALOG
+from data.config import FONTS, GEO_CATALOG
 
 BASE_DIR = os.path.normpath(os.path.join(os.path.dirname(__file__), ".."))
 PT_TO_PX = 1.0   # Photoshop 72 dpi → 1 pt = 1 px
@@ -51,35 +52,6 @@ def _find_item(item_key: str, geo: str = "bo") -> dict | None:
     return None
 
 
-def _resolve_geo_asset_path(asset_path: str, geo: str = "bo") -> str:
-    """Return a geo-specific asset path when the default asset is present in a geo folder."""
-    if not asset_path.startswith("assets/"):
-        return asset_path
-
-    if geo == "bo":
-        candidates = []
-        if asset_path.startswith("assets/fd/proofs/"):
-            candidates.append(asset_path.replace("assets/fd/proofs/", "assets/Bolivia/FD/proofs/", 1))
-        elif asset_path.startswith("assets/fd/"):
-            candidates.append(asset_path.replace("assets/fd/", "assets/Bolivia/FD/", 1))
-        if asset_path.startswith("assets/rd/proofs/"):
-            candidates.append(asset_path.replace("assets/rd/proofs/", "assets/Bolivia/RD/proofs/", 1))
-        elif asset_path.startswith("assets/rd/"):
-            candidates.append(asset_path.replace("assets/rd/", "assets/Bolivia/RD/", 1))
-        if asset_path == "assets/other/Check.png":
-            candidates.append("assets/Bolivia/Чек/Check.png")
-        if asset_path == "assets/other/QR_code.png":
-            candidates.append("assets/Bolivia/QRCode/QR_code.png")
-        if asset_path == "assets/other/SUPPORT.jpg":
-            candidates.append("assets/Bolivia/SUPPORT/SUPPORT.jpg")
-
-        for candidate in candidates:
-            full_candidate = os.path.normpath(os.path.join(BASE_DIR, candidate))
-            if os.path.exists(full_candidate):
-                return candidate
-
-    # fallback to original path if no geo-specific override exists
-    return asset_path
 
 
 def _load_font(alias: str, size_pt: int | float) -> ImageFont.FreeTypeFont:
@@ -121,8 +93,6 @@ def _wrap(text: str, font: ImageFont.FreeTypeFont, max_w: int) -> list[str]:
         lines.append(cur)
     return lines or [""]
 
-
-import re
 
 def _format_number(value: str) -> str:
     if value is None: return ""
@@ -539,7 +509,7 @@ def render_image(item_key: str, field_values: dict[str, str], geo: str = "bo", i
     if item is None:
         raise ValueError(f"Unknown item_key: {item_key}")
 
-    asset_path = _resolve_geo_asset_path(item["asset"], geo)
+    asset_path = item["asset"]
     asset_path = os.path.normpath(os.path.join(BASE_DIR, asset_path))
     img = Image.open(asset_path).convert("RGBA")
     txt_layer = Image.new("RGBA", img.size, (255, 255, 255, 0))
@@ -930,7 +900,7 @@ def render_video(item_key: str, field_values: dict[str, str], geo: str = "bo", i
     if item is None:
         raise ValueError(f"Unknown item_key: {item_key}")
 
-    asset_path = _resolve_geo_asset_path(item["asset"], geo)
+    asset_path = item["asset"]
     asset_path = os.path.normpath(os.path.join(BASE_DIR, asset_path))
     out_path = os.path.join(tempfile.gettempdir(), f"render_{uuid.uuid4().hex}.mp4")
     import shutil

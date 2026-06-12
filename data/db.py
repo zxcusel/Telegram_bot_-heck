@@ -30,6 +30,66 @@ def _conn():
         con.close()
 
 
+MIGRATIONS: list[tuple[str, str]] = [
+    ("001_add_pinned_date", "ALTER TABLE users ADD COLUMN pinned_date TEXT DEFAULT NULL"),
+    ("002_add_pinned_name", "ALTER TABLE users ADD COLUMN pinned_name TEXT DEFAULT NULL"),
+    ("003_add_name_pin_enabled", "ALTER TABLE users ADD COLUMN name_pin_enabled INTEGER DEFAULT 0"),
+    ("004_add_pinned_bank", "ALTER TABLE users ADD COLUMN pinned_bank TEXT DEFAULT NULL"),
+    ("005_add_time_suffix", "ALTER TABLE users ADD COLUMN time_suffix TEXT DEFAULT NULL"),
+    ("006_add_rand_enabled", "ALTER TABLE users ADD COLUMN rand_enabled INTEGER DEFAULT 0"),
+    ("007_add_rand_min", "ALTER TABLE users ADD COLUMN rand_min INTEGER DEFAULT 17500"),
+    ("008_add_rand_max", "ALTER TABLE users ADD COLUMN rand_max INTEGER DEFAULT 21999"),
+    ("009_add_rand_perc_min", "ALTER TABLE users ADD COLUMN rand_perc_min REAL DEFAULT 10.0"),
+    ("010_add_rand_perc_max", "ALTER TABLE users ADD COLUMN rand_perc_max REAL DEFAULT 1500.0"),
+    ("011_add_rand_percent_enabled", "ALTER TABLE users ADD COLUMN rand_percent_enabled INTEGER DEFAULT 0"),
+    ("012_add_rand_percent_min", "ALTER TABLE users ADD COLUMN rand_percent_min REAL DEFAULT 1.0"),
+    ("013_add_rand_percent_max", "ALTER TABLE users ADD COLUMN rand_percent_max REAL DEFAULT 100.0"),
+    ("014_add_rand_bank_enabled", "ALTER TABLE users ADD COLUMN rand_bank_enabled INTEGER DEFAULT 0"),
+    ("015_add_rand_acc_enabled", "ALTER TABLE users ADD COLUMN rand_acc_enabled INTEGER DEFAULT 0"),
+    ("016_add_rand_name_enabled", "ALTER TABLE users ADD COLUMN rand_name_enabled INTEGER DEFAULT 0"),
+    ("017_add_blur_enabled", "ALTER TABLE users ADD COLUMN blur_enabled INTEGER DEFAULT 1"),
+    ("018_add_blur_qr_enabled", "ALTER TABLE users ADD COLUMN blur_qr_enabled INTEGER DEFAULT 1"),
+    ("019_add_jose_sender_enabled", "ALTER TABLE users ADD COLUMN jose_sender_enabled INTEGER DEFAULT 0"),
+    ("020_add_rand_rocket_min", "ALTER TABLE users ADD COLUMN rand_rocket_min INTEGER DEFAULT 10"),
+    ("021_add_rand_rocket_max", "ALTER TABLE users ADD COLUMN rand_rocket_max INTEGER DEFAULT 1000"),
+    ("022_geos_table_recreate", "dummy")
+]
+
+def _run_migrations(con):
+    con.execute("""
+        CREATE TABLE IF NOT EXISTS schema_migrations (
+            version TEXT PRIMARY KEY,
+            applied_at TEXT DEFAULT (datetime('now'))
+        )
+    """)
+    applied = {r["version"] for r in con.execute("SELECT version FROM schema_migrations").fetchall()}
+    for version, sql in MIGRATIONS:
+        if version not in applied:
+            try:
+                if version == "022_geos_table_recreate":
+                    schema_geos = con.execute("SELECT sql FROM sqlite_master WHERE type='table' AND name='geos'").fetchone()
+                    if schema_geos and "'ma'" not in schema_geos[0]:
+                        con.execute("PRAGMA foreign_keys=OFF")
+                        con.execute("""
+                            CREATE TABLE geos_new (
+                                user_id  INTEGER NOT NULL,
+                                geo      TEXT    NOT NULL CHECK(geo IN ('bo','pe','uy','py','ma')),
+                                added_at TEXT    DEFAULT (datetime('now')),
+                                PRIMARY KEY (user_id, geo)
+                            )
+                        """)
+                        con.execute("INSERT INTO geos_new SELECT * FROM geos")
+                        con.execute("DROP TABLE geos")
+                        con.execute("ALTER TABLE geos_new RENAME TO geos")
+                        con.execute("PRAGMA foreign_keys=ON")
+                else:
+                    con.execute(sql)
+            except sqlite3.OperationalError as e:
+                err_msg = str(e).lower()
+                if "duplicate" not in err_msg and "already exists" not in err_msg:
+                    raise
+            con.execute("INSERT INTO schema_migrations (version) VALUES (?)", (version,))
+
 def init_db():
     if not os.path.exists(INFO_PATH):
         raise FileNotFoundError(f"info.json не найден: {INFO_PATH}")
@@ -63,26 +123,6 @@ def init_db():
                 rand_rocket_max      INTEGER DEFAULT 1000
             )
         """)
-        # Миграция колонок
-        for col_name, col_def in [
-            ("pinned_date","TEXT DEFAULT NULL"),("pinned_name","TEXT DEFAULT NULL"),
-            ("name_pin_enabled","INTEGER DEFAULT 0"),("pinned_bank","TEXT DEFAULT NULL"),
-            ("time_suffix","TEXT DEFAULT NULL"),("rand_enabled","INTEGER DEFAULT 0"),
-            ("rand_min","INTEGER DEFAULT 17500"),("rand_max","INTEGER DEFAULT 21999"),
-            ("rand_perc_min","REAL DEFAULT 10.0"),("rand_perc_max","REAL DEFAULT 1500.0"),
-            ("rand_percent_enabled","INTEGER DEFAULT 0"),("rand_percent_min","REAL DEFAULT 1.0"),
-            ("rand_percent_max","REAL DEFAULT 100.0"),("rand_bank_enabled","INTEGER DEFAULT 0"),
-            ("rand_acc_enabled","INTEGER DEFAULT 0"),("rand_name_enabled","INTEGER DEFAULT 0"),
-            ("blur_enabled","INTEGER DEFAULT 1"),("blur_qr_enabled","INTEGER DEFAULT 1"),
-            ("jose_sender_enabled","INTEGER DEFAULT 0"),
-            ("rand_rocket_min","INTEGER DEFAULT 10"),("rand_rocket_max","INTEGER DEFAULT 1000"),
-        ]:
-            try:
-                con.execute(f"ALTER TABLE users ADD COLUMN {col_name} {col_def}")
-            except sqlite3.OperationalError as e:
-                err_msg = str(e).lower()
-                if "duplicate" not in err_msg and "already exists" not in err_msg:
-                    raise
 
         con.execute("""
             CREATE TABLE IF NOT EXISTS name_blacklist (
@@ -119,25 +159,8 @@ def init_db():
             )
         """)
         
-        # Авто-миграция для старой таблицы geos
-        schema_geos = con.execute("SELECT sql FROM sqlite_master WHERE type='table' AND name='geos'").fetchone()
-        if schema_geos and "'ma'" not in schema_geos[0]:
-            try:
-                con.execute("PRAGMA foreign_keys=OFF")
-                con.execute("""
-                    CREATE TABLE geos_new (
-                        user_id  INTEGER NOT NULL,
-                        geo      TEXT    NOT NULL CHECK(geo IN ('bo','pe','uy','py','ma')),
-                        added_at TEXT    DEFAULT (datetime('now')),
-                        PRIMARY KEY (user_id, geo)
-                    )
-                """)
-                con.execute("INSERT INTO geos_new SELECT * FROM geos")
-                con.execute("DROP TABLE geos")
-                con.execute("ALTER TABLE geos_new RENAME TO geos")
-                con.execute("PRAGMA foreign_keys=ON")
-            except Exception as e:
-                print(f"Migration error: {e}")
+        _run_migrations(con)
+        
         # Миграция из info.json
         data = json.load(open(INFO_PATH, encoding="utf-8"))
         for uid_str in data.get("admins", []):
@@ -167,7 +190,10 @@ def init_db():
 
 
 def get_token() -> str:
-    return json.load(open(INFO_PATH, encoding="utf-8"))["TOKEN"]
+    import os
+    from dotenv import load_dotenv
+    load_dotenv()
+    return os.environ["BOT_TOKEN"]
 
 
 # ── Users ─────────────────────────────────────────────────────────────────────
@@ -196,8 +222,7 @@ def get_user_display(user_id: int) -> str:
 
 fmt_user = get_user_display
 
-def save_username(user_id: int, username: str | None):
-    upsert_user(user_id, username)
+
 
 
 # ── Admins ────────────────────────────────────────────────────────────────────
@@ -251,7 +276,7 @@ def has_any_access(user_id: int) -> bool:
         return True
     return bool(get_roles(user_id)) and bool(get_geos(user_id))
 
-def get_role(user_id: int) -> str | None:
+def get_role_string(user_id: int) -> str | None:
     """Возвращает строку ролей через '+': 'fd', 'rd+cr', 'all' и т.д."""
     if is_admin(user_id):
         return "all"

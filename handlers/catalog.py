@@ -6,7 +6,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.exceptions import TelegramBadRequest
 import asyncio
 
-from data.db import get_role, get_geos, is_admin
+from data.db import get_role_string, get_geos, is_admin
 from data.config import GEO_CATALOG, GEO_LABELS
 from handlers.admin import show_admin_panel
 from keyboards.inline import geo_menu, main_menu, sections_menu, items_menu, geo_menu_for
@@ -74,7 +74,7 @@ async def cb_start_clear(call: CallbackQuery, state: FSMContext):
 @router.callback_query(F.data == "start:begin")
 async def cb_start_begin(call: CallbackQuery, state: FSMContext):
     await state.clear()
-    role = get_role(call.from_user.id)
+    role = get_role_string(call.from_user.id)
     kb   = geo_menu_for(call.from_user.id, role)
     await _safe_edit(call, "🌍 Выберите регион:", kb)
     await call.answer()
@@ -102,7 +102,7 @@ async def cb_geo(call: CallbackQuery, state: FSMContext):
         await call.answer("⛔ Нет доступа к этому региону", show_alert=True); return
 
     await state.update_data(current_geo=geo)
-    role = get_role(call.from_user.id)
+    role = get_role_string(call.from_user.id)
     geo_label = GEO_CATALOG[geo]["label"]
     log.open_category(call.from_user.id, geo, call.from_user.username)
     await _safe_edit(call, f"{geo_label}\n📂 Выберите категорию:", main_menu(role, geo))
@@ -146,13 +146,13 @@ async def cb_back(call: CallbackQuery, state: FSMContext):
 
     elif dest == "geo":
         # Назад к выбору гео
-        role = get_role(call.from_user.id)
+        role = get_role_string(call.from_user.id)
         await _safe_edit(call, "🌍 Выберите регион:", geo_menu_for(call.from_user.id, role))
 
     elif dest == "geo_menu":
         # Назад в меню категорий конкретного гео
         geo  = parts[2]
-        role = get_role(call.from_user.id)
+        role = get_role_string(call.from_user.id)
         geo_label = GEO_CATALOG[geo]["label"]
         await _safe_edit(call, f"{geo_label}\n📂 Выберите категорию:", main_menu(role, geo))
 
@@ -168,13 +168,13 @@ async def cb_back(call: CallbackQuery, state: FSMContext):
         geo  = data.get("current_geo")
         await state.clear()
         if geo:
-            role = get_role(call.from_user.id)
+            role = get_role_string(call.from_user.id)
             geo_label = GEO_CATALOG[geo]["label"]
             await call.message.answer(
                 f"{geo_label}\n📂 Выберите категорию:", reply_markup=main_menu(role, geo)
             )
         else:
-            role = get_role(call.from_user.id)
+            role = get_role_string(call.from_user.id)
             await call.message.answer(
                 "🌍 Выберите регион:", reply_markup=geo_menu_for(call.from_user.id, role)
             )

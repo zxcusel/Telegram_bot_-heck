@@ -14,8 +14,8 @@ from aiogram.fsm.state import State, StatesGroup
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.filters import CommandStart, Command
 
-from data.config import CATALOG, GEO_CATALOG
-from data.db import get_role, get_settings
+from data.config import GEO_CATALOG
+from data.db import get_role_string, get_settings
 from keyboards.inline import cancel_kb, after_render_kb, main_menu, sections_menu, items_menu, geo_menu, geo_menu_for
 from utils.logger import log
 import random
@@ -23,95 +23,41 @@ import random
 router = Router()
 
 
-def _get_random_bank(item_key: str) -> str:
-    """Возвращает рандомный банк в зависимости от шаблона."""
-    if item_key.endswith("_pe"):
-        return random.choice(["BCP", "BBVA", "Scotiabank", "Interbank", "Banco de la Nación", "Banco Falabella Perú"])
-    elif item_key.endswith("_py"):
-        if item_key == "check3_py":
-            return random.choice(["ATLAS", "SOLAR", "GNB"])
-        return random.choice(["ATLAS", "CONTINENTAL", "SOLAR", "INTERFISA", "SUDAMERIS", "GNB", "familiar", "interfisa"])
-    elif item_key.endswith("_uy"):
-        return random.choice(["Itaú", "Santander", "BBVA", "Scotiabank", "Oca blue"])
-    else:
-        return random.choice(["Banco Mercantil Santa Cruz", "Banco Fie", "Banco Bisa", "Banco Union", "Banco Económico", "Banco Nacional de Bolivia"])
-
 def _is_name_field(field_key: str) -> bool:
     return field_key in ("name", "fullname", "recipient_name", "sender_name", "receiver_name", "client_name", "name_1", "name_2", "name1", "name2", "payer_1", "payer_2", "destino", "origen")
 
-def _format_name(full_name: str, prompt: str, item_key: str) -> str:
-    """Форматирует ФИО из name.json (Фамилия1 Фамилия2 Имя1 Имя2) под нужный шаблон на основе текста prompt."""
-    p = " ".join(prompt.lower().split()) # Нормализуем пробелы
+def _format_name(full_name: str, item: dict) -> str:
+    fmt = item.get("name_format", "raw")
     parts = full_name.split()
     
-    # Сначала пытаемся собрать из 4-х слов, если столько и передано
+    if fmt == "upper":
+        return full_name.upper()
+        
     if len(parts) == 4:
         surname1, surname2, name1, name2 = parts
-        
-        # 1. Поиск точных примеров в тексте prompt
-        if "ivan ivanov ivanovich" in p:
-            return f"{name1} {surname1} {surname2}"
-        if "ivanov ivan ivanovich" in p:
-            return f"{surname1} {name1} {name2}"
-        if "nilda mamani apaza" in p:
-            return f"{name1} {surname1} {surname2}"
-        if "ivanov ivan" in p:
-            return f"{surname1} {name1}"
-        if "estrada garcia" in p:
+        if fmt == "4_words":
             return f"{name1} {name2} {surname1} {surname2}"
-        if "estrada g." in p or "aro c." in p:
-            return f"{name1} {name2} {surname1} {surname2[0]}."
-            
-        name_str = f"{name1} {name2} {surname1} {surname2}"
-    else:
-        name_str = full_name
-        
-    if "4 слова" in p and "счёт" in p:
-        import re
-        if not re.match(r'^\d+', name_str):
-            import random
-            acc = "".join([str(random.randint(0, 9)) for _ in range(8)])
-            name_str = f"{acc} {name_str}"
-        
-    if "капсом" in p or item_key == "fire_check":
-        return name_str.upper()
-
-    if len(parts) == 4:
-        # 2. Общие ключевые слова
-        if "фамилия имя" in p:
-            return f"{surname1} {name1}"
-        if "имя фамилия" in p:
+        if fmt == "2_words":
             return f"{name1} {surname1}"
-            
-        # 3. Эвристика по регионам и ключевым словам
-        # Для Парагвая
-        if item_key.endswith("_py"):
-            if "фио" in p and ("отправителя" in p or "получателя" in p or "пользователя" in p):
-                return f"{name1} {name2} {surname1} {surname2}"
-            elif "имя" in p:
-                return f"{name1} {surname1}"
-                
-        # Общая логика
-        if "фио" in p:
-            if "капсом" in p:
-                return f"{name1} {name2} {surname1} {surname2}".upper()
+        if fmt == "py_fio":
             return f"{name1} {name2} {surname1} {surname2}"
-            
-        if "имя" in p:
-            return f"{name1} {surname1}"
+    elif len(parts) >= 2:
+        if fmt == "py_fio" or fmt == "2_words":
+            return f"{parts[1]} {parts[0]}"
             
     return full_name
 
-def _format_date_for_item(val: str, item_key: str) -> str:
-    if item_key == "check_pe": return _to_es_date(val)
-    if item_key in ("check2_pe", "check4_pe"): return _to_es_date2(val)
-    if item_key == "check3_pe": return _to_es_date3(val)
-    if item_key == "fire_check": return _to_es_date_fire(val)
-    if item_key == "check1_uy": return _to_es_date_uy(val)
-    if item_key == "check2_uy": return val.replace(".", "/")
-    if item_key == "check2_py": return _to_es_date_py(val)
-    if item_key == "check3_py": return _to_es_date_py_check3(val)
-    if item_key == "check3_bo":
+def _format_date_for_item(val: str, item: dict) -> str:
+    fmt = item.get("date_format", "raw")
+    if fmt == "es_long": return _to_es_date(val)
+    if fmt == "es_slash": return _to_es_date2(val)
+    if fmt == "es_short": return _to_es_date3(val)
+    if fmt == "fire": return _to_es_date_fire(val)
+    if fmt == "uy": return _to_es_date_uy(val)
+    if fmt == "dot_slash": return val.replace(".", "/")
+    if fmt == "py": return _to_es_date_py(val)
+    if fmt == "py3": return _to_es_date_py_check3(val)
+    if fmt == "dot_slash_year20":
         val = val.replace(".", "/")
         parts = val.split("/")
         if len(parts) == 3 and len(parts[2]) == 2:
@@ -120,16 +66,17 @@ def _format_date_for_item(val: str, item_key: str) -> str:
         return val
     return val
 
-def _advance_steps(askable: list, start_step: int, values: dict, s: dict, item_key: str) -> int:
+def _advance_steps(askable: list, start_step: int, values: dict, s: dict, item: dict, item_key: str) -> int:
+    import random
     done_step = start_step
     while done_step < len(askable):
         if s.get("pinned_date") and "date" in askable[done_step]["key"]:
-            values[askable[done_step]["key"]] = _format_date_for_item(s["pinned_date"], item_key)
+            values[askable[done_step]["key"]] = _format_date_for_item(s["pinned_date"], item)
             done_step += 1
             continue
         key = askable[done_step]["key"]
         if key == "bank" and s.get("rand_bank_enabled") and not item_key.startswith("rd") and item_key not in ("check2_py", "check3_py", "check2_uy", "check3_uy", "check4_uy", "check3_bo"):
-            val_rand = _get_random_bank(item_key)
+            val_rand = random.choice(item.get("banks", ["Banco"]))
             values["bank"] = val_rand
             if item_key == "check2_py":
                 values["_bank_image"] = f"assets/Paraguay/Чек/bank/{val_rand}.jpg"
@@ -606,9 +553,9 @@ async def _finish_render(message: Message, item_key: str, values: dict, item: di
         wait_msg = await message.answer(wait_text)
         log.render_start(message.from_user.id, item.get("label", item_key), message.from_user.username)
         if render_mode == "support_bubbles":
-            from utils.renderer import render_support, FONTS, BASE_DIR, _resolve_geo_asset_path
+            from utils.renderer import render_support, FONTS, BASE_DIR
             import os
-            asset_path = _resolve_geo_asset_path(item["asset"], geo)
+            asset_path = item["asset"]
             asset_path = os.path.normpath(os.path.join(BASE_DIR, asset_path))
             font_path  = os.path.join(BASE_DIR, FONTS["montserrat"])
             media_bytes  = render_support(values, asset_path, font_path, font_size_pt=20)
@@ -663,7 +610,7 @@ async def _return_to_last_section(call: CallbackQuery, state: FSMContext):
     last_line    = data.get("last_line")
     last_section = data.get("last_section")
     geo          = data.get("current_geo")
-    role = get_role(call.from_user.id)
+    role = get_role_string(call.from_user.id)
 
     if last_section and last_line and geo:
         text = "📄 Выберите шаблон:"
@@ -757,7 +704,7 @@ async def cb_item_selected(call: CallbackQuery, state: FSMContext):
             auto_values["account"] = "922" + "".join([str(random.randint(0, 9)) for _ in range(8)])
         
     try:
-        start_step = _advance_steps(askable, 0, auto_values, s, item_key)
+        start_step = _advance_steps(askable, 0, auto_values, s, item, item_key)
     except ValueError:
         await call.answer("❌ В списке name.json не осталось имен! Пополните список или отключите 'Рандом имен' в настройках.", show_alert=True)
         return
@@ -911,7 +858,7 @@ async def collect_text_field(message: Message, state: FSMContext):
         
         # Если это текстовое поле для ФИО и юзер ввел 4 слова, пытаемся его отформатировать
         if _is_name_field(askable[step]["key"]):
-            val = _format_name(val, askable[step].get("prompt", ""), item_key)
+            val = _format_name(val, item)
         
         # Применяем суффикс времени если он выбран в state
         if data.get("time_suffix") and "time" in askable[step]["key"] and item_key not in ("qr_pe", "check1_py"):
@@ -932,7 +879,7 @@ async def collect_text_field(message: Message, state: FSMContext):
 
         # Автоматический подгон даты для чеков
         if "date" in askable[step]["key"]:
-            val = _format_date_for_item(val, item_key)
+            val = _format_date_for_item(val, item)
         if item_key in ("check2_pe", "check4_pe") and askable[step]["key"] == "time":
             val = val.replace("A.M.", "am.").replace("P.M.", "pm.").replace("a. m.", "am.").replace("p. m.", "pm.")\
                      .replace("a.m.", "am.").replace("p.m.", "pm.").replace("AM", "am.").replace("PM", "pm.")
@@ -953,7 +900,7 @@ async def collect_text_field(message: Message, state: FSMContext):
         s_temp["perc_sign"] = data.get("perc_sign", "+")
 
         try:
-            done_step = _advance_steps(askable, done_step, values, s, item_key)
+            done_step = _advance_steps(askable, done_step, values, s, item, item_key)
         except ValueError:
             await message.answer("❌ В списке name.json не осталось имен! Пополните список или отключите 'Рандом имен' в настройках.")
             await state.clear()
@@ -1040,7 +987,7 @@ async def collect_photo_field(message: Message, state: FSMContext):
 
         s = get_settings(message.from_user.id)
         try:
-            done_step = _advance_steps(askable, done_step, values, s, item_key)
+            done_step = _advance_steps(askable, done_step, values, s, item, item_key)
         except ValueError:
             await message.answer("❌ В списке name.json не осталось имен! Пополните список или отключите 'Рандом имен' в настройках.")
             await state.clear()
@@ -1086,7 +1033,7 @@ async def cb_cancel(call: CallbackQuery, state: FSMContext):
     log.cancel(call.from_user.id, data.get("item_key", "?"), call.from_user.username)
 
     # Возвращаем в выбор категории
-    role = get_role(call.from_user.id)
+    role = get_role_string(call.from_user.id)
     geo: str | None = data.get("current_geo")
     if geo:
         await call.message.answer("📂 Выберите категорию:", reply_markup=main_menu(role, geo))
@@ -1104,7 +1051,7 @@ async def cb_cancel(call: CallbackQuery, state: FSMContext):
 async def cb_back_main_from_render(call: CallbackQuery, state: FSMContext):
     data = await state.get_data()
     await state.clear()
-    role = get_role(call.from_user.id)
+    role = get_role_string(call.from_user.id)
     geo: str | None = data.get("current_geo")
     # Всегда отправляем новое сообщение — не трогаем фото с результатом
     if geo:
@@ -1171,7 +1118,7 @@ async def cb_render_shortcuts(call: CallbackQuery, state: FSMContext):
             formatted = f"{abs(val_float):,.2f}"
             val = f"{sign}{formatted}"
         elif key == "bank":
-            val = _get_random_bank(item_key)
+            val = random.choice(item.get("banks", ["Banco"]))
         elif key == "number":
             val = "".join([str(random.randint(0, 9)) for _ in range(8)])
         elif key in ("account", "sender_acc", "receiver_acc", "acc_num", "acc_num_2"):
@@ -1249,8 +1196,7 @@ async def cb_render_shortcuts(call: CallbackQuery, state: FSMContext):
         from data.db import get_and_blacklist_random_name
         try:
             val = get_and_blacklist_random_name()
-            prompt = askable[step]["prompt"]
-            val = _format_name(val, prompt, item_key)
+            val = _format_name(val, item)
         except ValueError:
             try:
                 await call.answer("❌ В списке name.json не осталось доступных имен!", show_alert=True)
@@ -1328,7 +1274,7 @@ async def cb_render_shortcuts(call: CallbackQuery, state: FSMContext):
 
     s = get_settings(call.from_user.id)
     try:
-        done_step = _advance_steps(askable, done_step, values, s, item_key)
+        done_step = _advance_steps(askable, done_step, values, s, item, item_key)
     except ValueError:
         await call.answer("❌ В списке name.json не осталось имен! Пополните список или отключите 'Рандом имен' в настройках.", show_alert=True)
         await state.clear()

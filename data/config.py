@@ -1300,7 +1300,7 @@ GEO_CATALOG: dict = {
                                 },
                                 {
                                     "key": "destino",
-                                    "prompt": "👤 DESTINO (Получатель) — счёт + ФИО капсом (4 слова)\nПример: 72781074 DIEGO EDGAR ABASTO CACERES",
+                                    "prompt": "👤 Получатель счёт + ФИО капсом (4 слова)\nПример: 72781074 DIEGO EDGAR ABASTO CACERES",
                                     "text_config": {
                                         "font": "quicksand_regular",
                                         "size": 22,
@@ -1317,7 +1317,7 @@ GEO_CATALOG: dict = {
                                 },
                                 {
                                     "key": "origen",
-                                    "prompt": "👤 ORIGEN (Отправитель) — счёт + ФИО капсом (4 слова)\nПример: 63395815 PEDRO JUAN GARCIA LOPEZ",
+                                    "prompt": "👤 Отправитель счёт + ФИО капсом (4 слова)\nПример: 63395815 PEDRO JUAN GARCIA LOPEZ",
                                     "text_config": {
                                         "font": "quicksand_regular",
                                         "size": 22,
@@ -2301,6 +2301,7 @@ GEO_CATALOG: dict = {
                             "check_pe": {
                                 "label": "Peru Чек 1",
                                 "asset": "assets/Peru/Чек/Check1.jpg",
+                                "preview": "assets/Peru/Preview/Чек/Check1_prew.jpg",
                                 "fields": [
                                     {
                                         "key": "amount",
@@ -2313,7 +2314,7 @@ GEO_CATALOG: dict = {
                                     },
                                     {
                                         "key": "fullname",
-                                        "prompt": "✏️ Введите ФИО (пример: Dennis Fabricio Estrada Garcia)",
+                                        "prompt": "✏️ Введите ФИО получателя (пример: Dennis Fabricio Estrada Garcia)",
                                         "text_config": {
                                             "font": "araboto_medium", "size": 36,
                                             "color": (37, 34, 41), "pos": (59, 432),
@@ -2367,6 +2368,7 @@ GEO_CATALOG: dict = {
                             "check2_pe": {
                                 "label": "Peru Чек 2",
                                 "asset": "assets/Peru/Чек/Check2.jpg",
+                                "preview": "assets/Peru/Preview/Чек/Check2_prew.jpg",
                                 "fields": [
                                     {
                                         "key": "amount",
@@ -2389,6 +2391,15 @@ GEO_CATALOG: dict = {
                                         "text_config": {
                                             "font": "flexo_bold", "size": 33,
                                             "color": (32, 36, 48), "area": (100, 478, 629, 515),
+                                            "align": "right",
+                                        },
+                                    },
+                                    {
+                                        "key": "sender_name",
+                                        "prompt": "✏️ ФИО отправителя",
+                                        "text_config": {
+                                            "font": "flexo_bold", "size": 33,
+                                            "color": (32, 36, 48), "pos": (628, 894),
                                             "align": "right",
                                         },
                                     },
@@ -2462,6 +2473,7 @@ GEO_CATALOG: dict = {
                             "check3_pe": {
                                 "label": "Peru Чек 3",
                                 "asset": "assets/Peru/Чек/Check3.jpg",
+                                "preview": "assets/Peru/Preview/Чек/Check3_prew.jpg",
                                 "fields": [
                                     {
                                         "key": "amount",
@@ -2479,7 +2491,7 @@ GEO_CATALOG: dict = {
                                     },
                                     {
                                         "key": "fullname",
-                                        "prompt": "✏️ Введите ФИО отправителя",
+                                        "prompt": "✏️ Введите ФИО получателя",
                                         "text_config": {
                                             "font": "geometria_medium", "size": 35,
                                             "color": (19, 24, 27), "pos": (90, 558),
@@ -2512,6 +2524,7 @@ GEO_CATALOG: dict = {
                             "check4_pe": {
                                 "label": "Peru Чек 4",
                                 "asset": "assets/Peru/Чек/Check4.jpg",
+                                "preview": "assets/Peru/Preview/Чек/Check4_prew.jpg",
                                 "fields": [
                                     {
                                         "key": "amount",
@@ -2534,6 +2547,15 @@ GEO_CATALOG: dict = {
                                         "text_config": {
                                             "font": "flexo_medium", "size": 22,
                                             "color": (32, 36, 48), "area": (100, 543, 543, 580),
+                                            "align": "right",
+                                        },
+                                    },
+                                    {
+                                        "key": "sender_name",
+                                        "prompt": "✏️ ФИО отправителя",
+                                        "text_config": {
+                                            "font": "flexo_medium", "size": 22,
+                                            "color": (32, 36, 48), "pos": (543, 843),
                                             "align": "right",
                                         },
                                     },
@@ -3699,7 +3721,7 @@ GEO_CATALOG: dict = {
                                             "font": "nunito_medium", "size": 35, "color": (43, 43, 52),
                                             "pos": (461, 839), "align": "center",
                                             "line_spacing": 1.2,
-                                            "template_eval": "lambda v, fv: f\"{ ' '.join(w + '*' * (3 if i==0 else 4 if i==1 else 3) for i, w in enumerate(str(fv.get('receiver_name','')).upper().split())) } recibe el dinero en\\nsu cuenta {fv.get('bank','')}.\\nSi querés podés compartirle el comprobante.\"",
+                                            "template_eval": "lambda v, fv: f\"{ str(fv.get('receiver_name','')).upper() if '*' in str(fv.get('receiver_name','')) else ' '.join(w[:3] + '***' for w in str(fv.get('receiver_name','')).upper().split()[:3]) } recibe el dinero en\\nsu cuenta {fv.get('bank','')}.\\nSi querés podés compartirle el comprobante.\"",
                                             "template": "{_info_text}"
                                         }
                                     },

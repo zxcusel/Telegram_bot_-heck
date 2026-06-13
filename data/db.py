@@ -201,6 +201,15 @@ def get_token() -> str:
             "BOT_TOKEN не найден. Убедитесь, что переменная окружения BOT_TOKEN "
             f"задана на хостинге или что файл .env существует по пути: {_env_path}"
         )
+    
+    # Очищаем от возможных пробелов и кавычек
+    token = token.strip().strip("'\"")
+    
+    if token == "YOUR_TOKEN_HERE" or not token:
+        raise RuntimeError(
+            f"Ошибка: В значении BOT_TOKEN обнаружен стандартный плейсхолдер или пустая строка: '{token}'. "
+            f"Пожалуйста, отредактируйте файл .env на хостинге и впишите туда настоящий токен бота от @BotFather."
+        )
     return token
 
 

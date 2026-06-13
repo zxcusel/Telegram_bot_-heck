@@ -858,7 +858,7 @@ departamentos, recibirá inmediatamente en su cuenta bancaria la suma total de "
                                 },
                                 {
                                     "key": "name_1",
-                                    "prompt": '👤 Введите ФИО отправителя (DE)',
+                                    "prompt": '👤 Введите ФИО отправителя',
                                     "text_config": {
                                         "font": "inter_semibold",
                                         "size": 40,
@@ -868,8 +868,22 @@ departamentos, recibirá inmediatamente en su cuenta bancaria la suma total de "
                                     },
                                 },
                                 {
+                                    "key": "acc_num",
+                                    "prompt": "🔢 Введите номер счета отправителя",
+                                    "text_config": {
+                                        "font": "inter",
+                                        "size": 39,
+                                        "color": (106, 106, 108),
+                                        "pos": (425, 861),
+                                        "align": "left",
+                                        "template_eval": (
+                                            "lambda v, fv: (lambda b=fv.get('bank_name_sender', ''): str(__import__('random').randint(1000000, 1999999)) if b == 'BANCO ATLAS S.A.' else str(__import__('random').randint(10000000000, 19999999999)) if b == 'BANCO GNB PARAGUAY SA' else str(__import__('random').randint(100000000, 999999999)) if b in ['INTERFISA BANCO SAECA-GRUPO', 'SOLAR BANCO S.A.E'] else str(__import__('random').randint(1000000000, 9999999999)) if b in ['BANCO FAMILIAR S.A.E.C.A.', 'SUDAMERIS BANK S.A.E.C.A.'] else str(__import__('random').randint(100000000, 999999999)))() if str(v).lower() in ['рандом', 'random'] else v"
+                                        ),
+                                    },
+                                },
+                                {
                                     "key": "bank_name_sender",
-                                    "prompt": '🏦 Выберите банк отправителя:',
+                                    "prompt": '🏦 Выберите банк отправителя',
                                     "text_config": {
                                         "font": "inter",
                                         "size": 39,
@@ -905,22 +919,8 @@ departamentos, recibirá inmediatamente en su cuenta bancaria la suma total de "
                                     ],
                                 },
                                 {
-                                    "key": "acc_num",
-                                    "prompt": "🔢 Введите номер счета (или 'рандом')",
-                                    "text_config": {
-                                        "font": "inter",
-                                        "size": 39,
-                                        "color": (106, 106, 108),
-                                        "pos": (425, 861),
-                                        "align": "left",
-                                        "template_eval": (
-                                            "lambda v, fv: (lambda b=fv.get('bank_name_sender', ''): str(__import__('random').randint(1000000, 1999999)) if b == 'BANCO ATLAS S.A.' else str(__import__('random').randint(10000000000, 19999999999)) if b == 'BANCO GNB PARAGUAY SA' else str(__import__('random').randint(100000000, 999999999)) if b in ['INTERFISA BANCO SAECA-GRUPO', 'SOLAR BANCO S.A.E'] else str(__import__('random').randint(1000000000, 9999999999)) if b in ['BANCO FAMILIAR S.A.E.C.A.', 'SUDAMERIS BANK S.A.E.C.A.'] else str(__import__('random').randint(100000000, 999999999)))() if str(v).lower() in ['рандом', 'random'] else v"
-                                        ),
-                                    },
-                                },
-                                {
                                     "key": "name_2",
-                                    "prompt": '👤 Введите ФИО получателя (PARA)',
+                                    "prompt": '👤 Введите ФИО получателя',
                                     "text_config": {
                                         "font": "inter_semibold",
                                         "size": 40,
@@ -931,8 +931,22 @@ departamentos, recibirá inmediatamente en su cuenta bancaria la suma total de "
                                     },
                                 },
                                 {
+                                    "key": "acc_num_2",
+                                    "prompt": "🔢 Введите номер счета получателя",
+                                    "text_config": {
+                                        "font": "inter",
+                                        "size": 39,
+                                        "color": (106, 106, 108),
+                                        "pos": (145, 1218),
+                                        "align": "left",
+                                        "template_eval": (
+                                            "lambda v, fv: (lambda b=fv.get('bank_name', ''): str(__import__('random').randint(1000000, 1999999)) if b == 'BANCO ATLAS S.A.' else str(__import__('random').randint(10000000000, 19999999999)) if b == 'BANCO GNB PARAGUAY SA' else str(__import__('random').randint(100000000, 999999999)) if b in ['INTERFISA BANCO SAECA-GRUPO', 'SOLAR BANCO S.A.E'] else str(__import__('random').randint(1000000000, 9999999999)) if b in ['BANCO FAMILIAR S.A.E.C.A.', 'SUDAMERIS BANK S.A.E.C.A.'] else str(__import__('random').randint(100000000, 999999999)))() if str(v).lower() in ['рандом', 'random'] else v"
+                                        ),
+                                    },
+                                },
+                                {
                                     "key": "bank_name",
-                                    "prompt": '🏦 Выберите банк получателя:',
+                                    "prompt": '🏦 Выберите банк получателя',
                                     "text_config": {
                                         "font": "inter",
                                         "size": 39,
@@ -966,20 +980,6 @@ departamentos, recibirá inmediatamente en su cuenta bancaria la suma total de "
                                             "value": 'SUDAMERIS BANK S.A.E.C.A.',
                                         },
                                     ],
-                                },
-                                {
-                                    "key": "acc_num_2",
-                                    "prompt": "🔢 Введите номер счета получателя (или 'рандом')",
-                                    "text_config": {
-                                        "font": "inter",
-                                        "size": 39,
-                                        "color": (106, 106, 108),
-                                        "pos": (145, 1218),
-                                        "align": "left",
-                                        "template_eval": (
-                                            "lambda v, fv: (lambda b=fv.get('bank_name', ''): str(__import__('random').randint(1000000, 1999999)) if b == 'BANCO ATLAS S.A.' else str(__import__('random').randint(10000000000, 19999999999)) if b == 'BANCO GNB PARAGUAY SA' else str(__import__('random').randint(100000000, 999999999)) if b in ['INTERFISA BANCO SAECA-GRUPO', 'SOLAR BANCO S.A.E'] else str(__import__('random').randint(1000000000, 9999999999)) if b in ['BANCO FAMILIAR S.A.E.C.A.', 'SUDAMERIS BANK S.A.E.C.A.'] else str(__import__('random').randint(100000000, 999999999)))() if str(v).lower() in ['рандом', 'random'] else v"
-                                        ),
-                                    },
                                 },
                                 {
                                     "key": "_blur_mask1",

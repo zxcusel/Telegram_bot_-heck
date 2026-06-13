@@ -1135,7 +1135,7 @@ GEO_ENTRY = {
                                 {
                                     "key": "bank_name",
                                     "prompt": "🏦 Выберите "
-                                    "финансовую "
+                                    "банк "
                                     "организацию:",
                                     "text_config": {
                                         "font": "inter",

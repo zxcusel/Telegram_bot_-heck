@@ -192,8 +192,16 @@ def init_db():
 def get_token() -> str:
     import os
     from dotenv import load_dotenv
-    load_dotenv()
-    return os.environ["BOT_TOKEN"]
+    # Явно указываем путь к .env в корне проекта (на случай если cwd != папка проекта)
+    _env_path = os.path.join(BASE_DIR, ".env")
+    load_dotenv(dotenv_path=_env_path, override=False)
+    token = os.environ.get("BOT_TOKEN")
+    if not token:
+        raise RuntimeError(
+            "BOT_TOKEN не найден. Убедитесь, что переменная окружения BOT_TOKEN "
+            f"задана на хостинге или что файл .env существует по пути: {_env_path}"
+        )
+    return token
 
 
 # ── Users ─────────────────────────────────────────────────────────────────────

@@ -12,8 +12,7 @@ GEO_ENTRY = {
                             "fields": [
                                 {
                                     "key": "name",
-                                    "prompt": "✏️ Введите Фамилия Имя "
-                                    "(пример: Ivanov Ivan)",
+                                    "prompt": '✏️ Введите Фамилия Имя (пример: Ivanov Ivan)',
                                     "text_config": {
                                         "area": (1250, 700, 2780, 925),
                                         "line_spacing": 1.25,
@@ -22,7 +21,7 @@ GEO_ENTRY = {
                                                 "color": (255, 255, 255),
                                                 "font": "montserrat",
                                                 "size": 45,
-                                                "text": "Su " "pago " "al " "cliente ",
+                                                "text": 'Su pago al cliente ',
                                             },
                                             {
                                                 "color": (255, 255, 255),
@@ -34,59 +33,33 @@ GEO_ENTRY = {
                                                 "color": (255, 255, 255),
                                                 "font": "montserrat",
                                                 "size": 45,
-                                                "text": " " "por " "un " "monto " "de ",
+                                                "text": ' por un monto de ',
                                             },
                                             {
                                                 "color": (0, 255, 84),
                                                 "font": "montserrat",
                                                 "size": 45,
-                                                "text": "$U " "168,286",
+                                                "text": '$U 168,286',
                                             },
                                             {
                                                 "color": (255, 255, 255),
                                                 "font": "montserrat",
                                                 "size": 45,
-                                                "text": " "
-                                                "ha "
-                                                "sido "
-                                                "bloqueado "
-                                                "temporalmente. "
-                                                "Para "
-                                                "retirar "
-                                                "los "
-                                                "fondos "
-                                                "de "
-                                                "la "
-                                                "plataforma "
-                                                "a "
-                                                "la "
-                                                "cuenta "
-                                                "del "
-                                                "beneficiario, "
-                                                "su "
-                                                "cliente "
-                                                "está "
-                                                "obligado "
-                                                "a "
-                                                "pagar "
-                                                "una "
-                                                "tarifa "
-                                                "de ",
+                                                "text": ' ha sido bloqueado temporalmente. Para retirar los fondos de la plataforma a la cuenta del beneficiario, su cliente está obligado a pagar una tarifa de ',
                                             },
                                             {
                                                 "color": (255, 0, 0),
                                                 "font": "montserrat",
                                                 "format_number_comma": True,
                                                 "size": 45,
-                                                "text": "$U " "{commission}.",
+                                                "text": '$U {commission}.',
                                             },
                                         ],
                                     },
                                 },
                                 {
                                     "key": "commission",
-                                    "prompt": "💰 Введите сумму "
-                                    "(рекомендуется 6720)",
+                                    "prompt": '💰 Введите сумму (рекомендуется 6720)',
                                     "text_config": {"collect_only": True},
                                 },
                             ],
@@ -107,24 +80,19 @@ GEO_ENTRY = {
                             "fields": [
                                 {
                                     "key": "name",
-                                    "prompt": "✏️ Введите Фамилия Имя "
-                                    "(пример: Ivanov Ivan)",
+                                    "prompt": '✏️ Введите Фамилия Имя (пример: Ivanov Ivan)',
                                     "text_config": {
                                         "area": (2235, 1420, 3050, 1460),
                                         "color": (57, 62, 67),
                                         "font": "montserrat",
                                         "line_spacing": 1.2,
                                         "size": 30,
-                                        "template": "Cuenta "
-                                        "bancaria "
-                                        "del cliente "
-                                        "{name}.",
+                                        "template": 'Cuenta bancaria del cliente {name}.',
                                     },
                                 },
                                 {
                                     "key": "amount",
-                                    "prompt": "💰 Введите сумму "
-                                    "(рекомендуется 10920)",
+                                    "prompt": '💰 Введите сумму (рекомендуется 10920)',
                                     "text_config": {"collect_only": True},
                                 },
                                 {
@@ -137,13 +105,7 @@ GEO_ENTRY = {
                                                 "color": (255, 255, 255),
                                                 "font": "montserrat_light",
                                                 "size": 44,
-                                                "text": "Es "
-                                                "necesario "
-                                                "pagar "
-                                                "una "
-                                                "tarifa "
-                                                "por "
-                                                "la",
+                                                "text": 'Es necesario pagar una tarifa por la',
                                             }
                                         ],
                                     },
@@ -158,7 +120,7 @@ GEO_ENTRY = {
                                                 "color": (255, 255, 255),
                                                 "font": "montserrat_light",
                                                 "size": 44,
-                                                "text": "conversión " "de ",
+                                                "text": 'conversión de ',
                                             },
                                             {
                                                 "color": (136, 255, 164),
@@ -170,7 +132,7 @@ GEO_ENTRY = {
                                                 "color": (255, 255, 255),
                                                 "font": "montserrat_light",
                                                 "size": 44,
-                                                "text": " " "a ",
+                                                "text": ' a ',
                                             },
                                             {
                                                 "color": (254, 68, 92),
@@ -191,17 +153,14 @@ GEO_ENTRY = {
                                                 "color": (255, 255, 255),
                                                 "font": "montserrat_light",
                                                 "size": 44,
-                                                "text": "Importe "
-                                                "de "
-                                                "la "
-                                                "tarifa: ",
+                                                "text": 'Importe de la tarifa: ',
                                             },
                                             {
                                                 "color": (255, 13, 13),
                                                 "font": "montserrat_medium",
                                                 "format_number_comma": True,
                                                 "size": 44,
-                                                "text": "$U " "{amount}",
+                                                "text": '$U {amount}',
                                             },
                                             {
                                                 "color": (255, 255, 255),
@@ -230,27 +189,23 @@ GEO_ENTRY = {
                             "fields": [
                                 {
                                     "key": "name",
-                                    "prompt": "✏️ Введите ФИО (пример: Nilda "
-                                    "Mamani Apaza)",
+                                    "prompt": '✏️ Введите ФИО (пример: Nilda Mamani Apaza)',
                                     "text_config": {
                                         "color": (0, 0, 0),
                                         "font": "times_bold",
                                         "pos": (68, 474),
                                         "size": 59,
-                                        "template": "Notificación " "para " "{name}",
+                                        "template": 'Notificación para {name}',
                                     },
                                 },
                                 {
                                     "key": "gender",
-                                    "prompt": "👤 Выберите пол (введите 'o' "
-                                    "для мужского, 'a' для "
-                                    "женского):",
+                                    "prompt": "👤 Выберите пол (введите 'o' для мужского, 'a' для женского):",
                                     "text_config": {"collect_only": True},
                                 },
                                 {
                                     "key": "amount",
-                                    "prompt": "💰 Введите сумму "
-                                    "(рекомендуется 13860)",
+                                    "prompt": '💰 Введите сумму (рекомендуется 13860)',
                                     "text_config": {"collect_only": True},
                                 },
                                 {
@@ -285,91 +240,30 @@ GEO_ENTRY = {
                                                 "color": (0, 0, 0),
                                                 "font": "times_roman",
                                                 "size": 60,
-                                                "text": "Le "
-                                                "informamos "
-                                                "acerca "
-                                                "de "
-                                                "una "
-                                                "condición "
-                                                "importante "
-                                                "relacionada "
-                                                "con "
-                                                "la "
-                                                "retirada "
-                                                "de "
-                                                "fondos "
-                                                "a\n"
-                                                "la "
-                                                "cuenta "
-                                                "bancaria "
-                                                "que "
-                                                "usted "
-                                                "indicó. "
-                                                "El "
-                                                "pago "
-                                                "estará "
-                                                "disponible "
-                                                "únicamente "
-                                                "después "
-                                                "de\n"
-                                                "realizar "
-                                                "el "
-                                                "abono "
-                                                "por "
-                                                "servicios "
-                                                "por "
-                                                "un "
-                                                "importe "
-                                                "de ",
+                                                "text": """Le informamos acerca de una condición importante relacionada con la retirada de fondos a
+la cuenta bancaria que usted indicó. El pago estará disponible únicamente después de
+realizar el abono por servicios por un importe de """,
                                             },
                                             {
                                                 "color": (0, 0, 0),
                                                 "font": "times_bold",
                                                 "format_number": True,
                                                 "size": 60,
-                                                "text": "$U " "{amount}",
+                                                "text": '$U {amount}',
                                             },
                                             {
                                                 "color": (0, 0, 0),
                                                 "font": "times_roman",
                                                 "size": 60,
-                                                "text": ". "
-                                                "Le "
-                                                "rogamos "
-                                                "efectuar "
-                                                "dicho\n"
-                                                "pago "
-                                                "a "
-                                                "la "
-                                                "mayor "
-                                                "brevedad; "
-                                                "tras "
-                                                "su "
-                                                "confirmación "
-                                                "y "
-                                                "el "
-                                                "procesamiento "
-                                                "por "
-                                                "parte "
-                                                "de "
-                                                "nuestros\n"
-                                                "departamentos, "
-                                                "recibirá "
-                                                "inmediatamente "
-                                                "en "
-                                                "su "
-                                                "cuenta "
-                                                "bancaria "
-                                                "la "
-                                                "suma "
-                                                "total "
-                                                "de ",
+                                                "text": """. Le rogamos efectuar dicho
+pago a la mayor brevedad; tras su confirmación y el procesamiento por parte de nuestros
+departamentos, recibirá inmediatamente en su cuenta bancaria la suma total de """,
                                             },
                                             {
                                                 "color": (0, 0, 0),
                                                 "font": "times_bold",
                                                 "size": 60,
-                                                "text": "$U " "168 " "286",
+                                                "text": '$U 168 286',
                                             },
                                             {
                                                 "color": (0, 0, 0),
@@ -397,8 +291,7 @@ GEO_ENTRY = {
                             "fields": [
                                 {
                                     "key": "time",
-                                    "prompt": "🕐 Введите время (пример: "
-                                    "10:00) (24-часовой формат)",
+                                    "prompt": '🕐 Введите время (пример: 10:00) (24-часовой формат)',
                                     "text_config": {
                                         "area": (115, 39, 243, 60),
                                         "color": (82, 82, 82),
@@ -413,8 +306,7 @@ GEO_ENTRY = {
                                 },
                                 {
                                     "key": "amount",
-                                    "prompt": "💰 Введите сумму "
-                                    "(рекомендуется 7980)",
+                                    "prompt": '💰 Введите сумму (рекомендуется 7980)',
                                     "text_config": {"collect_only": True},
                                 },
                                 {
@@ -429,17 +321,7 @@ GEO_ENTRY = {
                                                 "color": (255, 255, 255),
                                                 "font": "sf_pro",
                                                 "size": 30,
-                                                "text": "Para "
-                                                "una "
-                                                "ejecución "
-                                                "exitosa "
-                                                "y "
-                                                "segura "
-                                                "del "
-                                                "pago "
-                                                "a "
-                                                "su "
-                                                "cliente ",
+                                                "text": 'Para una ejecución exitosa y segura del pago a su cliente ',
                                             },
                                             {
                                                 "color": (255, 255, 255),
@@ -451,54 +333,28 @@ GEO_ENTRY = {
                                                 "color": (255, 255, 255),
                                                 "font": "sf_pro",
                                                 "size": 30,
-                                                "text": ", "
-                                                "es "
-                                                "necesario "
-                                                "que "
-                                                "abone "
-                                                "el "
-                                                "proceso "
-                                                "de "
-                                                "segregación "
-                                                "por "
-                                                "un "
-                                                "monto "
-                                                "de ",
+                                                "text": ', es necesario que abone el proceso de segregación por un monto de ',
                                             },
                                             {
                                                 "color": (255, 0, 0),
                                                 "font": "sf_pro",
                                                 "format_number_dot": True,
                                                 "size": 30,
-                                                "text": "$U " "{amount}.",
+                                                "text": '$U {amount}.',
                                             },
                                             {
                                                 "color": (255, 255, 255),
                                                 "font": "sf_pro",
                                                 "size": 30,
-                                                "text": "\n" "\n",
+                                                "text": """
+
+""",
                                             },
                                             {
                                                 "color": (255, 255, 255),
                                                 "font": "sf_pro",
                                                 "size": 30,
-                                                "text": "Una "
-                                                "vez "
-                                                "abonada "
-                                                "la "
-                                                "segregación, "
-                                                "todo "
-                                                "el "
-                                                "dinero "
-                                                "se "
-                                                "acreditará "
-                                                "automáticamente "
-                                                "en "
-                                                "la "
-                                                "cuenta "
-                                                "de "
-                                                "su "
-                                                "cliente.",
+                                                "text": 'Una vez abonada la segregación, todo el dinero se acreditará automáticamente en la cuenta de su cliente.',
                                             },
                                         ],
                                     },
@@ -521,27 +377,23 @@ GEO_ENTRY = {
                             "fields": [
                                 {
                                     "key": "name",
-                                    "prompt": "✏️ Введите ФИО (пример: Nilda "
-                                    "Mamani Apaza)",
+                                    "prompt": '✏️ Введите ФИО (пример: Nilda Mamani Apaza)',
                                     "text_config": {
                                         "color": (0, 0, 0),
                                         "font": "times_bold",
                                         "pos": (68, 474),
                                         "size": 59,
-                                        "template": "Notificación " "para " "{name}",
+                                        "template": 'Notificación para {name}',
                                     },
                                 },
                                 {
                                     "key": "gender",
-                                    "prompt": "👤 Выберите пол (введите 'o' "
-                                    "для мужского, 'a' для "
-                                    "женского):",
+                                    "prompt": "👤 Выберите пол (введите 'o' для мужского, 'a' для женского):",
                                     "text_config": {"collect_only": True},
                                 },
                                 {
                                     "key": "amount",
-                                    "prompt": "💰 Введите сумму "
-                                    "(рекомендуется 23520)",
+                                    "prompt": '💰 Введите сумму (рекомендуется 23520)',
                                     "text_config": {"collect_only": True},
                                 },
                                 {
@@ -576,98 +428,32 @@ GEO_ENTRY = {
                                                 "color": (0, 0, 0),
                                                 "font": "times_roman",
                                                 "size": 60,
-                                                "text": "En "
-                                                "el "
-                                                "sistema "
-                                                "figura "
-                                                "un "
-                                                "pago "
-                                                "pendiente "
-                                                "por "
-                                                "concepto "
-                                                "de "
-                                                "prima "
-                                                "de "
-                                                "seguro "
-                                                "por ",
+                                                "text": 'En el sistema figura un pago pendiente por concepto de prima de seguro por ',
                                             },
                                             {
                                                 "color": (0, 0, 0),
                                                 "font": "times_bold",
                                                 "format_number": True,
                                                 "size": 60,
-                                                "text": "$U " "{amount}",
+                                                "text": '$U {amount}',
                                             },
                                             {
                                                 "color": (0, 0, 0),
                                                 "font": "times_roman",
                                                 "size": 60,
-                                                "text": ", "
-                                                "necesario "
-                                                "para "
-                                                "activar "
-                                                "las "
-                                                "garantías "
-                                                "y "
-                                                "el "
-                                                "acceso "
-                                                "completo "
-                                                "a "
-                                                "las "
-                                                "funciones "
-                                                "de "
-                                                "protección. "
-                                                "Le "
-                                                "rogamos "
-                                                "efectuar "
-                                                "dicho "
-                                                "pago "
-                                                "a "
-                                                "través "
-                                                "de "
-                                                "los "
-                                                "métodos "
-                                                "de "
-                                                "recarga "
-                                                "disponibles. "
-                                                "Tras "
-                                                "la "
-                                                "confirmación "
-                                                "del "
-                                                "pago, "
-                                                "se "
-                                                "restaurará "
-                                                "el "
-                                                "acceso "
-                                                "a "
-                                                "los "
-                                                "retiros "
-                                                "y "
-                                                "podrá "
-                                                "iniciar "
-                                                "la "
-                                                "transferencia "
-                                                "del "
-                                                "monto "
-                                                "total "
-                                                "de ",
+                                                "text": ', necesario para activar las garantías y el acceso completo a las funciones de protección. Le rogamos efectuar dicho pago a través de los métodos de recarga disponibles. Tras la confirmación del pago, se restaurará el acceso a los retiros y podrá iniciar la transferencia del monto total de ',
                                             },
                                             {
                                                 "color": (0, 0, 0),
                                                 "font": "times_bold",
                                                 "size": 60,
-                                                "text": "$U " "169 " "286",
+                                                "text": '$U 169 286',
                                             },
                                             {
                                                 "color": (0, 0, 0),
                                                 "font": "times_roman",
                                                 "size": 60,
-                                                "text": " "
-                                                "a "
-                                                "la "
-                                                "cuenta "
-                                                "bancaria "
-                                                "indicada.",
+                                                "text": ' a la cuenta bancaria indicada.',
                                             },
                                         ],
                                     },
@@ -699,7 +485,7 @@ GEO_ENTRY = {
                                 },
                                 {
                                     "key": "date2",
-                                    "prompt": "📅 Дата 2 (пример: Fr " "01/01/2026)",
+                                    "prompt": '📅 Дата 2 (пример: Fr 01/01/2026)',
                                     "text_config": {
                                         "area": (1730, 236, 1845, 247),
                                         "color": (147, 147, 147),
@@ -709,25 +495,22 @@ GEO_ENTRY = {
                                 },
                                 {
                                     "key": "bank",
-                                    "prompt": "🏦 Название банка (пример: " "Yane)",
+                                    "prompt": '🏦 Название банка (пример: Yane)',
                                     "text_config": {"collect_only": True},
                                 },
                                 {
                                     "key": "tx_time",
-                                    "prompt": "🕐 Время транзакции (пример: " "10:00)",
+                                    "prompt": '🕐 Время транзакции (пример: 10:00)',
                                     "text_config": {"collect_only": True},
                                 },
                                 {
                                     "key": "name",
-                                    "prompt": "✏️ Введите ФИО клиента "
-                                    "(пример: Ivan Ivanov "
-                                    "Ivanovich)",
+                                    "prompt": '✏️ Введите ФИО клиента (пример: Ivan Ivanov Ivanovich)',
                                     "text_config": {"collect_only": True},
                                 },
                                 {
                                     "key": "commission",
-                                    "prompt": "💰 Введите сумму "
-                                    "(рекомендуется 33600)",
+                                    "prompt": '💰 Введите сумму (рекомендуется 33600)',
                                     "text_config": {"collect_only": True},
                                 },
                                 {
@@ -742,61 +525,47 @@ GEO_ENTRY = {
                                                 "color": (44, 44, 44),
                                                 "font": "arial_bold",
                                                 "size": 20,
-                                                "text": "Estimado " "José " "García!",
+                                                "text": 'Estimado José García!',
                                             },
                                             {
                                                 "color": (44, 44, 44),
                                                 "font": "arial",
                                                 "size": 20,
-                                                "text": "\n" "\n",
+                                                "text": """
+
+""",
                                             },
                                             {
                                                 "color": (44, 44, 44),
                                                 "font": "arial",
                                                 "size": 20,
-                                                "text": "Ha "
-                                                "realizado "
-                                                "un "
-                                                "intercambio "
-                                                "de "
-                                                "USDT "
-                                                "por "
-                                                "un "
-                                                "monto "
-                                                "de ",
+                                                "text": 'Ha realizado un intercambio de USDT por un monto de ',
                                             },
                                             {
                                                 "color": (44, 44, 44),
                                                 "font": "arial_bold",
                                                 "size": 20,
-                                                "text": "U$ " "168,286",
+                                                "text": 'U$ 168,286',
                                             },
                                             {
                                                 "color": (44, 44, 44),
                                                 "font": "arial",
                                                 "size": 20,
-                                                "text": " "
-                                                "para "
-                                                "el "
-                                                "pago "
-                                                "a "
-                                                "su "
-                                                "cliente.",
+                                                "text": ' para el pago a su cliente.',
                                             },
                                             {
                                                 "color": (44, 44, 44),
                                                 "font": "arial",
                                                 "size": 20,
-                                                "text": "\n" "\n",
+                                                "text": """
+
+""",
                                             },
                                             {
                                                 "color": (44, 44, 44),
                                                 "font": "arial",
                                                 "size": 20,
-                                                "text": "Detalles "
-                                                "de "
-                                                "la "
-                                                "transacción:",
+                                                "text": 'Detalles de la transacción:',
                                             },
                                             {
                                                 "color": (44, 44, 44),
@@ -808,11 +577,7 @@ GEO_ENTRY = {
                                                 "color": (44, 44, 44),
                                                 "font": "arial",
                                                 "size": 20,
-                                                "text": "  "
-                                                "ID "
-                                                "de "
-                                                "la "
-                                                "transacción: ",
+                                                "text": '  ID de la transacción: ',
                                             },
                                             {
                                                 "color": (44, 44, 44),
@@ -830,10 +595,7 @@ GEO_ENTRY = {
                                                 "color": (44, 44, 44),
                                                 "font": "arial",
                                                 "size": 20,
-                                                "text": "  "
-                                                "Banco "
-                                                "del "
-                                                "destinatario: ",
+                                                "text": '  Banco del destinatario: ',
                                             },
                                             {
                                                 "color": (44, 44, 44),
@@ -851,13 +613,13 @@ GEO_ENTRY = {
                                                 "color": (44, 44, 44),
                                                 "font": "arial",
                                                 "size": 20,
-                                                "text": "  " "Monto " "a " "recibir: ",
+                                                "text": '  Monto a recibir: ',
                                             },
                                             {
                                                 "color": (44, 44, 44),
                                                 "font": "arial_bold",
                                                 "size": 20,
-                                                "text": "U$ " "168,286",
+                                                "text": 'U$ 168,286',
                                             },
                                             {
                                                 "color": (44, 44, 44),
@@ -869,7 +631,7 @@ GEO_ENTRY = {
                                                 "color": (44, 44, 44),
                                                 "font": "arial",
                                                 "size": 20,
-                                                "text": "  " "Monto " "en " "USDT: ",
+                                                "text": '  Monto en USDT: ',
                                             },
                                             {
                                                 "color": (44, 44, 44),
@@ -887,11 +649,7 @@ GEO_ENTRY = {
                                                 "color": (44, 44, 44),
                                                 "font": "arial",
                                                 "size": 20,
-                                                "text": "  "
-                                                "Hora "
-                                                "de "
-                                                "la "
-                                                "transacción: ",
+                                                "text": '  Hora de la transacción: ',
                                             },
                                             {
                                                 "color": (44, 44, 44),
@@ -903,13 +661,15 @@ GEO_ENTRY = {
                                                 "color": (44, 44, 44),
                                                 "font": "arial",
                                                 "size": 20,
-                                                "text": "\n" "\n",
+                                                "text": """
+
+""",
                                             },
                                             {
                                                 "color": (44, 44, 44),
                                                 "font": "arial",
                                                 "size": 20,
-                                                "text": "Su " "cliente, ",
+                                                "text": 'Su cliente, ',
                                             },
                                             {
                                                 "color": (44, 44, 44),
@@ -921,29 +681,14 @@ GEO_ENTRY = {
                                                 "color": (44, 44, 44),
                                                 "font": "arial",
                                                 "size": 20,
-                                                "text": ", "
-                                                "está "
-                                                "obligado "
-                                                "a "
-                                                "pagar "
-                                                "el "
-                                                "7% "
-                                                "de "
-                                                "impuesto "
-                                                "sobre "
-                                                "el "
-                                                "intercambio "
-                                                "de "
-                                                "criptomonedas, "
-                                                "es "
-                                                "decir, ",
+                                                "text": ', está obligado a pagar el 7% de impuesto sobre el intercambio de criptomonedas, es decir, ',
                                             },
                                             {
                                                 "color": (44, 44, 44),
                                                 "font": "arial_bold",
                                                 "format_number_dot": True,
                                                 "size": 20,
-                                                "text": "$U " "{commission}.",
+                                                "text": '$U {commission}.',
                                             },
                                         ],
                                     },
@@ -966,8 +711,7 @@ GEO_ENTRY = {
                             "fields": [
                                 {
                                     "key": "time",
-                                    "prompt": "🕐 Введите время (пример: "
-                                    "10:00) (24-часовой формат)",
+                                    "prompt": '🕐 Введите время (пример: 10:00) (24-часовой формат)',
                                     "text_config": {
                                         "area": (100, 33, 200, 67),
                                         "color": (255, 255, 255),
@@ -977,8 +721,7 @@ GEO_ENTRY = {
                                 },
                                 {
                                     "key": "bank",
-                                    "prompt": "🏦 Введите название банка "
-                                    "(пример: YAPE)",
+                                    "prompt": '🏦 Введите название банка (пример: YAPE)',
                                     "text_config": {
                                         "area": (398, 850, 710, 880),
                                         "color": (0, 0, 0),
@@ -988,8 +731,7 @@ GEO_ENTRY = {
                                 },
                                 {
                                     "key": "fullname",
-                                    "prompt": "✏️ Введите ФИО (пример: "
-                                    "Ivanov Ivan Ivanovich)",
+                                    "prompt": '✏️ Введите ФИО (пример: Ivanov Ivan Ivanovich)',
                                     "text_config": {
                                         "area": (398, 913, 710, 944),
                                         "color": (0, 0, 0),
@@ -999,8 +741,7 @@ GEO_ENTRY = {
                                 },
                                 {
                                     "key": "number",
-                                    "prompt": "🔢 Введите номер счёта "
-                                    "(пример: 1234567890)",
+                                    "prompt": '🔢 Введите номер счёта (пример: 1234567890)',
                                     "text_config": {
                                         "area": (398, 994, 663, 1025),
                                         "color": (0, 0, 0),
@@ -1010,15 +751,14 @@ GEO_ENTRY = {
                                 },
                                 {
                                     "key": "amount",
-                                    "prompt": "💰 Введите сумму "
-                                    "(рекомендуется 29400)",
+                                    "prompt": '💰 Введите сумму (рекомендуется 29400)',
                                     "text_config": {
                                         "area": (395, 1206, 710, 1242),
                                         "color": (0, 0, 0),
                                         "font": "sf_pro_medium",
                                         "format_number_comma": True,
                                         "size": 29,
-                                        "template": "$U " "{amount}",
+                                        "template": '$U {amount}',
                                     },
                                 },
                             ],
@@ -1059,16 +799,12 @@ GEO_ENTRY = {
                                         "color": (46, 49, 54),
                                         "pos": (92, 67),
                                         "align": "left",
-                                        "template_eval": "lambda "
-                                        "v: "
-                                        "f'Transferiste "
-                                        "a "
-                                        "{str(v).upper()}'",
+                                        "template_eval": "lambda v: f'Transferiste a {str(v).upper()}'",
                                     },
                                 },
                                 {
                                     "key": "amount",
-                                    "prompt": "💰 Введите Сумму " "(пример: 1950)",
+                                    "prompt": '💰 Введите Сумму (пример: 1950)',
                                     "text_config": {
                                         "font": "alte_bold",
                                         "size": 40,
@@ -1081,14 +817,12 @@ GEO_ENTRY = {
                                 },
                                 {
                                     "key": "date",
-                                    "prompt": "📅 Введите дату " "(пример: 20.04.2026)",
+                                    "prompt": '📅 Введите дату (пример: 20.04.2026)',
                                     "text_config": {"collect_only": True},
                                 },
                                 {
                                     "key": "time",
-                                    "prompt": "🕐 Введите время "
-                                    "(пример: 12:20) "
-                                    "(24-часовой формат)",
+                                    "prompt": '🕐 Введите время (пример: 12:20) (24-часовой формат)',
                                     "text_config": {"collect_only": True},
                                 },
                                 {
@@ -1100,14 +834,12 @@ GEO_ENTRY = {
                                         "color": (171, 171, 179),
                                         "pos": (92, 145),
                                         "align": "left",
-                                        "template": "{date} " "{time}",
+                                        "template": '{date} {time}',
                                     },
                                 },
                                 {
                                     "key": "comment",
-                                    "prompt": "💬 Введите "
-                                    "Комментарий (пример: "
-                                    "PAGO)",
+                                    "prompt": '💬 Введите Комментарий (пример: PAGO)',
                                     "text_config": {
                                         "font": "arial_italic",
                                         "size": 19,
@@ -1118,7 +850,7 @@ GEO_ENTRY = {
                                 },
                                 {
                                     "key": "acc_1",
-                                    "prompt": "🔢 Введите Счет " "получателя",
+                                    "prompt": '🔢 Введите Счет получателя',
                                     "text_config": {
                                         "font": "alte_regular",
                                         "size": 21,
@@ -1129,7 +861,7 @@ GEO_ENTRY = {
                                 },
                                 {
                                     "key": "payer_1",
-                                    "prompt": "👤 Введите ФИО " "получателя",
+                                    "prompt": '👤 Введите ФИО получателя',
                                     "text_config": {
                                         "font": "alte_regular",
                                         "size": 21,
@@ -1140,7 +872,7 @@ GEO_ENTRY = {
                                 },
                                 {
                                     "key": "service",
-                                    "prompt": "🔧 Введите Сервис " "(пример: MIDINERO)",
+                                    "prompt": '🔧 Введите Сервис (пример: MIDINERO)',
                                     "text_config": {
                                         "font": "alte_bold",
                                         "size": 21.5,
@@ -1151,7 +883,7 @@ GEO_ENTRY = {
                                 },
                                 {
                                     "key": "acc_2",
-                                    "prompt": "🔢 Введите Счет " "отправителя",
+                                    "prompt": '🔢 Введите Счет отправителя',
                                     "text_config": {
                                         "font": "alte_regular",
                                         "size": 21,
@@ -1162,7 +894,7 @@ GEO_ENTRY = {
                                 },
                                 {
                                     "key": "payer_2",
-                                    "prompt": "👤 Введите ФИО " "отправителя",
+                                    "prompt": '👤 Введите ФИО отправителя',
                                     "text_config": {
                                         "font": "alte_regular",
                                         "size": 21,
@@ -1173,7 +905,7 @@ GEO_ENTRY = {
                                 },
                                 {
                                     "key": "ref_num",
-                                    "prompt": "📄 Введите Справочный " "номер",
+                                    "prompt": '📄 Введите Справочный номер',
                                     "text_config": {
                                         "font": "alte_regular",
                                         "size": 21,
@@ -1191,7 +923,7 @@ GEO_ENTRY = {
                                         "color": (34, 37, 44),
                                         "pos": (503, 769),
                                         "align": "right",
-                                        "template": "$ " "{amount},00",
+                                        "template": '$ {amount},00',
                                         "format_number_dot": True,
                                     },
                                 },
@@ -1229,7 +961,7 @@ GEO_ENTRY = {
                             "fields": [
                                 {
                                     "key": "amount",
-                                    "prompt": "💰 Введите сумму " "(пример: 123456)",
+                                    "prompt": '💰 Введите сумму (пример: 123456)',
                                     "text_config": {
                                         "font": "sf_pro_text_bold",
                                         "size": 54,
@@ -1252,32 +984,30 @@ GEO_ENTRY = {
                                         "color": (8, 8, 8),
                                         "pos": (725, 870),
                                         "align": "right",
-                                        "template": "UYU " "{amount},00",
+                                        "template": 'UYU {amount},00',
                                         "format_number_dot": True,
                                     },
                                 },
                                 {
                                     "key": "sender_acc",
-                                    "prompt": "🔢 Введите Номер "
-                                    "отправителя (10 "
-                                    "цифр)",
+                                    "prompt": '🔢 Введите Номер отправителя (10 цифр)',
                                     "text_config": {
                                         "font": "sf_pro_text_bold",
                                         "size": 28,
                                         "color": (8, 8, 8),
                                         "pos": (385, 351),
                                         "align": "center",
-                                        "template": "CA " "UYU " "{sender_acc}",
+                                        "template": 'CA UYU {sender_acc}',
                                     },
                                 },
                                 {
                                     "key": "bank",
-                                    "prompt": "🏦 Введите Банк " "(пример: Itaú)",
+                                    "prompt": '🏦 Введите Банк (пример: Itaú)',
                                     "text_config": {"collect_only": True},
                                 },
                                 {
                                     "key": "receiver_acc",
-                                    "prompt": "🔢 Введите Номер " "получателя (7 цифр)",
+                                    "prompt": '🔢 Введите Номер получателя (7 цифр)',
                                     "text_config": {"collect_only": True},
                                 },
                                 {
@@ -1289,14 +1019,12 @@ GEO_ENTRY = {
                                         "color": (8, 8, 8),
                                         "pos": (385, 451),
                                         "align": "center",
-                                        "template": "{bank} " "{receiver_acc}",
+                                        "template": '{bank} {receiver_acc}',
                                     },
                                 },
                                 {
                                     "key": "name",
-                                    "prompt": "👤 Введите получателя "
-                                    "(пример: CARD BUE "
-                                    "WILF)",
+                                    "prompt": '👤 Введите получателя (пример: CARD BUE WILF)',
                                     "text_config": {
                                         "font": "sf_pro_text_bold",
                                         "size": 28,
@@ -1304,44 +1032,17 @@ GEO_ENTRY = {
                                         "pos": (304, 539),
                                         "align": "left",
                                         "max_width": 404,
-                                        "template_eval": "lambda "
-                                        "v: "
-                                        "str(v).upper() "
-                                        "if "
-                                        "'*' "
-                                        "in "
-                                        "str(v) "
-                                        "else "
-                                        "' "
-                                        "'.join(w[:len(w)//2] "
-                                        "+ "
-                                        "'*' "
-                                        "* "
-                                        "(len(w) "
-                                        "- "
-                                        "len(w)//2) "
-                                        "if "
-                                        "len(w) "
-                                        "> "
-                                        "1 "
-                                        "else "
-                                        "w "
-                                        "for "
-                                        "w "
-                                        "in "
-                                        "str(v).upper().split())",
+                                        "template_eval": "lambda v: str(v).upper() if '*' in str(v) else ' '.join(w[:len(w)//2] + '*' * (len(w) - len(w)//2) if len(w) > 1 else w for w in str(v).upper().split())",
                                     },
                                 },
                                 {
                                     "key": "date",
-                                    "prompt": "📅 Введите дату " "(пример: 04.01.2026)",
+                                    "prompt": '📅 Введите дату (пример: 04.01.2026)',
                                     "text_config": {"collect_only": True},
                                 },
                                 {
                                     "key": "time",
-                                    "prompt": "🕐 Введите время "
-                                    "(пример: 15:23) "
-                                    "(24-часовой формат)",
+                                    "prompt": '🕐 Введите время (пример: 15:23) (24-часовой формат)',
                                     "text_config": {"collect_only": True},
                                 },
                                 {
@@ -1353,7 +1054,7 @@ GEO_ENTRY = {
                                         "color": (8, 8, 8),
                                         "pos": (725, 647),
                                         "align": "right",
-                                        "template": "{date} " "{time}",
+                                        "template": '{date} {time}',
                                     },
                                 },
                                 {
@@ -1401,9 +1102,7 @@ GEO_ENTRY = {
                             "fields": [
                                 {
                                     "key": "time",
-                                    "prompt": "🕐 Введите время "
-                                    "(пример: 15:23) "
-                                    "(24-часовой формат)",
+                                    "prompt": '🕐 Введите время (пример: 15:23) (24-часовой формат)',
                                     "text_config": {
                                         "font": "sf_pro_text_bold",
                                         "size": 40,
@@ -1414,14 +1113,14 @@ GEO_ENTRY = {
                                 },
                                 {
                                     "key": "amount",
-                                    "prompt": "💰 Введите сумму " "(пример: 1700)",
+                                    "prompt": '💰 Введите сумму (пример: 1700)',
                                     "text_config": {
                                         "font": "nunito_bold",
                                         "size": 62,
                                         "color": (40, 42, 59),
                                         "pos": (461, 718),
                                         "align": "center",
-                                        "template": "Enviaste " "UYU " "{amount},00",
+                                        "template": 'Enviaste UYU {amount},00',
                                         "format_number_dot": True,
                                         "stroke_width": 1,
                                         "stroke_fill": (40, 42, 59),
@@ -1429,9 +1128,7 @@ GEO_ENTRY = {
                                 },
                                 {
                                     "key": "receiver_name",
-                                    "prompt": "👤 Введите получателя "
-                                    "(пример: VIGN FERR "
-                                    "AYR)",
+                                    "prompt": '👤 Введите получателя (пример: VIGN FERR AYR)',
                                     "text_config": {"collect_only": True},
                                 },
                                 {
@@ -1443,7 +1140,7 @@ GEO_ENTRY = {
                                         {"text": "Santander", "value": "Santander"},
                                         {"text": "BBVA", "value": "BBVA"},
                                         {"text": "Scotiabank", "value": "Scotiabank"},
-                                        {"text": "Oca blue", "value": "Oca " "blue"},
+                                        {"text": "Oca blue", "value": 'Oca blue'},
                                     ],
                                 },
                                 {
@@ -1456,36 +1153,7 @@ GEO_ENTRY = {
                                         "pos": (461, 839),
                                         "align": "center",
                                         "line_spacing": 1.2,
-                                        "template_eval": "lambda "
-                                        "v, "
-                                        "fv: "
-                                        'f"{ '
-                                        "str(fv.get('receiver_name','')).upper() "
-                                        "if "
-                                        "'*' "
-                                        "in "
-                                        "str(fv.get('receiver_name','')) "
-                                        "else "
-                                        "' "
-                                        "'.join(w[:3] "
-                                        "+ "
-                                        "'***' "
-                                        "for "
-                                        "w "
-                                        "in "
-                                        "str(fv.get('receiver_name','')).upper().split()[:3]) "
-                                        "} "
-                                        "recibe "
-                                        "el "
-                                        "dinero "
-                                        "en\\nsu "
-                                        "cuenta "
-                                        "{fv.get('bank','')}.\\nSi "
-                                        "querés "
-                                        "podés "
-                                        "compartirle "
-                                        "el "
-                                        'comprobante."',
+                                        "template_eval": "lambda v, fv: f\"{ str(fv.get('receiver_name','')).upper() if '*' in str(fv.get('receiver_name','')) else ' '.join(w[:3] + '***' for w in str(fv.get('receiver_name','')).upper().split()[:3]) } recibe el dinero en\nsu cuenta {fv.get('bank','')}.\nSi querés podés compartirle el comprobante.\"",
                                         "template": "{_info_text}",
                                     },
                                 },
@@ -1549,7 +1217,7 @@ GEO_ENTRY = {
                                         "color": (106, 115, 126),
                                         "pos": (835, 590),
                                         "align": "right",
-                                        "template": "{account} " "($)",
+                                        "template": '{account} ($)',
                                     },
                                 },
                                 {
@@ -1582,21 +1250,7 @@ GEO_ENTRY = {
                                         "color": (106, 115, 126),
                                         "pos": (835, 738),
                                         "align": "right",
-                                        "template_eval": "lambda "
-                                        "v, "
-                                        "fv: "
-                                        "fv.get('receiver_acc', "
-                                        "'') "
-                                        "if "
-                                        "fv.get('bank') "
-                                        "== "
-                                        "'Oca "
-                                        "Blue' "
-                                        "else "
-                                        "f\"{fv.get('bank', "
-                                        "'')} "
-                                        "{fv.get('receiver_acc', "
-                                        "'')}\"",
+                                        "template_eval": "lambda v, fv: fv.get('receiver_acc', '') if fv.get('bank') == 'Oca Blue' else f\"{fv.get('bank', '')} {fv.get('receiver_acc', '')}\"",
                                     },
                                 },
                                 {
@@ -1605,40 +1259,30 @@ GEO_ENTRY = {
                                     "text_config": {
                                         "image_paste": True,
                                         "area": (596, 735, 707, 774),
-                                        "image_eval": "lambda "
-                                        "v, "
-                                        "fv: "
-                                        "'assets/Uruguay/Чек/bank/Oca.jpg' "
-                                        "if "
-                                        "fv.get('bank') "
-                                        "== "
-                                        "'Oca "
-                                        "Blue' "
-                                        "else "
-                                        "None",
+                                        "image_eval": "lambda v, fv: 'assets/Uruguay/Чек/bank/Oca.jpg' if fv.get('bank') == 'Oca Blue' else None",
                                     },
                                 },
                                 {
                                     "key": "amount",
-                                    "prompt": "💰 Сумма перевода " "(пример: 6424)",
+                                    "prompt": '💰 Сумма перевода (пример: 6424)',
                                     "text_config": {
                                         "font": "sf_pro",
                                         "size": 37,
                                         "color": (35, 53, 65),
                                         "pos": (835, 851),
                                         "align": "right",
-                                        "template": "$ " "{amount},00",
+                                        "template": '$ {amount},00',
                                         "format_number_dot": True,
                                     },
                                 },
                                 {
                                     "key": "date",
-                                    "prompt": "📅 Дата (пример: " "18.11.2025)",
+                                    "prompt": '📅 Дата (пример: 18.11.2025)',
                                     "text_config": {"collect_only": True},
                                 },
                                 {
                                     "key": "time",
-                                    "prompt": "🕐 Время (пример: " "03:19)",
+                                    "prompt": '🕐 Время (пример: 03:19)',
                                     "text_config": {"collect_only": True},
                                 },
                                 {
@@ -1650,43 +1294,7 @@ GEO_ENTRY = {
                                         "color": (97, 106, 116),
                                         "pos": (62, 1304),
                                         "align": "left",
-                                        "template_eval": "lambda "
-                                        "v, "
-                                        "fv: "
-                                        "'Realizada "
-                                        "el "
-                                        "' "
-                                        "+ "
-                                        "fv.get('date', "
-                                        "'').split('.')[0] "
-                                        "+ "
-                                        "' "
-                                        "' "
-                                        "+ "
-                                        "{'01':'enero','02':'febrero','03':'marzo','04':'abril','05':'mayo','06':'junio','07':'julio','08':'agosto','09':'septiembre','10':'octubre','11':'noviembre','12':'diciembre'}.get(fv.get('date', "
-                                        "'').split('.')[1] "
-                                        "if "
-                                        "'.' "
-                                        "in "
-                                        "fv.get('date', "
-                                        "'') "
-                                        "else "
-                                        "'', "
-                                        "'') "
-                                        "+ "
-                                        "'. "
-                                        "' "
-                                        "+ "
-                                        "fv.get('date', "
-                                        "'').split('.')[-1] "
-                                        "+ "
-                                        "' "
-                                        "a "
-                                        "las "
-                                        "' "
-                                        "+ "
-                                        "fv.get('time', "
-                                        "'').lower()",
+                                        "template_eval": "lambda v, fv: 'Realizada el ' + fv.get('date', '').split('.')[0] + ' ' + {'01':'enero','02':'febrero','03':'marzo','04':'abril','05':'mayo','06':'junio','07':'julio','08':'agosto','09':'septiembre','10':'octubre','11':'noviembre','12':'diciembre'}.get(fv.get('date', '').split('.')[1] if '.' in fv.get('date', '') else '', '') + '. ' + fv.get('date', '').split('.')[-1] + ' a las ' + fv.get('time', '').lower()",
                                     },
                                 },
                                 {
@@ -1698,7 +1306,7 @@ GEO_ENTRY = {
                                         "color": (35, 53, 65),
                                         "pos": (835, 999),
                                         "align": "right",
-                                        "template": "$ " "{amount},00",
+                                        "template": '$ {amount},00',
                                         "format_number_dot": True,
                                     },
                                 },
@@ -1758,122 +1366,63 @@ GEO_ENTRY = {
                             "fields": [
                                 {
                                     "key": "currency",
-                                    "prompt": "💰 Введите валюту " "(пример: ETH)",
+                                    "prompt": '💰 Введите валюту (пример: ETH)',
                                     "text_config": {
                                         "font": "roboto_cond_med",
                                         "size": 70,
                                         "color": (251, 251, 251),
                                         "pos": (370, 800),
                                         "anchor": "ls",
-                                        "template": "{currency}USDT "
-                                        "| "
-                                        "Sin "
-                                        "límite "
-                                        "de "
-                                        "tiempo",
+                                        "template": '{currency}USDT | Sin límite de tiempo',
                                     },
                                 },
                                 {
                                     "key": "long_short",
-                                    "prompt": "📈 Введите " "Long/Short",
+                                    "prompt": '📈 Введите Long/Short',
                                     "text_config": {
                                         "font": "roboto_cond_reg",
                                         "size": 60,
                                         "pos": (370, 883),
                                         "anchor": "ls",
-                                        "color_eval": "lambda "
-                                        "v: "
-                                        "(95, "
-                                        "166, "
-                                        "106) "
-                                        "if "
-                                        "v.lower() "
-                                        "== "
-                                        "'long' "
-                                        "else "
-                                        "(212, "
-                                        "72, "
-                                        "92)",
+                                        "color_eval": "lambda v: (95, 166, 106) if v.lower() == 'long' else (212, 72, 92)",
                                     },
                                 },
                                 {
                                     "key": "x_amount",
-                                    "prompt": "✖️ Введите "
-                                    "количество X-са "
-                                    "(пример: 100X)",
+                                    "prompt": '✖️ Введите количество X-са (пример: 100X)',
                                     "text_config": {
                                         "font": "roboto_cond_reg",
                                         "size": 60,
                                         "color": (118, 119, 123),
                                         "pos": (600, 883),
                                         "anchor": "ls",
-                                        "template_eval": "lambda "
-                                        "v: "
-                                        "str(v).upper().rstrip('X').strip() "
-                                        "+ "
-                                        "'X'",
+                                        "template_eval": "lambda v: str(v).upper().rstrip('X').strip() + 'X'",
                                     },
                                 },
                                 {
                                     "key": "percentage",
-                                    "prompt": "📈 Введите процент "
-                                    "(пример: "
-                                    "+1,044.86)",
+                                    "prompt": '📈 Введите процент (пример: +1,044.86)',
                                     "text_config": {
                                         "font": "roboto_cond_semibold",
                                         "size": 159,
                                         "pos": (370, 1057),
                                         "anchor": "ls",
-                                        "color_eval": "lambda "
-                                        "v: "
-                                        "(95, "
-                                        "166, "
-                                        "106) "
-                                        "if "
-                                        "str(v).startswith('+') "
-                                        "else "
-                                        "(212, "
-                                        "72, "
-                                        "92)",
+                                        "color_eval": "lambda v: (95, 166, 106) if str(v).startswith('+') else (212, 72, 92)",
                                         "template": "{percentage}%",
                                         "special_number_sizes": 79,
                                     },
                                 },
                                 {
                                     "key": "amount",
-                                    "prompt": "💰 Введите сумму "
-                                    "(пример: 18,045 "
-                                    "или -18,045)",
+                                    "prompt": '💰 Введите сумму (пример: 18,045 или -18,045)',
                                     "text_config": {
                                         "font": "roboto_cond_med",
                                         "size": 80,
                                         "color": (95, 166, 106, 153),
-                                        "color_eval": "lambda "
-                                        "v: "
-                                        "(212, "
-                                        "72, "
-                                        "92, "
-                                        "153) "
-                                        "if "
-                                        "str(v).startswith('-') "
-                                        "else "
-                                        "(95, "
-                                        "166, "
-                                        "106, "
-                                        "153)",
+                                        "color_eval": "lambda v: (212, 72, 92, 153) if str(v).startswith('-') else (95, 166, 106, 153)",
                                         "pos": (370, 1182),
                                         "anchor": "ls",
-                                        "template_eval": "lambda "
-                                        "v: "
-                                        "('-$U "
-                                        "' "
-                                        "if "
-                                        "str(v).startswith('-') "
-                                        "else "
-                                        "'+$U "
-                                        "') "
-                                        "+ "
-                                        "_format_number_comma(str(v)).lstrip('-').lstrip()",
+                                        "template_eval": "lambda v: ('-$U ' if str(v).startswith('-') else '+$U ') + _format_number_comma(str(v)).lstrip('-').lstrip()",
                                         "special_number_sizes": 70,
                                         "space_size": 40,
                                     },

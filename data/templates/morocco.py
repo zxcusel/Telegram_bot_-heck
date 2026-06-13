@@ -14,17 +14,13 @@ GEO_ENTRY = {
                             "fields": [
                                 {
                                     "key": "name",
-                                    "prompt": "✏️ Введите Фамилия Имя "
-                                    "(пример: Nombre Apellido)",
+                                    "prompt": '✏️ Введите Фамилия Имя (пример: Nombre Apellido)',
                                     "text_config": {
                                         "area": (815, 700, 3215, 800),
                                         "segments_align": "center_rtl",
                                         "segments": [
                                             {
-                                                "text": "تم "
-                                                "توقيف "
-                                                "دفعتك "
-                                                "للزبون ",
+                                                "text": 'تم توقيف دفعتك للزبون ',
                                                 "font": "araboto",
                                                 "size": 50,
                                                 "color": (255, 255, 255),
@@ -34,16 +30,10 @@ GEO_ENTRY = {
                                                 "font": "araboto",
                                                 "size": 56,
                                                 "color": (255, 255, 255),
-                                                "template_eval": "lambda "
-                                                "name='', "
-                                                "**kw: "
-                                                "name.replace(' "
-                                                "', "
-                                                "'\xa0"
-                                                "')",
+                                                "template_eval": "lambda name='', **kw: name.replace(' ', ' ')",
                                             },
                                             {
-                                                "text": " " "عن " "مبلغ ",
+                                                "text": ' عن مبلغ ',
                                                 "font": "araboto",
                                                 "size": 50,
                                                 "color": (255, 255, 255),
@@ -61,7 +51,7 @@ GEO_ENTRY = {
                                                 "color": (0, 255, 84),
                                             },
                                             {
-                                                "text": " " "مؤقتًا.",
+                                                "text": ' مؤقتًا.',
                                                 "font": "araboto",
                                                 "size": 50,
                                                 "color": (255, 255, 255),
@@ -76,23 +66,13 @@ GEO_ENTRY = {
                                         "segments_align": "center_rtl",
                                         "segments": [
                                             {
-                                                "text": "لسحب "
-                                                "الأموال "
-                                                "من "
-                                                "المنصة "
-                                                "إلى "
-                                                "حساب "
-                                                "المستفيد، "
-                                                "يجب "
-                                                "على "
-                                                "زبونك "
-                                                "دفع ",
+                                                "text": 'لسحب الأموال من المنصة إلى حساب المستفيد، يجب على زبونك دفع ',
                                                 "font": "araboto",
                                                 "size": 44,
                                                 "color": (255, 255, 255),
                                             },
                                             {
-                                                "text": "رسوم " "قدرها",
+                                                "text": 'رسوم قدرها',
                                                 "font": "araboto",
                                                 "size": 44,
                                                 "color": (255, 255, 255),
@@ -102,8 +82,7 @@ GEO_ENTRY = {
                                 },
                                 {
                                     "key": "commission",
-                                    "prompt": "💰 Введите сумму "
-                                    "(рекомендуется 1280)",
+                                    "prompt": '💰 Введите сумму (рекомендуется 1280)',
                                     "text_config": {
                                         "area": (815, 842, 3215, 942),
                                         "segments_align": "center_rtl",
@@ -177,13 +156,7 @@ GEO_ENTRY = {
                                                 "font": "araboto",
                                                 "size": 30,
                                                 "color": (57, 62, 67),
-                                                "template_eval": "lambda "
-                                                "name='', "
-                                                "**kw: "
-                                                "name.replace(' "
-                                                "', "
-                                                "'\xa0"
-                                                "')",
+                                                "template_eval": "lambda name='', **kw: name.replace(' ', ' ')",
                                             },
                                         ],
                                     },
@@ -202,11 +175,8 @@ GEO_ENTRY = {
                                         "line_spacing": 1.2,
                                         "segments": [
                                             {
-                                                "text": "من "
-                                                "الضروري "
-                                                "دفع "
-                                                "رسوم "
-                                                "لتحويل\n",
+                                                "text": """من الضروري دفع رسوم لتحويل
+""",
                                                 "font": "araboto",
                                                 "size": 44,
                                                 "color": (255, 255, 255),
@@ -230,7 +200,7 @@ GEO_ENTRY = {
                                                 "color": (136, 255, 164),
                                             },
                                             {
-                                                "text": "مقدار " "الرسوم:\xa0",
+                                                "text": 'مقدار الرسوم: ',
                                                 "font": "araboto",
                                                 "size": 44,
                                                 "color": (255, 255, 255),
@@ -270,14 +240,13 @@ GEO_ENTRY = {
                             "fields": [
                                 {
                                     "key": "name",
-                                    "prompt": "✏️ Введите ФИО (пример: Nilda "
-                                    "Mamani Apaza)",
+                                    "prompt": '✏️ Введите ФИО (пример: Nilda Mamani Apaza)',
                                     "text_config": {
                                         "area": (68, 460, 2412, 560),
                                         "segments_align": "right",
                                         "segments": [
                                             {
-                                                "text": "إشعار " "لـ ",
+                                                "text": 'إشعار لـ ',
                                                 "font": "araboto_bold",
                                                 "size": 59,
                                                 "color": (0, 0, 0),
@@ -287,28 +256,19 @@ GEO_ENTRY = {
                                                 "font": "araboto_bold",
                                                 "size": 59,
                                                 "color": (0, 0, 0),
-                                                "template_eval": "lambda "
-                                                "name='', "
-                                                "**kw: "
-                                                "name.replace(' "
-                                                "', "
-                                                "'\xa0"
-                                                "')",
+                                                "template_eval": "lambda name='', **kw: name.replace(' ', ' ')",
                                             },
                                         ],
                                     },
                                 },
                                 {
                                     "key": "gender",
-                                    "prompt": "👤 Выберите обращение (введите "
-                                    "'y' для мужского (عزيزي), 't' "
-                                    "для женского (عزيزتي)):",
+                                    "prompt": "👤 Выберите обращение (введите 'y' для мужского (عزيزي), 't' для женского (عزيزتي)):",
                                     "text_config": {"collect_only": True},
                                 },
                                 {
                                     "key": "amount",
-                                    "prompt": "💰 Введите сумму "
-                                    "(рекомендуется 2 343)",
+                                    "prompt": '💰 Введите сумму (рекомендуется 2 343)',
                                     "text_config": {"collect_only": True},
                                 },
                                 {
@@ -323,32 +283,14 @@ GEO_ENTRY = {
                                                 "font": "araboto",
                                                 "size": 59,
                                                 "color": (0, 0, 0),
-                                                "template_eval": "lambda "
-                                                "gender='', "
-                                                "**kw: "
-                                                "'عزيزي "
-                                                "' "
-                                                "if "
-                                                "str(gender).lower() "
-                                                "in "
-                                                "['y', "
-                                                "'м'] "
-                                                "else "
-                                                "'عزيزتي "
-                                                "'",
+                                                "template_eval": "lambda gender='', **kw: 'عزيزي ' if str(gender).lower() in ['y', 'м'] else 'عزيزتي '",
                                             },
                                             {
                                                 "text": "{name}",
                                                 "font": "araboto_bold",
                                                 "size": 59,
                                                 "color": (0, 0, 0),
-                                                "template_eval": "lambda "
-                                                "name='', "
-                                                "**kw: "
-                                                "name.replace(' "
-                                                "', "
-                                                "'\xa0"
-                                                "')",
+                                                "template_eval": "lambda name='', **kw: name.replace(' ', ' ')",
                                             },
                                             {
                                                 "text": ":",
@@ -368,29 +310,7 @@ GEO_ENTRY = {
                                         "line_spacing": 0.76,
                                         "segments": [
                                             {
-                                                "text": "نحيطكم "
-                                                "علماً "
-                                                "بوجود "
-                                                "شرط "
-                                                "هام "
-                                                "يتعلق "
-                                                "بسحب "
-                                                "الأموال "
-                                                "إلى "
-                                                "الحساب "
-                                                "البنكي "
-                                                "الذي "
-                                                "حددته. "
-                                                "ستكون "
-                                                "عملية "
-                                                "الدفع "
-                                                "متاحة "
-                                                "فقط "
-                                                "بعد "
-                                                "دفع "
-                                                "رسوم "
-                                                "الخدمات "
-                                                "بمبلغ ",
+                                                "text": 'نحيطكم علماً بوجود شرط هام يتعلق بسحب الأموال إلى الحساب البنكي الذي حددته. ستكون عملية الدفع متاحة فقط بعد دفع رسوم الخدمات بمبلغ ',
                                                 "font": "araboto",
                                                 "size": 60,
                                                 "color": (0, 0, 0),
@@ -409,30 +329,7 @@ GEO_ENTRY = {
                                                 "format_number_comma": True,
                                             },
                                             {
-                                                "text": ". "
-                                                "يرجى "
-                                                "سداد "
-                                                "الدفعة "
-                                                "المذكورة "
-                                                "في "
-                                                "أقرب "
-                                                "وقت "
-                                                "ممكن؛ "
-                                                "بعد "
-                                                "تأكيدها "
-                                                "ومعالجتها "
-                                                "من "
-                                                "قبل "
-                                                "أقسامنا، "
-                                                "ستتلقى "
-                                                "على "
-                                                "الفور "
-                                                "في "
-                                                "حسابك "
-                                                "البنكي "
-                                                "المبلغ "
-                                                "الإجمالي "
-                                                "وقدره ",
+                                                "text": '. يرجى سداد الدفعة المذكورة في أقرب وقت ممكن؛ بعد تأكيدها ومعالجتها من قبل أقسامنا، ستتلقى على الفور في حسابك البنكي المبلغ الإجمالي وقدره ',
                                                 "font": "araboto",
                                                 "size": 60,
                                                 "color": (0, 0, 0),
@@ -444,7 +341,7 @@ GEO_ENTRY = {
                                                 "color": (0, 0, 0),
                                             },
                                             {
-                                                "text": " " "د.م.",
+                                                "text": ' د.م.',
                                                 "font": "araboto",
                                                 "size": 60,
                                                 "color": (0, 0, 0),
@@ -471,8 +368,7 @@ GEO_ENTRY = {
                             "fields": [
                                 {
                                     "key": "time",
-                                    "prompt": "🕐 Введите время (пример: "
-                                    "10:00) (24-часовой формат)",
+                                    "prompt": '🕐 Введите время (пример: 10:00) (24-часовой формат)',
                                     "text_config": {
                                         "font": "sf_pro_bold",
                                         "size": 34,
@@ -487,8 +383,7 @@ GEO_ENTRY = {
                                 },
                                 {
                                     "key": "amount",
-                                    "prompt": "💰 Введите сумму "
-                                    "(рекомендуется 2 258)",
+                                    "prompt": '💰 Введите сумму (рекомендуется 2 258)',
                                     "text_config": {"collect_only": True},
                                 },
                                 {
@@ -501,14 +396,7 @@ GEO_ENTRY = {
                                         "blank_line_size": 14,
                                         "segments": [
                                             {
-                                                "text": "من "
-                                                "أجل "
-                                                "إتمام "
-                                                "عملية "
-                                                "الدفع "
-                                                "لزبونك "
-                                                "بنجاح "
-                                                "وأمان ",
+                                                "text": 'من أجل إتمام عملية الدفع لزبونك بنجاح وأمان ',
                                                 "font": "araboto",
                                                 "size": 30,
                                                 "color": (255, 255, 255),
@@ -518,23 +406,10 @@ GEO_ENTRY = {
                                                 "font": "araboto",
                                                 "size": 30,
                                                 "color": (255, 255, 255),
-                                                "template_eval": "lambda "
-                                                "name='', "
-                                                "**kw: "
-                                                "name.replace(' "
-                                                "', "
-                                                "'\xa0"
-                                                "')",
+                                                "template_eval": "lambda name='', **kw: name.replace(' ', ' ')",
                                             },
                                             {
-                                                "text": "، "
-                                                "يجب "
-                                                "عليك "
-                                                "سداد "
-                                                "رسوم "
-                                                "عملية "
-                                                "الفصل "
-                                                "بمبلغ ",
+                                                "text": '، يجب عليك سداد رسوم عملية الفصل بمبلغ ',
                                                 "font": "araboto",
                                                 "size": 30,
                                                 "color": (255, 255, 255),
@@ -553,24 +428,15 @@ GEO_ENTRY = {
                                                 "format_number_comma": True,
                                             },
                                             {
-                                                "text": ".\n" "\n",
+                                                "text": """.
+
+""",
                                                 "font": "araboto",
                                                 "size": 30,
                                                 "color": (255, 255, 255),
                                             },
                                             {
-                                                "text": "بمجرد "
-                                                "دفع "
-                                                "رسوم "
-                                                "الفصل، "
-                                                "سيتم "
-                                                "تحويل "
-                                                "جميع "
-                                                "الأموال "
-                                                "تلقائيًا "
-                                                "إلى "
-                                                "حساب "
-                                                "زبونك.",
+                                                "text": 'بمجرد دفع رسوم الفصل، سيتم تحويل جميع الأموال تلقائيًا إلى حساب زبونك.',
                                                 "font": "araboto",
                                                 "size": 30,
                                                 "color": (255, 255, 255),
@@ -597,14 +463,13 @@ GEO_ENTRY = {
                             "fields": [
                                 {
                                     "key": "name",
-                                    "prompt": "✏️ Введите ФИО (пример: Nilda "
-                                    "Mamani Apaza)",
+                                    "prompt": '✏️ Введите ФИО (пример: Nilda Mamani Apaza)',
                                     "text_config": {
                                         "area": (68, 460, 2412, 560),
                                         "segments_align": "right",
                                         "segments": [
                                             {
-                                                "text": "إشعار " "لـ ",
+                                                "text": 'إشعار لـ ',
                                                 "font": "araboto_bold",
                                                 "size": 59,
                                                 "color": (0, 0, 0),
@@ -614,28 +479,19 @@ GEO_ENTRY = {
                                                 "font": "araboto_bold",
                                                 "size": 59,
                                                 "color": (0, 0, 0),
-                                                "template_eval": "lambda "
-                                                "name='', "
-                                                "**kw: "
-                                                "name.replace(' "
-                                                "', "
-                                                "'\xa0"
-                                                "')",
+                                                "template_eval": "lambda name='', **kw: name.replace(' ', ' ')",
                                             },
                                         ],
                                     },
                                 },
                                 {
                                     "key": "gender",
-                                    "prompt": "👤 Выберите обращение (введите "
-                                    "'y' для мужского (عزيزي), 't' "
-                                    "для женского (عزيزتي)):",
+                                    "prompt": "👤 Выберите обращение (введите 'y' для мужского (عزيزي), 't' для женского (عزيزتي)):",
                                     "text_config": {"collect_only": True},
                                 },
                                 {
                                     "key": "amount",
-                                    "prompt": "💰 Введите сумму "
-                                    "(рекомендуется 2 100)",
+                                    "prompt": '💰 Введите сумму (рекомендуется 2 100)',
                                     "text_config": {"collect_only": True},
                                 },
                                 {
@@ -650,32 +506,14 @@ GEO_ENTRY = {
                                                 "font": "araboto",
                                                 "size": 59,
                                                 "color": (0, 0, 0),
-                                                "template_eval": "lambda "
-                                                "gender='', "
-                                                "**kw: "
-                                                "'عزيزي "
-                                                "' "
-                                                "if "
-                                                "str(gender).lower() "
-                                                "in "
-                                                "['y', "
-                                                "'м'] "
-                                                "else "
-                                                "'عزيزتي "
-                                                "'",
+                                                "template_eval": "lambda gender='', **kw: 'عزيزي ' if str(gender).lower() in ['y', 'м'] else 'عزيزتي '",
                                             },
                                             {
                                                 "text": "{name}",
                                                 "font": "araboto_bold",
                                                 "size": 59,
                                                 "color": (0, 0, 0),
-                                                "template_eval": "lambda "
-                                                "name='', "
-                                                "**kw: "
-                                                "name.replace(' "
-                                                "', "
-                                                "'\xa0"
-                                                "')",
+                                                "template_eval": "lambda name='', **kw: name.replace(' ', ' ')",
                                             },
                                             {
                                                 "text": ":",
@@ -695,14 +533,7 @@ GEO_ENTRY = {
                                         "line_spacing": 1.45,
                                         "segments": [
                                             {
-                                                "text": "يظهر "
-                                                "في "
-                                                "النظام "
-                                                "دفعة "
-                                                "معلقة "
-                                                "كقسط "
-                                                "تأمين "
-                                                "بمبلغ ",
+                                                "text": 'يظهر في النظام دفعة معلقة كقسط تأمين بمبلغ ',
                                                 "font": "araboto",
                                                 "size": 60,
                                                 "color": (0, 0, 0),
@@ -721,40 +552,7 @@ GEO_ENTRY = {
                                                 "format_number_comma": True,
                                             },
                                             {
-                                                "text": "، "
-                                                "وهو "
-                                                "أمر "
-                                                "ضروري "
-                                                "لتفعيل "
-                                                "الضمانات "
-                                                "والوصول "
-                                                "الكامل "
-                                                "إلى "
-                                                "ميزات "
-                                                "الحماية. "
-                                                "يرجى "
-                                                "سداد "
-                                                "هذه "
-                                                "الدفعة "
-                                                "من "
-                                                "خلال "
-                                                "طرق "
-                                                "الشحن "
-                                                "المتاحة. "
-                                                "بعد "
-                                                "تأكيد "
-                                                "الدفع، "
-                                                "سيتم "
-                                                "استعادة "
-                                                "الوصول "
-                                                "إلى "
-                                                "السحوبات "
-                                                "ويمكنك "
-                                                "بدء "
-                                                "تحويل "
-                                                "المبلغ "
-                                                "الإجمالي "
-                                                "البالغ ",
+                                                "text": '، وهو أمر ضروري لتفعيل الضمانات والوصول الكامل إلى ميزات الحماية. يرجى سداد هذه الدفعة من خلال طرق الشحن المتاحة. بعد تأكيد الدفع، سيتم استعادة الوصول إلى السحوبات ويمكنك بدء تحويل المبلغ الإجمالي البالغ ',
                                                 "font": "araboto",
                                                 "size": 60,
                                                 "color": (0, 0, 0),
@@ -766,17 +564,13 @@ GEO_ENTRY = {
                                                 "color": (0, 0, 0),
                                             },
                                             {
-                                                "text": " " "د.م.",
+                                                "text": ' د.م.',
                                                 "font": "araboto",
                                                 "size": 60,
                                                 "color": (0, 0, 0),
                                             },
                                             {
-                                                "text": " "
-                                                "إلى "
-                                                "الحساب "
-                                                "البنكي "
-                                                "المحدد.",
+                                                "text": ' إلى الحساب البنكي المحدد.',
                                                 "font": "araboto",
                                                 "size": 60,
                                                 "color": (0, 0, 0),
@@ -813,7 +607,7 @@ GEO_ENTRY = {
                                 },
                                 {
                                     "key": "date2",
-                                    "prompt": "📅 Дата 2 (пример: Fr " "01/01/2026)",
+                                    "prompt": '📅 Дата 2 (пример: Fr 01/01/2026)',
                                     "text_config": {
                                         "font": "opensans",
                                         "size": 14,
@@ -823,24 +617,22 @@ GEO_ENTRY = {
                                 },
                                 {
                                     "key": "bank",
-                                    "prompt": "🏦 Название банка (пример: CIH " "Bank)",
+                                    "prompt": '🏦 Название банка (пример: CIH Bank)',
                                     "text_config": {"collect_only": True},
                                 },
                                 {
                                     "key": "tx_time",
-                                    "prompt": "🕐 Время транзакции (пример: " "10:00)",
+                                    "prompt": '🕐 Время транзакции (пример: 10:00)',
                                     "text_config": {"collect_only": True},
                                 },
                                 {
                                     "key": "name",
-                                    "prompt": "✏️ Введите ФИО клиента "
-                                    "(пример: Ivan Ivanov)",
+                                    "prompt": '✏️ Введите ФИО клиента (пример: Ivan Ivanov)',
                                     "text_config": {"collect_only": True},
                                 },
                                 {
                                     "key": "commission",
-                                    "prompt": "💰 Введите сумму налога "
-                                    "(рекомендуется 1.920)",
+                                    "prompt": '💰 Введите сумму налога (рекомендуется 1.920)',
                                     "text_config": {"collect_only": True},
                                 },
                                 {
@@ -853,20 +645,15 @@ GEO_ENTRY = {
                                         "blank_line_size": 10,
                                         "segments": [
                                             {
-                                                "text": "عزيزي "
-                                                "خوسيه "
-                                                "غارسيا!\n"
-                                                "\n",
+                                                "text": """عزيزي خوسيه غارسيا!
+
+""",
                                                 "font": "araboto_bold",
                                                 "size": 20,
                                                 "color": (44, 44, 44),
                                             },
                                             {
-                                                "text": "لقد "
-                                                "قمت "
-                                                "بتبادل "
-                                                "USDT "
-                                                "بمبلغ ",
+                                                "text": 'لقد قمت بتبادل USDT بمبلغ ',
                                                 "font": "araboto",
                                                 "size": 20,
                                                 "color": (44, 44, 44),
@@ -878,23 +665,22 @@ GEO_ENTRY = {
                                                 "color": (44, 44, 44),
                                             },
                                             {
-                                                "text": " "
-                                                "د.م. "
-                                                "لدفعها "
-                                                "لزبونك.\n"
-                                                "\n",
+                                                "text": """ د.م. لدفعها لزبونك.
+
+""",
                                                 "font": "araboto",
                                                 "size": 20,
                                                 "color": (44, 44, 44),
                                             },
                                             {
-                                                "text": "تفاصيل " "المعاملة:\n",
+                                                "text": """تفاصيل المعاملة:
+""",
                                                 "font": "araboto_bold",
                                                 "size": 20,
                                                 "color": (44, 44, 44),
                                             },
                                             {
-                                                "text": "  " "معرف " "المعاملة: ",
+                                                "text": '  معرف المعاملة: ',
                                                 "font": "araboto",
                                                 "size": 20,
                                                 "color": (44, 44, 44),
@@ -906,7 +692,7 @@ GEO_ENTRY = {
                                                 "color": (44, 44, 44),
                                             },
                                             {
-                                                "text": "  " "بنك " "المستلم: ",
+                                                "text": '  بنك المستلم: ',
                                                 "font": "araboto",
                                                 "size": 20,
                                                 "color": (44, 44, 44),
@@ -916,19 +702,10 @@ GEO_ENTRY = {
                                                 "font": "araboto_bold",
                                                 "size": 20,
                                                 "color": (44, 44, 44),
-                                                "template_eval": "lambda "
-                                                "bank='', "
-                                                "**kw: "
-                                                "bank.replace(' "
-                                                "', "
-                                                "'\xa0"
-                                                "')",
+                                                "template_eval": "lambda bank='', **kw: bank.replace(' ', ' ')",
                                             },
                                             {
-                                                "text": "  "
-                                                "المبلغ "
-                                                "المراد "
-                                                "استلامه: ",
+                                                "text": '  المبلغ المراد استلامه: ',
                                                 "font": "araboto",
                                                 "size": 20,
                                                 "color": (44, 44, 44),
@@ -940,13 +717,14 @@ GEO_ENTRY = {
                                                 "color": (44, 44, 44),
                                             },
                                             {
-                                                "text": " " "د.م.\n",
+                                                "text": """ د.م.
+""",
                                                 "font": "araboto",
                                                 "size": 20,
                                                 "color": (44, 44, 44),
                                             },
                                             {
-                                                "text": "  " "المبلغ " "بالـ " "USDT: ",
+                                                "text": '  المبلغ بالـ USDT: ',
                                                 "font": "araboto",
                                                 "size": 20,
                                                 "color": (44, 44, 44),
@@ -958,13 +736,15 @@ GEO_ENTRY = {
                                                 "color": (44, 44, 44),
                                             },
                                             {
-                                                "text": "  " "وقت " "المعاملة: ",
+                                                "text": '  وقت المعاملة: ',
                                                 "font": "araboto",
                                                 "size": 20,
                                                 "color": (44, 44, 44),
                                             },
                                             {
-                                                "text": "{tx_time}\n" "\n",
+                                                "text": """{tx_time}
+
+""",
                                                 "font": "myriad_arabic_bold",
                                                 "size": 20,
                                                 "color": (44, 44, 44),
@@ -980,29 +760,10 @@ GEO_ENTRY = {
                                                 "font": "araboto_bold",
                                                 "size": 20,
                                                 "color": (44, 44, 44),
-                                                "template_eval": "lambda "
-                                                "name='', "
-                                                "**kw: "
-                                                "name.replace(' "
-                                                "', "
-                                                "'\xa0"
-                                                "')",
+                                                "template_eval": "lambda name='', **kw: name.replace(' ', ' ')",
                                             },
                                             {
-                                                "text": "، "
-                                                "ملزم "
-                                                "بموجب "
-                                                "القانون "
-                                                "بدفع "
-                                                "ضريبة "
-                                                "بنسبة "
-                                                "7% "
-                                                "على "
-                                                "صرف "
-                                                "العملات "
-                                                "المشفرة، "
-                                                "أي "
-                                                "بمبلغ ",
+                                                "text": '، ملزم بموجب القانون بدفع ضريبة بنسبة 7% على صرف العملات المشفرة، أي بمبلغ ',
                                                 "font": "araboto",
                                                 "size": 20,
                                                 "color": (44, 44, 44),
@@ -1048,8 +809,7 @@ GEO_ENTRY = {
                             "fields": [
                                 {
                                     "key": "time",
-                                    "prompt": "🕐 Введите время (пример: "
-                                    "10:00) (24-часовой формат)",
+                                    "prompt": '🕐 Введите время (пример: 10:00) (24-часовой формат)',
                                     "text_config": {
                                         "font": "sf_pro_bold",
                                         "size": 32,
@@ -1059,8 +819,7 @@ GEO_ENTRY = {
                                 },
                                 {
                                     "key": "bank",
-                                    "prompt": "🏦 Введите название банка "
-                                    "(пример: CIH Bank)",
+                                    "prompt": '🏦 Введите название банка (пример: CIH Bank)',
                                     "text_config": {
                                         "font": "araboto_medium",
                                         "size": 29,
@@ -1071,7 +830,7 @@ GEO_ENTRY = {
                                 },
                                 {
                                     "key": "fullname",
-                                    "prompt": "✏️ Введите ФИО (пример: " "Ivanov Ivan)",
+                                    "prompt": '✏️ Введите ФИО (пример: Ivanov Ivan)',
                                     "text_config": {
                                         "font": "araboto_medium",
                                         "size": 29,
@@ -1082,8 +841,7 @@ GEO_ENTRY = {
                                 },
                                 {
                                     "key": "number",
-                                    "prompt": "🔢 Введите номер счёта "
-                                    "(пример: 1234567890)",
+                                    "prompt": '🔢 Введите номер счёта (пример: 1234567890)',
                                     "text_config": {
                                         "font": "sf_pro_medium",
                                         "size": 29,
@@ -1096,8 +854,7 @@ GEO_ENTRY = {
                                 },
                                 {
                                     "key": "amount",
-                                    "prompt": "💰 Введите сумму "
-                                    "(рекомендуется 1 745)",
+                                    "prompt": '💰 Введите сумму (рекомендуется 1 745)',
                                     "text_config": {
                                         "area": (395, 1206, 710, 1242),
                                         "segments_align": "right",
@@ -1110,7 +867,7 @@ GEO_ENTRY = {
                                                 "format_number_comma": True,
                                             },
                                             {
-                                                "text": " " "د.م.",
+                                                "text": ' د.م.',
                                                 "font": "araboto_medium",
                                                 "size": 29,
                                                 "color": (0, 0, 0),

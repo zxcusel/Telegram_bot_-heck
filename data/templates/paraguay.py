@@ -1133,10 +1133,51 @@ GEO_ENTRY = {
                                     },
                                 },
                                 {
+                                    "key": "bank_name_sender",
+                                    "prompt": "🏦 Выберите "
+                                    "банк "
+                                    "отправителя:",
+                                    "text_config": {
+                                        "font": "inter",
+                                        "size": 39,
+                                        "color": (106, 106, 108),
+                                        "pos": (57, 940),
+                                        "align": "left",
+                                    },
+                                    "options": [
+                                        {
+                                            "text": "ATLAS",
+                                            "value": "BANCO " "ATLAS " "S.A.",
+                                        },
+                                        {
+                                            "text": "SOLAR",
+                                            "value": "SOLAR " "BANCO " "S.A.E",
+                                        },
+                                        {
+                                            "text": "GNB",
+                                            "value": "BANCO " "GNB " "PARAGUAY " "SA",
+                                        },
+                                        {
+                                            "text": "familiar",
+                                            "value": "BANCO " "FAMILIAR " "S.A.E.C.A.",
+                                        },
+                                        {
+                                            "text": "INTERFISA",
+                                            "value": "INTERFISA "
+                                            "BANCO "
+                                            "SAECA-GRUPO",
+                                        },
+                                        {
+                                            "text": "SUDAMERIS",
+                                            "value": "SUDAMERIS " "BANK " "S.A.E.C.A.",
+                                        },
+                                    ],
+                                },
+                                {
                                     "key": "bank_name",
                                     "prompt": "🏦 Выберите "
                                     "банк "
-                                    "организацию:",
+                                    "получателя:",
                                     "text_config": {
                                         "font": "inter",
                                         "size": 39,
@@ -1187,7 +1228,7 @@ GEO_ENTRY = {
                                         "v, "
                                         "fv: "
                                         "(lambda "
-                                        "b=fv.get('bank_name', "
+                                        "b=fv.get('bank_name_sender', "
                                         "''): "
                                         "str(__import__('random').randint(1000000, "
                                         "1999999)) "

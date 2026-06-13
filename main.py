@@ -7,6 +7,25 @@ from middlewares.role_check import RoleMiddleware
 from data.db import init_db, get_token
 from utils.logger import log
 
+# Глобальный патч CallbackQuery.answer для предотвращения падений при старых/таймаутнутых callback-запросах
+from aiogram.types import CallbackQuery
+from aiogram.exceptions import TelegramBadRequest, TelegramAPIError
+
+_original_callback_answer = CallbackQuery.answer
+
+async def _safe_callback_answer(self, *args, **kwargs):
+    try:
+        return await _original_callback_answer(self, *args, **kwargs)
+    except (TelegramBadRequest, TelegramAPIError) as e:
+        err_msg = str(e).lower()
+        if any(substring in err_msg for substring in ("query is too old", "query id is invalid", "timeout expired")):
+            return False
+        raise
+
+CallbackQuery.answer = _safe_callback_answer
+
+
+
 
 async def main():
     init_db()

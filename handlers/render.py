@@ -206,7 +206,7 @@ def _get_field_keyboard(field_key: str, s: dict, item_key: str = None) -> Inline
     if s.get("rand_bank_enabled") and field_key == "bank":
         buttons.append([InlineKeyboardButton(text="🎲 Сгенерировать", callback_data="render:random")])
         
-    if field_key == "bank_name" and item_key == "check1_py":
+    if field_key in ("bank_name", "bank_name_sender") and item_key == "check1_py":
         buttons.append([
             InlineKeyboardButton(text="ATLAS", callback_data="render:set:BANCO ATLAS S.A."),
             InlineKeyboardButton(text="SOLAR", callback_data="render:set:SOLAR BANCO S.A.E")

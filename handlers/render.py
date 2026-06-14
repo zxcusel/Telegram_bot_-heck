@@ -203,7 +203,7 @@ def _get_field_keyboard(field_key: str, s: dict, item_key: str = None) -> Inline
         buttons.append([InlineKeyboardButton(text="🎲 Сгенерировать", callback_data="render:random")])
         
     # 🎲 Рандомайзер банков
-    if s.get("rand_bank_enabled") and field_key == "bank":
+    if s.get("rand_bank_enabled") and field_key in ("bank", "sender_bank"):
         buttons.append([InlineKeyboardButton(text="🎲 Сгенерировать", callback_data="render:random")])
         
     if field_key in ("bank_name", "bank_name_sender") and item_key == "check1_py":
@@ -234,7 +234,7 @@ def _get_field_keyboard(field_key: str, s: dict, item_key: str = None) -> Inline
             InlineKeyboardButton(text="SUDAMERIS", callback_data="render:set:SUDAMERIS")
         ])
 
-    if field_key == "bank" and item_key == "check3_py":
+    if field_key in ("bank", "sender_bank") and item_key == "check3_py":
         buttons.append([
             InlineKeyboardButton(text="ATLAS", callback_data="render:set:ATLAS"),
             InlineKeyboardButton(text="SOLAR", callback_data="render:set:SOLAR")
@@ -893,6 +893,8 @@ async def collect_text_field(message: Message, state: FSMContext):
             values["_bank_image"] = f"assets/Paraguay/Чек/bank/{val}.jpg"
         if item_key == "check3_py" and askable[step]["key"] == "bank":
             values["_bank_image"] = f"assets/Paraguay/Чек/bank2/{val}.png"
+        if item_key == "check3_py" and askable[step]["key"] == "sender_bank":
+            values["_sender_bank_image"] = f"assets/Paraguay/Чек/bank2/{val}.png"
         done_step = step + 1
 
         s = get_settings(message.from_user.id)
@@ -1117,7 +1119,7 @@ async def cb_render_shortcuts(call: CallbackQuery, state: FSMContext):
             sign = data.get("perc_sign", "+")
             formatted = f"{abs(val_float):,.2f}"
             val = f"{sign}{formatted}"
-        elif key == "bank":
+        elif key in ("bank", "sender_bank"):
             val = random.choice(item.get("banks", ["Banco"]))
         elif key == "number":
             val = "".join([str(random.randint(0, 9)) for _ in range(8)])
@@ -1270,6 +1272,8 @@ async def cb_render_shortcuts(call: CallbackQuery, state: FSMContext):
         values["_bank_image"] = f"assets/Paraguay/Чек/bank/{val}.jpg"
     if item_key == "check3_py" and askable[step]["key"] == "bank":
         values["_bank_image"] = f"assets/Paraguay/Чек/bank2/{val}.png"
+    if item_key == "check3_py" and askable[step]["key"] == "sender_bank":
+        values["_sender_bank_image"] = f"assets/Paraguay/Чек/bank2/{val}.png"
     done_step = step + 1
 
     s = get_settings(call.from_user.id)

@@ -1170,7 +1170,7 @@ departamentos, recibirá inmediatamente en su cuenta bancaria la suma total de "
                                 },
                                 {
                                     "key": "sender_name",
-                                    "prompt": "👤 ФИО отправителя",
+                                    "prompt": "👤 Введите ФИО отправителя",
                                     "text_config": {
                                         "font": "sf_pro_text_medium",
                                         "size": 22,
@@ -1180,8 +1180,61 @@ departamentos, recibirá inmediatamente en su cuenta bancaria la suma total de "
                                     },
                                 },
                                 {
+                                    "key": "sender_bank",
+                                    "prompt": "🏦 Выберите банк отправителя",
+                                    "text_config": {"collect_only": True},
+                                },
+                                {
+                                    "key": "sender_bank",
+                                    "prompt": "",
+                                    "text_config": {
+                                        "font": "inter_extralight",
+                                        "size": 22,
+                                        "color": (182, 182, 182),
+                                        "pos": (64, 375),
+                                        "align": "left",
+                                        "template_eval": "lambda v: {'ATLAS': 'Banco Atlas S.a.', 'SOLAR': 'Solar Banco S.a.e.', 'interfisa': 'Interfisa Banco Saeca-grupo', 'SUDAMERIS': 'Sudameris Bank S.a.e.c.a.', 'GNB': 'Banco Gnb Paraguay Sa', 'familiar': 'Banco Familiar S.a.e.c.a.'}.get(v, '')",
+                                    },
+                                },
+                                {
+                                    "key": "_sender_bank_image",
+                                    "prompt": "",
+                                    "text_config": {
+                                        "image_paste": True,
+                                        "area": (437, 321, 500, 384),
+                                    },
+                                },
+                                {
+                                    "key": "sender_acc",
+                                    "prompt": "🔢 Введите номер счета отправителя",
+                                    "text_config": {
+                                        "font": "inter_light",
+                                        "size": 19,
+                                        "color": (205, 205, 205),
+                                        "pos": (127, 403),
+                                        "align": "left",
+                                        "template_eval": "lambda v, fv: (lambda b=fv.get('sender_bank', ''): str(__import__('random').randint(1000000, 1999999)) if b == 'ATLAS' else str(__import__('random').randint(10000000000, 19999999999)) if b == 'GNB' else str(__import__('random').randint(100000000, 999999999)) if b in ['interfisa', 'SOLAR'] else str(__import__('random').randint(1000000000, 9999999999)) if b in ['familiar', 'SUDAMERIS'] else str(__import__('random').randint(100000000, 999999999)))() if str(v).lower() in ['рандом', 'random'] else v",
+                                    },
+                                },
+                                {
+                                    "key": "_blur_mask_sender",
+                                    "prompt": "",
+                                    "text_config": {"blur_area": (167, 405, 207, 425)},
+                                },
+                                {
+                                    "key": "name",
+                                    "prompt": '👤 Введите ФИО получателя',
+                                    "text_config": {
+                                        "font": "sf_pro_text_medium",
+                                        "size": 22,
+                                        "color": (255, 255, 255),
+                                        "pos": (62, 472),
+                                        "align": "left",
+                                    },
+                                },
+                                {
                                     "key": "bank",
-                                    "prompt": "🏦 Выберите банк",
+                                    "prompt": "🏦 Выберите банк получателя",
                                     "text_config": {"collect_only": True},
                                 },
                                 {
@@ -1205,19 +1258,8 @@ departamentos, recibirá inmediatamente en su cuenta bancaria la suma total de "
                                     },
                                 },
                                 {
-                                    "key": "name",
-                                    "prompt": '✏️ Введите Имя получателя',
-                                    "text_config": {
-                                        "font": "sf_pro_text_medium",
-                                        "size": 22,
-                                        "color": (255, 255, 255),
-                                        "pos": (62, 472),
-                                        "align": "left",
-                                    },
-                                },
-                                {
                                     "key": "account",
-                                    "prompt": "🔢 Введите номер счета (или 'рандом')",
+                                    "prompt": "🔢 Введите номер счета получателя",
                                     "text_config": {
                                         "font": "inter_light",
                                         "size": 19,

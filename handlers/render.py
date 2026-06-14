@@ -243,7 +243,7 @@ def _get_field_keyboard(field_key: str, s: dict, item_key: str = None) -> Inline
             InlineKeyboardButton(text="GNB", callback_data="render:set:GNB")
         ])
 
-    if field_key == "bank" and item_key == "check3_bo":
+    if field_key in ("bank", "sender_bank") and item_key == "check3_bo":
         buttons.append([
             InlineKeyboardButton(text="Banco Union", callback_data="render:set:Banco Union"),
             InlineKeyboardButton(text="Banco Fassil", callback_data="render:set:Banco Fassil")
@@ -259,7 +259,7 @@ def _get_field_keyboard(field_key: str, s: dict, item_key: str = None) -> Inline
             InlineKeyboardButton(text="Tus ganancias!", callback_data="render:set:Tus ganancias!")
         ])
 
-    if field_key == "bank" and item_key == "check3_uy":
+    if field_key in ("bank", "sender_bank") and item_key in ("check3_uy", "check1_uy"):
         buttons.append([
             InlineKeyboardButton(text="Itaú", callback_data="render:set:Itaú"),
             InlineKeyboardButton(text="Santander", callback_data="render:set:Santander")

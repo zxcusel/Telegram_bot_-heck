@@ -792,7 +792,7 @@ departamentos, recibirá inmediatamente en su cuenta bancaria la suma total de "
                             "fields": [
                                 {
                                     "key": "name",
-                                    "prompt": "✏️ Введите Имя",
+                                    "prompt": "✏️ Введите Имя получателя",
                                     "text_config": {
                                         "font": "alte_regular",
                                         "size": 19,
@@ -849,35 +849,13 @@ departamentos, recibirá inmediatamente en su cuenta bancaria la suma total de "
                                     },
                                 },
                                 {
-                                    "key": "acc_1",
-                                    "prompt": '🔢 Введите Счет получателя',
-                                    "text_config": {
-                                        "font": "alte_regular",
-                                        "size": 21,
-                                        "color": (34, 37, 44),
-                                        "pos": (504, 342),
-                                        "align": "right",
-                                    },
-                                },
-                                {
-                                    "key": "payer_1",
-                                    "prompt": '👤 Введите ФИО получателя',
-                                    "text_config": {
-                                        "font": "alte_regular",
-                                        "size": 21,
-                                        "color": (34, 37, 44),
-                                        "pos": (503, 373),
-                                        "align": "right",
-                                    },
-                                },
-                                {
-                                    "key": "service",
-                                    "prompt": '🔧 Введите Сервис (пример: MIDINERO)',
+                                    "key": "sender_bank",
+                                    "prompt": '🔧 Введите Банк отправителя (пример: MIDINERO)',
                                     "text_config": {
                                         "font": "alte_bold",
                                         "size": 21.5,
                                         "color": (32, 36, 56),
-                                        "pos": (503, 434),
+                                        "pos": (503, 293),
                                         "align": "right",
                                     },
                                 },
@@ -900,6 +878,39 @@ departamentos, recibirá inmediatamente en su cuenta bancaria la suma total de "
                                         "size": 21,
                                         "color": (34, 37, 44),
                                         "pos": (503, 514),
+                                        "align": "right",
+                                    },
+                                },
+                                {
+                                    "key": "service",
+                                    "prompt": '🔧 Введите Банк получателя (пример: MIDINERO)',
+                                    "text_config": {
+                                        "font": "alte_bold",
+                                        "size": 21.5,
+                                        "color": (32, 36, 56),
+                                        "pos": (503, 434),
+                                        "align": "right",
+                                    },
+                                },
+                                {
+                                    "key": "acc_1",
+                                    "prompt": '🔢 Введите Счет получателя',
+                                    "text_config": {
+                                        "font": "alte_regular",
+                                        "size": 21,
+                                        "color": (34, 37, 44),
+                                        "pos": (504, 342),
+                                        "align": "right",
+                                    },
+                                },
+                                {
+                                    "key": "payer_1",
+                                    "prompt": '👤 Введите ФИО получателя',
+                                    "text_config": {
+                                        "font": "alte_regular",
+                                        "size": 21,
+                                        "color": (34, 37, 44),
+                                        "pos": (503, 373),
                                         "align": "right",
                                     },
                                 },
@@ -961,7 +972,7 @@ departamentos, recibirá inmediatamente en su cuenta bancaria la suma total de "
                             "fields": [
                                 {
                                     "key": "amount",
-                                    "prompt": '💰 Введите сумму (пример: 123456)',
+                                    "prompt": '💰 Введите сумму (пример: 1500)',
                                     "text_config": {
                                         "font": "sf_pro_text_bold",
                                         "size": 54,
@@ -1002,7 +1013,7 @@ departamentos, recibirá inmediatamente en su cuenta bancaria la suma total de "
                                 },
                                 {
                                     "key": "bank",
-                                    "prompt": '🏦 Введите Банк (пример: Itaú)',
+                                    "prompt": '🏦 Введите Банк получателя (пример: Itaú)',
                                     "text_config": {"collect_only": True},
                                 },
                                 {
@@ -1059,7 +1070,7 @@ departamentos, recibirá inmediatamente en su cuenta bancaria la suma total de "
                                 },
                                 {
                                     "key": "account",
-                                    "prompt": "🔢 Введите Ссылку",
+                                    "prompt": "📄 Введите референс",
                                     "text_config": {
                                         "font": "sf_pro_text_bold",
                                         "size": 24,

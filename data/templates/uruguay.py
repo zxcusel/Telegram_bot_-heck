@@ -1164,7 +1164,7 @@ departamentos, recibirá inmediatamente en su cuenta bancaria la suma total de "
                                         "pos": (461, 839),
                                         "align": "center",
                                         "line_spacing": 1.2,
-                                        "template_eval": "lambda v, fv: f\"{ str(fv.get('receiver_name','')).upper() if '*' in str(fv.get('receiver_name','')) else ' '.join(w[:3] + '***' for w in str(fv.get('receiver_name','')).upper().split()[:3]) } recibe el dinero en\nsu cuenta {fv.get('bank','')}.\nSi querés podés compartirle el comprobante.\"",
+                                        "template_eval": "lambda v, fv: f\"{ str(fv.get('receiver_name','')).upper() if '*' in str(fv.get('receiver_name','')) else ' '.join(w[:3] + '***' for w in str(fv.get('receiver_name','')).upper().split()[:3]) } recibe el dinero en\\nsu cuenta {fv.get('bank','')}.\\nSi querés podés compartirle el comprobante.\"",
                                         "template": "{_info_text}",
                                     },
                                 },

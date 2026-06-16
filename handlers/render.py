@@ -862,13 +862,16 @@ async def collect_text_field(message: Message, state: FSMContext):
         
         # Применяем суффикс времени если он выбран в state
         if data.get("time_suffix") and "time" in askable[step]["key"] and item_key not in ("qr_pe", "check1_py"):
-            if "M." not in val.upper():  # Если пользователь сам не написал AM/PM
-                suff = data['time_suffix']
-                if item_key in ("check_doc", "check_pe"):
-                    suff = suff.lower().replace("a.m.", "a. m.").replace("p.m.", "p. m.")
-                if item_key == "check3_pe":
-                    suff = suff.replace(".", "")
-                val = f"{val} {suff}"
+            prompt_text = askable[step].get("prompt", "")
+            is_24h = "24-часовой" in prompt_text or not any(x in prompt_text.lower() for x in ["a.m.", "p.m.", "am", "pm"])
+            if not is_24h:
+                if "M." not in val.upper() and "AM" not in val.upper() and "PM" not in val.upper():  # Если пользователь сам не написал AM/PM
+                    suff = data['time_suffix']
+                    if item_key in ("check_doc", "check_pe"):
+                        suff = suff.lower().replace("a.m.", "a. m.").replace("p.m.", "p. m.")
+                    if item_key == "check3_pe":
+                        suff = suff.replace(".", "")
+                    val = f"{val} {suff}"
 
         # Если пользователь сам ввел AM/PM в чеке — тоже в нижний регистр
         if item_key in ("check_doc", "check_pe") and "time" in askable[step]["key"]:

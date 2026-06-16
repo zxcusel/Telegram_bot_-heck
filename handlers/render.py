@@ -454,41 +454,79 @@ def _find_item(item_key: str, geo: str = "bo") -> dict | None:
     return None
 
 
+JOSE_RULES = {
+    # Bolivia
+    ("check_doc", "sender"): ("assets/jose/Bolivia/Check1 отправитель jose.jpg", {"sender_name"}),
+    ("check_doc", "recipient"): ("assets/jose/Bolivia/Check1 получатель jose.jpg", {"fullname", "account"}),
+    ("fire_check", "sender"): ("assets/jose/Bolivia/Check2 отправитель jose.jpg", {"origen"}),
+    ("fire_check", "recipient"): ("assets/jose/Bolivia/Check2 получатель jose.jpg", {"destino"}),
+    ("check3_bo", "sender"): ("assets/jose/Bolivia/Check3 отправитель jose.jpg", {"sender_name", "sender_acc", "sender_bank"}),
+    ("check3_bo", "recipient"): ("assets/jose/Bolivia/Check3 получатель jose.jpg", {"name_1", "acc_num", "bank"}),
+
+    # Paraguay
+    ("check1_py", "sender"): ("assets/jose/Paraguay/Check1 отправитель jose.jpg", {"name_1", "acc_num", "bank_name_sender"}),
+    ("check1_py", "recipient"): ("assets/jose/Paraguay/Check1 получатель jose.jpg", {"name_2", "acc_num_2", "bank_name"}),
+    ("check2_py", "sender"): ("assets/jose/Paraguay/Check2 отправитель jose.jpg", {"name2", "account_end"}),
+    ("check2_py", "recipient"): ("assets/jose/Paraguay/Check2 получатель jose.jpg", {"name1", "account"}),
+    ("check3_py", "sender"): ("assets/jose/Paraguay/Check3 отправитель jose.jpg", {"sender_name", "sender_bank", "sender_acc"}),
+    ("check3_py", "recipient"): ("assets/jose/Paraguay/Check3 получатель jose.jpg", {"name", "bank", "account"}),
+
+    # Peru
+    ("check_pe", "recipient"): ("assets/jose/Peru/Check1 получатель jose.jpg", {"fullname"}),
+    ("check2_pe", "sender"): ("assets/jose/Peru/Check2 отправитель jose.jpg", {"sender_name", "card_sender"}),
+    ("check2_pe", "recipient"): ("assets/jose/Peru/Check2 получатель jose.jpg", {"fullname", "card_recipient"}),
+    ("check3_pe", "recipient"): ("assets/jose/Peru/Check3 получатель jose.jpg", {"fullname"}),
+    ("check4_pe", "sender"): ("assets/jose/Peru/Check4 отправитель jose.jpg", {"sender_name", "card_sender"}),
+    ("check4_pe", "recipient"): ("assets/jose/Peru/Check4 получатель jose.jpg", {"fullname", "card_recipient"}),
+
+    # Uruguay
+    ("check1_uy", "sender"): ("assets/jose/Uruguay/Check1 отправитель jose.jpg", {"sender_bank", "acc_2", "payer_2"}),
+    ("check1_uy", "recipient"): ("assets/jose/Uruguay/Check1 получатель jose.jpg", {"service", "acc_1", "payer_1"}),
+    ("check2_uy", "recipient"): ("assets/jose/Uruguay/Check2 получатель jose.jpg", {"bank", "receiver_acc", "name"}),
+    ("check3_uy", "recipient"): ("assets/jose/Uruguay/Check3 получатель jose.jpg", {"receiver_name"}),
+    ("check4_uy", "sender"): ("assets/jose/Uruguay/Check4 отправитель jose.jpg", {"sender_name", "account"}),
+    ("check4_uy", "recipient"): ("assets/jose/Uruguay/Check4 получатель jose.jpg", {"receiver_acc", "receiver_name"}),
+}
+
+
 def _get_item_for_user(item_key: str, geo: str, user_id: int) -> dict | None:
     item = _find_item(item_key, geo)
     if not item:
         return None
     from data.db import get_settings
     s = get_settings(user_id)
-    if s.get("jose_sender_enabled") and item_key in ("check1_py", "check2_py", "check3_py", "check1_uy", "check4_uy", "check_doc", "fire_check"):
+    
+    mode = None
+    if s.get("jose_sender_enabled"):
+        mode = "sender"
+    elif s.get("jose_recipient_enabled"):
+        mode = "recipient"
+
+    if mode and (item_key, mode) in JOSE_RULES:
         import copy
         item = copy.deepcopy(item)
-        if item_key == "check1_py":
-            item["asset"] = "assets/Paraguay/Чек/jose/Check1 jose.jpg"
-            item["fields"] = [f for f in item["fields"] if f["key"] != "name_1"]
-        elif item_key == "check2_py":
-            item["asset"] = "assets/Paraguay/Чек/jose/Check2 jose.jpg"
-            item["fields"] = [f for f in item["fields"] if f["key"] != "name2"]
-        elif item_key == "check3_py":
-            item["asset"] = "assets/Paraguay/Чек/jose/Check3 jose.jpg"
-            item["fields"] = [f for f in item["fields"] if f["key"] != "sender_name"]
-        elif item_key == "check1_uy":
-            item["asset"] = "assets/Uruguay/Чек/jose/Check1.jpg"
-            item["fields"] = [f for f in item["fields"] if f["key"] not in ("payer_2", "acc_2")]
-        elif item_key == "check4_uy":
-            item["asset"] = "assets/Uruguay/Чек/jose/Check4.jpg"
-            item["fields"] = [f for f in item["fields"] if f["key"] not in ("sender_name", "account")]
-        elif item_key == "check_doc":
-            item["asset"] = "assets/Bolivia/Чек/jose/Check1.jpg"
-            item["fields"] = [f for f in item["fields"] if f["key"] != "sender_name"]
-        elif item_key == "fire_check":
-            item["asset"] = "assets/Bolivia/Чек/jose/Check2.jpg"
-            item["fields"] = [f for f in item["fields"] if f["key"] != "origen"]
+        asset_path, excluded_fields = JOSE_RULES[(item_key, mode)]
+        item["asset"] = asset_path
+        item["fields"] = [f for f in item["fields"] if f["key"] not in excluded_fields]
+        
     return item
 
 
-def _askable_fields(fields: list[dict]) -> list[dict]:
-    return [f for f in fields if f.get("prompt", "").strip()]
+def _askable_fields(fields: list[dict], item_key: str = None, geo: str = "bo") -> list[dict]:
+    orig_item = _find_item(item_key, geo) if item_key else None
+    if orig_item:
+        orig_askable_keys = [f["key"] for f in orig_item["fields"] if f.get("prompt", "").strip()]
+        key_to_idx = {key: i+1 for i, key in enumerate(orig_askable_keys)}
+    else:
+        key_to_idx = {}
+
+    result = []
+    for f in fields:
+        if f.get("prompt", "").strip():
+            f_copy = dict(f)
+            f_copy["_orig_index"] = key_to_idx.get(f["key"], len(result) + 1)
+            result.append(f_copy)
+    return result
 
 
 def _is_image_field(field: dict) -> bool:
@@ -500,11 +538,12 @@ def _build_checklist(item_label: str, askable: list[dict],
     lines = [f"🖼 Шаблон: <b>{item_label}</b>\n"]
     for i, field in enumerate(askable):
         short = field["prompt"].split("(")[0].strip()
+        idx_str = f"{field['_orig_index']}" if "_orig_index" in field else f"{i + 1}"
         if i < done_step:
             val_str = "✓" if _is_image_field(field) else values.get(field["key"], "")
-            lines.append(f"🟢 {i + 1}. {short} [{val_str}]")
+            lines.append(f"🟢 {idx_str}. {short} [{val_str}]")
         else:
-            lines.append(f"⚪️ {i + 1}. {short}")
+            lines.append(f"⚪️ {idx_str}. {short}")
     return "\n".join(lines)
 
 
@@ -654,7 +693,7 @@ async def cb_item_selected(call: CallbackQuery, state: FSMContext):
         return
 
     import copy
-    askable = copy.deepcopy(_askable_fields(item["fields"]))
+    askable = copy.deepcopy(_askable_fields(item["fields"], item_key, geo))
     
     if blur_mode == "with_blur":
         if item_key == "fire_check":

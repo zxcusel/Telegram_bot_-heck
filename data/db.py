@@ -52,7 +52,8 @@ MIGRATIONS: list[tuple[str, str]] = [
     ("019_add_jose_sender_enabled", "ALTER TABLE users ADD COLUMN jose_sender_enabled INTEGER DEFAULT 0"),
     ("020_add_rand_rocket_min", "ALTER TABLE users ADD COLUMN rand_rocket_min INTEGER DEFAULT 10"),
     ("021_add_rand_rocket_max", "ALTER TABLE users ADD COLUMN rand_rocket_max INTEGER DEFAULT 1000"),
-    ("022_geos_table_recreate", "dummy")
+    ("022_geos_table_recreate", "dummy"),
+    ("023_add_jose_recipient_enabled", "ALTER TABLE users ADD COLUMN jose_recipient_enabled INTEGER DEFAULT 0")
 ]
 
 def _run_migrations(con):
@@ -119,6 +120,7 @@ def init_db():
                 blur_enabled         INTEGER DEFAULT 1,
                 blur_qr_enabled      INTEGER DEFAULT 1,
                 jose_sender_enabled  INTEGER DEFAULT 0,
+                jose_recipient_enabled INTEGER DEFAULT 0,
                 rand_rocket_min      INTEGER DEFAULT 10,
                 rand_rocket_max      INTEGER DEFAULT 1000
             )
@@ -373,7 +375,7 @@ def get_settings(user_id: int) -> dict:
                    time_suffix, rand_enabled, rand_min, rand_max,
                    rand_perc_min, rand_perc_max,
                    rand_percent_enabled, rand_percent_min, rand_percent_max,
-                   rand_bank_enabled, rand_acc_enabled, rand_name_enabled, blur_enabled, blur_qr_enabled, jose_sender_enabled,
+                   rand_bank_enabled, rand_acc_enabled, rand_name_enabled, blur_enabled, blur_qr_enabled, jose_sender_enabled, jose_recipient_enabled,
                    rand_rocket_min, rand_rocket_max
             FROM users WHERE user_id = ?
         """, (user_id,)).fetchone()
@@ -384,7 +386,7 @@ def get_settings(user_id: int) -> dict:
                 "rand_perc_min": 10.0, "rand_perc_max": 1500.0,
                 "rand_percent_enabled": 0, "rand_percent_min": 1.0, "rand_percent_max": 100.0,
                 "rand_bank_enabled": 0, "rand_acc_enabled": 0, "rand_name_enabled": 0,
-                "blur_enabled": 1, "blur_qr_enabled": 1, "jose_sender_enabled": 0,
+                "blur_enabled": 1, "blur_qr_enabled": 1, "jose_sender_enabled": 0, "jose_recipient_enabled": 0,
                 "rand_rocket_min": 10, "rand_rocket_max": 1000}
     return dict(row)
 
@@ -393,7 +395,7 @@ def update_setting(user_id: int, key: str, value):
                   "time_suffix","rand_enabled","rand_min","rand_max",
                   "rand_perc_min", "rand_perc_max",
                   "rand_percent_enabled", "rand_percent_min", "rand_percent_max",
-                  "rand_bank_enabled", "rand_acc_enabled", "rand_name_enabled", "blur_enabled", "blur_qr_enabled", "jose_sender_enabled",
+                  "rand_bank_enabled", "rand_acc_enabled", "rand_name_enabled", "blur_enabled", "blur_qr_enabled", "jose_sender_enabled", "jose_recipient_enabled",
                   "rand_rocket_min", "rand_rocket_max")
     if key not in valid_keys: return
     with _conn() as con:

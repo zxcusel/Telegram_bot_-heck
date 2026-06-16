@@ -1453,6 +1453,78 @@ departamentos, recibirá inmediatamente en su cuenta bancaria la suma total de "
                 }
             },
         },
+        "payment": {
+            "label": "💳 Оплата",
+            "sections": {
+                "payment_main": {
+                    "label": "Оплата",
+                    "items": {
+                        "payment1_uy": {
+                            "label": "Оплата Уругвай",
+                            "asset": "assets/Uruguay/Оплата/PAYMENT.jpg",
+                            "preview": "assets/Uruguay/Preview/Оплата/PAYMENT_prew.jpg",
+                            "fields": [
+                                {
+                                    "key": "time",
+                                    "prompt": '🕐 Введите время (пример: 10:00)',
+                                    "text_config": {
+                                        "pos": (640, 646),
+                                        "align": "center",
+                                        "color": (41, 41, 41),
+                                        "font": "montserrat_bold",
+                                        "size": 76,
+                                    },
+                                },
+                                {
+                                    "key": "bank",
+                                    "prompt": '🏦 Введите название банка (пример: Itaú)',
+                                    "text_config": {
+                                        "pos": (307, 1187),
+                                        "align": "left",
+                                        "color": (19, 20, 21),
+                                        "font": "montserrat_medium",
+                                        "size": 66,
+                                    },
+                                },
+                                {
+                                    "key": "fullname",
+                                    "prompt": '✏️ Введите ФИО (пример: Ivanov Ivan Ivanovich)',
+                                    "text_config": {
+                                        "pos": (306, 1420),
+                                        "align": "left",
+                                        "color": (19, 20, 21),
+                                        "font": "montserrat_medium",
+                                        "size": 66,
+                                    },
+                                },
+                                {
+                                    "key": "account",
+                                    "prompt": '🔢 Введите Номер счета (11 символов)',
+                                    "text_config": {
+                                        "pos": (312, 1667),
+                                        "align": "left",
+                                        "color": (19, 20, 21),
+                                        "font": "montserrat_medium",
+                                        "size": 66,
+                                        "blur_area": (308, 1678, 795, 1738),
+                                        "blur_radius": 15,
+                                    },
+                                },
+                            ],
+                            "banks": [
+                                "Itaú",
+                                "Santander",
+                                "BBVA",
+                                "Scotiabank",
+                                "Oca blue",
+                            ],
+                            "date_format": "raw",
+                            "name_format": "raw",
+                        }
+                    },
+                }
+            },
+        },
         "fire": {"label": "🔥 Uruguay FIRE", "sections": {}},
     },
 }

@@ -259,7 +259,7 @@ def _get_field_keyboard(field_key: str, s: dict, item_key: str = None) -> Inline
             InlineKeyboardButton(text="Tus ganancias!", callback_data="render:set:Tus ganancias!")
         ])
 
-    if field_key in ("bank", "sender_bank") and item_key in ("check3_uy", "check1_uy"):
+    if field_key in ("bank", "sender_bank") and item_key in ("check3_uy", "check1_uy", "payment1_uy"):
         buttons.append([
             InlineKeyboardButton(text="Itaú", callback_data="render:set:Itaú"),
             InlineKeyboardButton(text="Santander", callback_data="render:set:Santander")
@@ -641,7 +641,7 @@ async def cb_item_selected(call: CallbackQuery, state: FSMContext):
     s = get_settings(call.from_user.id)
     if item_key in ("fire_check", "check4_bo", "check1_py", "check2_py", "check3_py", "check3_bo", "check1_uy", "check2_uy", "check4_uy"):
         blur_mode = "with_blur" if s.get("blur_enabled", 1) else "no_blur"
-    elif item_key == "payment1_py":
+    elif item_key in ("payment1_py", "payment1_uy"):
         blur_mode = "with_blur" if s.get("blur_qr_enabled", 1) else "no_blur"
     else:
         blur_mode = "no_blur"
@@ -663,7 +663,7 @@ async def cb_item_selected(call: CallbackQuery, state: FSMContext):
                     f["prompt"] = f["prompt"].split("\n")[0] + "\n(Бот сам сгенерирует рандомный счёт, введите только 4 слова ФИО)"
         elif item_key == "check4_bo":
             askable = [f for f in askable if f["key"] != "sender_acc"]
-        elif item_key == "payment1_py":
+        elif item_key in ("payment1_py", "payment1_uy"):
             askable = [f for f in askable if f["key"] != "account"]
 
     # Auto-generate x_amount for rocket templates if present
@@ -698,7 +698,7 @@ async def cb_item_selected(call: CallbackQuery, state: FSMContext):
     if item_key == "check4_bo" and blur_mode == "with_blur":
         import random
         auto_values["sender_acc"] = "1" + "".join([str(random.randint(0, 9)) for _ in range(9)])
-    elif item_key == "payment1_py":
+    elif item_key in ("payment1_py", "payment1_uy"):
         import random
         if blur_mode == "with_blur":
             auto_values["account"] = "922" + "".join([str(random.randint(0, 9)) for _ in range(8)])
@@ -1149,7 +1149,7 @@ async def cb_render_shortcuts(call: CallbackQuery, state: FSMContext):
                 val = "1" + "".join([str(random.randint(0, 9)) for _ in range(13)])
             elif item_key == "check4_bo" and key == "sender_acc":
                 val = "".join([str(random.randint(0, 9)) for _ in range(10)])
-            elif item_key == "payment1_py" and key == "account":
+            elif item_key in ("payment1_py", "payment1_uy") and key == "account":
                 val = "922" + "".join([str(random.randint(0, 9)) for _ in range(8)])
             else:
                 val = "".join([str(random.randint(0, 9)) for _ in range(length)])

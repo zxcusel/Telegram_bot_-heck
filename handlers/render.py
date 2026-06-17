@@ -259,7 +259,7 @@ def _get_field_keyboard(field_key: str, s: dict, item_key: str = None) -> Inline
             InlineKeyboardButton(text="Tus ganancias!", callback_data="render:set:Tus ganancias!")
         ])
 
-    if field_key in ("bank", "sender_bank", "service") and item_key in ("check3_uy", "check1_uy", "payment1_uy"):
+    if field_key in ("bank", "sender_bank", "service") and item_key in ("check3_uy", "check1_uy", "payment1_uy", "check2_uy"):
         buttons.append([
             InlineKeyboardButton(text="Itaú", callback_data="render:set:Itaú"),
             InlineKeyboardButton(text="Santander", callback_data="render:set:Santander")

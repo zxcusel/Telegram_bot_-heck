@@ -998,6 +998,12 @@ async def collect_text_field(message: Message, state: FSMContext):
             val = val.replace("A.M.", "am.").replace("P.M.", "pm.").replace("a. m.", "am.").replace("p. m.", "pm.")\
                      .replace("a.m.", "am.").replace("p.m.", "pm.").replace("AM", "am.").replace("PM", "pm.")
 
+        if item_key == "check4_uy" and askable[step]["key"] == "time":
+            val = val.upper().replace("A. M.", "A.M.").replace("P. M.", "P.M.")\
+                             .replace("AM", "A.M.").replace("PM", "P.M.")
+            val = val.replace("A.M.", "a.m.").replace("P.M.", "p.m.")
+            val = val.replace("a.m..", "a.m.").replace("p.m..", "p.m.")
+
         if askable[step]["key"] == "percentage":
             if not val.startswith("+") and not val.startswith("-"):
                 val = data.get("perc_sign", "+") + val

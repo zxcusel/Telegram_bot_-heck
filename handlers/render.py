@@ -671,6 +671,70 @@ async def _return_to_last_section(call: CallbackQuery, state: FSMContext):
 
 PREVIEW_FILE_IDS = {}
 
+SENDER_NAME_MAP = {
+    "check_doc": ["sender_name"],
+    "fire_check": ["origen"],
+    "check3_bo": ["sender_name"],
+    "check4_bo": [],
+    "check1_py": ["name_1"],
+    "check2_py": ["name2"],
+    "check3_py": ["sender_name"],
+    "check2_pe": ["sender_name"],
+    "check4_pe": ["sender_name"],
+    "check1_uy": ["payer_2"],
+    "check4_uy": ["sender_name"],
+}
+
+RECIPIENT_NAME_MAP = {
+    "check_doc": ["fullname"],
+    "fire_check": ["destino"],
+    "check3_bo": ["name_1"],
+    "check4_bo": ["sender_name"],
+    "check1_py": ["name_2"],
+    "check2_py": ["name1"],
+    "check3_py": ["name"],
+    "check_pe": ["fullname"],
+    "check2_pe": ["fullname"],
+    "check3_pe": ["fullname"],
+    "check4_pe": ["fullname"],
+    "check1_uy": ["name", "payer_1"],
+    "check2_uy": ["name"],
+    "check3_uy": ["receiver_name"],
+    "check4_uy": ["receiver_name"],
+    "payment1_py": ["fullname"],
+    "payment1_uy": ["fullname"],
+    "qr_code": ["name"],
+}
+
+def _get_target_name_keys(item_key: str, fields: list, target: str) -> list[str]:
+    if target == 'sender':
+        if item_key in SENDER_NAME_MAP:
+            return SENDER_NAME_MAP[item_key]
+    else:
+        if item_key in RECIPIENT_NAME_MAP:
+            return RECIPIENT_NAME_MAP[item_key]
+    
+    matched_keys = []
+    for f in fields:
+        key = f.get("key", "").lower()
+        prompt = f.get("prompt", "").lower()
+        
+        if target == 'sender':
+            is_sender = "отправител" in prompt or "origen" in key or "sender" in key
+            is_name = "имя" in prompt or "фио" in prompt or "name" in key or "fullname" in key or "payer" in key or "origen" in key
+            if is_sender and is_name:
+                matched_keys.append(f["key"])
+        else:
+            is_recipient = "получател" in prompt or "destino" in key or "receiver" in key or "client" in key or "customer" in key
+            is_name = "имя" in prompt or "фио" in prompt or "name" in key or "fullname" in key or "payer" in key or "destino" in key or "receiver_name" in key
+            if not is_recipient and (key == "name" or key == "fullname" or key == "client_name") and ("имя" in prompt or "фио" in prompt):
+                is_recipient = True
+            
+            if is_recipient and is_name:
+                matched_keys.append(f["key"])
+                
+    return matched_keys
+
 @router.callback_query(F.data.startswith("item:"))
 async def cb_item_selected(call: CallbackQuery, state: FSMContext):
     parts    = call.data.split(":")
@@ -695,6 +759,15 @@ async def cb_item_selected(call: CallbackQuery, state: FSMContext):
     import copy
     askable = copy.deepcopy(_askable_fields(item["fields"], item_key, geo))
     
+    auto_values = {"_blur_mode": blur_mode}
+    if s.get("custom_name_enabled") and s.get("custom_name_val"):
+        target = s.get("custom_name_target", "sender")
+        val_custom = s.get("custom_name_val")
+        target_keys = _get_target_name_keys(item_key, item["fields"], target)
+        for tkey in target_keys:
+            auto_values[tkey] = val_custom
+            askable = [f for f in askable if f["key"] != tkey]
+
     if blur_mode == "with_blur":
         if item_key == "fire_check":
             for f in askable:
@@ -714,7 +787,7 @@ async def cb_item_selected(call: CallbackQuery, state: FSMContext):
 
     if not askable:
         await state.clear()
-        await _finish_render(call.message, item_key, {}, item, geo=geo)
+        await _finish_render(call.message, item_key, auto_values, item, geo=geo)
         await call.answer()
         return
 
@@ -725,7 +798,6 @@ async def cb_item_selected(call: CallbackQuery, state: FSMContext):
     s_temp = s.copy()
     s_temp["perc_sign"] = "+"
 
-    auto_values = {"_blur_mode": blur_mode}
     if has_x_amount:
         import random
         r_min = s.get("rand_rocket_min", 10)

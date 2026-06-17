@@ -22,6 +22,7 @@ class SettingStates(StatesGroup):
     wait_pinned_bank = State()
     wait_rocket_min = State()
     wait_rocket_max = State()
+    wait_custom_name_val = State()
 
 def settings_kb(user_id: int, confirm_clear: bool = False) -> InlineKeyboardMarkup:
     s = get_settings(user_id)
@@ -51,6 +52,10 @@ def settings_kb(user_id: int, confirm_clear: bool = False) -> InlineKeyboardMark
     # Банк
     p_bank = s["pinned_bank"] or "Не задан"
     bank_text = f"🏦 Банк: {p_bank}"
+
+    custom_name_enabled_text = "✅ Авто-ФИО: ВКЛ" if s.get("custom_name_enabled") else "❌ Авто-ФИО: ВЫКЛ"
+    custom_name_target_text = "➡️ Направление: Отправитель" if s.get("custom_name_target") == "sender" else "➡️ Направление: Получатель"
+    custom_name_val_text = f"👤 Авто-ФИО: {s.get('custom_name_val') or 'Не задано'}"
 
     if confirm_clear:
         blacklist_btn = [
@@ -83,6 +88,9 @@ def settings_kb(user_id: int, confirm_clear: bool = False) -> InlineKeyboardMark
         [InlineKeyboardButton(text=blur_qr_text, callback_data="set:toggle_blur_qr")],
         [InlineKeyboardButton(text=jose_sender_text, callback_data="set:toggle_jose_sender")],
         [InlineKeyboardButton(text=jose_recipient_text, callback_data="set:toggle_jose_recipient")],
+        [InlineKeyboardButton(text=custom_name_enabled_text, callback_data="set:toggle_custom_name")],
+        [InlineKeyboardButton(text=custom_name_target_text, callback_data="set:toggle_custom_target")],
+        [InlineKeyboardButton(text=custom_name_val_text, callback_data="set:custom_name_val")],
         blacklist_btn,
         [InlineKeyboardButton(text=suffix_text, callback_data="set:toggle_suffix")],
         [InlineKeyboardButton(text=date_text, callback_data="set:pinned_date")],
@@ -181,6 +189,9 @@ async def cb_toggle_jose_sender(call: CallbackQuery):
         update_setting(call.from_user.id, "jose_recipient_enabled", 0)
         log.setting_changed(call.from_user.id, "jose_sender_enabled", 1, call.from_user.username)
         log.setting_changed(call.from_user.id, "jose_recipient_enabled", 0, call.from_user.username)
+        if s.get("custom_name_enabled") and s.get("custom_name_target") == "sender":
+            update_setting(call.from_user.id, "custom_name_enabled", 0)
+            log.setting_changed(call.from_user.id, "custom_name_enabled", 0, call.from_user.username)
     else:
         update_setting(call.from_user.id, "jose_sender_enabled", 0)
         log.setting_changed(call.from_user.id, "jose_sender_enabled", 0, call.from_user.username)
@@ -197,11 +208,74 @@ async def cb_toggle_jose_recipient(call: CallbackQuery):
         update_setting(call.from_user.id, "jose_sender_enabled", 0)
         log.setting_changed(call.from_user.id, "jose_recipient_enabled", 1, call.from_user.username)
         log.setting_changed(call.from_user.id, "jose_sender_enabled", 0, call.from_user.username)
+        if s.get("custom_name_enabled") and s.get("custom_name_target") == "recipient":
+            update_setting(call.from_user.id, "custom_name_enabled", 0)
+            log.setting_changed(call.from_user.id, "custom_name_enabled", 0, call.from_user.username)
     else:
         update_setting(call.from_user.id, "jose_recipient_enabled", 0)
         log.setting_changed(call.from_user.id, "jose_recipient_enabled", 0, call.from_user.username)
     await call.message.edit_reply_markup(reply_markup=settings_kb(call.from_user.id))
     await call.answer("Получатель JOSE изменен")
+
+@router.callback_query(F.data == "set:toggle_custom_name")
+async def cb_toggle_custom_name(call: CallbackQuery):
+    s = get_settings(call.from_user.id)
+    new_val = 0 if s.get("custom_name_enabled") else 1
+    update_setting(call.from_user.id, "custom_name_enabled", new_val)
+    log.setting_changed(call.from_user.id, "custom_name_enabled", new_val, call.from_user.username)
+    
+    if new_val == 1:
+        target = s.get("custom_name_target", "sender")
+        if target == "sender":
+            update_setting(call.from_user.id, "jose_sender_enabled", 0)
+            log.setting_changed(call.from_user.id, "jose_sender_enabled", 0, call.from_user.username)
+        else:
+            update_setting(call.from_user.id, "jose_recipient_enabled", 0)
+            log.setting_changed(call.from_user.id, "jose_recipient_enabled", 0, call.from_user.username)
+            
+    await call.message.edit_reply_markup(reply_markup=settings_kb(call.from_user.id))
+    await call.answer("Авто-ФИО изменено")
+
+
+@router.callback_query(F.data == "set:toggle_custom_target")
+async def cb_toggle_custom_target(call: CallbackQuery):
+    s = get_settings(call.from_user.id)
+    new_target = "recipient" if s.get("custom_name_target") == "sender" else "sender"
+    update_setting(call.from_user.id, "custom_name_target", new_target)
+    log.setting_changed(call.from_user.id, "custom_name_target", new_target, call.from_user.username)
+    
+    if s.get("custom_name_enabled"):
+        if new_target == "sender":
+            update_setting(call.from_user.id, "jose_sender_enabled", 0)
+            log.setting_changed(call.from_user.id, "jose_sender_enabled", 0, call.from_user.username)
+        else:
+            update_setting(call.from_user.id, "jose_recipient_enabled", 0)
+            log.setting_changed(call.from_user.id, "jose_recipient_enabled", 0, call.from_user.username)
+            
+    await call.message.edit_reply_markup(reply_markup=settings_kb(call.from_user.id))
+    await call.answer(f"Направление: {'Отправитель' if new_target == 'sender' else 'Получатель'}")
+
+
+@router.callback_query(F.data == "set:custom_name_val")
+async def cb_set_custom_name_val(call: CallbackQuery, state: FSMContext):
+    await state.set_state(SettingStates.wait_custom_name_val)
+    await state.update_data(settings_msg_id=call.message.message_id)
+    kb = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="🗑️ Сбросить значение", callback_data="set:clear_custom_name_val")],
+        [InlineKeyboardButton(text="❌ Отмена",                 callback_data="set:cancel")]
+    ])
+    await call.message.edit_text("⌨️ Введите Авто-ФИО (например, Ivanov Ivan):", reply_markup=kb)
+    await call.answer()
+
+
+@router.callback_query(F.data == "set:clear_custom_name_val")
+async def cb_clear_custom_name_val(call: CallbackQuery, state: FSMContext):
+    await state.clear()
+    update_setting(call.from_user.id, "custom_name_val", None)
+    log.setting_changed(call.from_user.id, "custom_name_val", None, call.from_user.username)
+    await call.message.edit_text("✅ Авто-ФИО удалено.\n\n⚙️ <b>Настройки пользователя</b>", 
+                                 reply_markup=settings_kb(call.from_user.id), parse_mode="HTML")
+    await call.answer()
 
 
 @router.callback_query(F.data == "set:clear_name_blacklist")
@@ -524,3 +598,19 @@ async def process_rocket_max(message: Message, state: FSMContext):
         await state.clear()
     except Exception:
         await message.answer("❌ Введите целое число.")
+
+@router.message(SettingStates.wait_custom_name_val, F.text)
+async def process_custom_name_val(message: Message, state: FSMContext):
+    data = await state.get_data()
+    msg_id = data.get("settings_msg_id")
+    val = message.text.strip()
+    update_setting(message.from_user.id, "custom_name_val", val)
+    log.setting_changed(message.from_user.id, "custom_name_val", val, message.from_user.username)
+    await message.delete()
+    if msg_id:
+        await message.bot.edit_message_text(
+            chat_id=message.chat.id, message_id=msg_id,
+            text=f"✅ Авто-ФИО установлено: {val}\n\n⚙️ <b>Настройки пользователя</b>",
+            reply_markup=settings_kb(message.from_user.id), parse_mode="HTML"
+        )
+    await state.clear()

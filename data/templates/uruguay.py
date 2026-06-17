@@ -1293,7 +1293,7 @@ departamentos, recibirá inmediatamente en su cuenta bancaria la suma total de "
                                 },
                                 {
                                     "key": "time",
-                                    "prompt": '🕐 Время (пример: 03:19)',
+                                    "prompt": '🕐 Время (пример: 03:19 p.m.)',
                                     "text_config": {"collect_only": True},
                                 },
                                 {

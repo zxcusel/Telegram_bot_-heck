@@ -1240,6 +1240,11 @@ async def cb_render_shortcuts(call: CallbackQuery, state: FSMContext):
         from data.db import get_and_blacklist_random_name
         try:
             val = get_and_blacklist_random_name()
+            key = askable[step]["key"]
+            if item_key == "check1_uy" and key == "name":
+                name_parts = val.split()
+                if len(name_parts) >= 3:
+                    val = name_parts[2]
             val = _format_name(val, item)
         except ValueError:
             try:

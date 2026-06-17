@@ -75,7 +75,7 @@ def _advance_steps(askable: list, start_step: int, values: dict, s: dict, item: 
             done_step += 1
             continue
         key = askable[done_step]["key"]
-        if key == "bank" and s.get("rand_bank_enabled") and not item_key.startswith("rd") and item_key not in ("check2_py", "check3_py", "check2_uy", "check3_uy", "check4_uy", "check3_bo"):
+        if key == "bank" and s.get("rand_bank_enabled") and not item_key.startswith("rd") and item_key not in ("check2_py", "check3_py", "check2_uy", "check3_uy", "check4_uy", "check3_bo", "payment1_uy", "payment1_py"):
             val_rand = random.choice(item.get("banks", ["Banco"]))
             values["bank"] = val_rand
             if item_key == "check2_py":
@@ -203,7 +203,7 @@ def _get_field_keyboard(field_key: str, s: dict, item_key: str = None) -> Inline
         buttons.append([InlineKeyboardButton(text="🎲 Сгенерировать", callback_data="render:random")])
         
     # 🎲 Рандомайзер банков
-    if s.get("rand_bank_enabled") and field_key in ("bank", "sender_bank"):
+    if s.get("rand_bank_enabled") and field_key in ("bank", "sender_bank", "service"):
         buttons.append([InlineKeyboardButton(text="🎲 Сгенерировать", callback_data="render:random")])
         
     if field_key in ("bank_name", "bank_name_sender") and item_key == "check1_py":
@@ -259,7 +259,7 @@ def _get_field_keyboard(field_key: str, s: dict, item_key: str = None) -> Inline
             InlineKeyboardButton(text="Tus ganancias!", callback_data="render:set:Tus ganancias!")
         ])
 
-    if field_key in ("bank", "sender_bank") and item_key in ("check3_uy", "check1_uy", "payment1_uy"):
+    if field_key in ("bank", "sender_bank", "service") and item_key in ("check3_uy", "check1_uy", "payment1_uy"):
         buttons.append([
             InlineKeyboardButton(text="Itaú", callback_data="render:set:Itaú"),
             InlineKeyboardButton(text="Santander", callback_data="render:set:Santander")
@@ -480,8 +480,8 @@ JOSE_RULES = {
     ("check4_pe", "recipient"): ("assets/jose/Peru/Check4 получатель jose.jpg", {"fullname", "card_recipient"}),
 
     # Uruguay
-    ("check1_uy", "sender"): ("assets/jose/Uruguay/Check1 отправитель jose.jpg", {"sender_bank", "acc_2", "payer_2"}),
-    ("check1_uy", "recipient"): ("assets/jose/Uruguay/Check1 получатель jose.jpg", {"service", "acc_1", "payer_1"}),
+    ("check1_uy", "sender"): ("assets/jose/Uruguay/Check1 получатель jose.jpg", {"sender_bank", "acc_2", "payer_2"}),
+    ("check1_uy", "recipient"): ("assets/jose/Uruguay/Check1 отправитель jose.jpg", {"service", "acc_1", "payer_1"}),
     ("check2_uy", "recipient"): ("assets/jose/Uruguay/Check2 получатель jose.jpg", {"bank", "receiver_acc", "name"}),
     ("check3_uy", "recipient"): ("assets/jose/Uruguay/Check3 получатель jose.jpg", {"receiver_name"}),
     ("check4_uy", "sender"): ("assets/jose/Uruguay/Check4 отправитель jose.jpg", {"sender_name", "account"}),
@@ -1161,7 +1161,7 @@ async def cb_render_shortcuts(call: CallbackQuery, state: FSMContext):
             sign = data.get("perc_sign", "+")
             formatted = f"{abs(val_float):,.2f}"
             val = f"{sign}{formatted}"
-        elif key in ("bank", "sender_bank"):
+        elif key in ("bank", "sender_bank", "service"):
             val = random.choice(item.get("banks", ["Banco"]))
         elif key == "number":
             val = "".join([str(random.randint(0, 9)) for _ in range(8)])

@@ -479,9 +479,9 @@ JOSE_RULES = {
     ("check4_pe", "sender"): ("assets/jose/Peru/Check4 отправитель jose.jpg", {"sender_name", "card_sender"}),
     ("check4_pe", "recipient"): ("assets/jose/Peru/Check4 получатель jose.jpg", {"fullname", "card_recipient"}),
 
-    # Uruguay
-    ("check1_uy", "sender"): ("assets/jose/Uruguay/Check1 отправитель jose.jpg", {"sender_bank", "acc_2", "payer_2"}),
-    ("check1_uy", "recipient"): ("assets/jose/Uruguay/Check1 получатель jose.jpg", {"service", "acc_1", "payer_1"}),
+    # Uruguay service
+    ("check1_uy", "sender"): ("assets/jose/Uruguay/Check1 отправитель jose.jpg", {"service", "acc_2", "payer_2"}),
+    ("check1_uy", "recipient"): ("assets/jose/Uruguay/Check1 получатель jose.jpg", {"sender_bank", "acc_1", "payer_1"}),
     ("check2_uy", "recipient"): ("assets/jose/Uruguay/Check2 получатель jose.jpg", {"bank", "receiver_acc", "name"}),
     ("check3_uy", "recipient"): ("assets/jose/Uruguay/Check3 получатель jose.jpg", {"receiver_name"}),
     ("check4_uy", "sender"): ("assets/jose/Uruguay/Check4 отправитель jose.jpg", {"sender_name", "account"}),

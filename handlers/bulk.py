@@ -832,6 +832,59 @@ def get_random_time(start: datetime.time, end: datetime.time) -> datetime.time:
     return datetime.time(hour=rand_minutes // 60, minute=rand_minutes % 60)
 
 
+def get_clean_filename(idx: int, item_key: str, item: dict, geo: str, check_values: dict, ext: str) -> str:
+    # Clean GEO
+    geo_clean = "".join(c for c in geo if c.isalnum() or c in (" ", "_", "-"))
+    geo_clean = geo_clean.replace(" ", "_").strip("_ ")
+    
+    # Clean Label
+    label_clean = item.get("label", item_key)
+    label_clean = "".join(c for c in label_clean if c.isalnum() or c in (" ", "_", "-"))
+    label_clean = label_clean.replace(" ", "_").strip("_ ")
+    
+    # Avoid duplicate geo prefix in label
+    if label_clean.lower().startswith(geo_clean.lower()):
+        label_part = label_clean
+    else:
+        label_part = f"{geo_clean}_{label_clean}"
+        
+    name_val = ""
+    for k in ("name", "fullname", "sender_name"):
+        if k in check_values and check_values[k]:
+            name_val = "".join(c for c in str(check_values[k]) if c.isalnum() or c in (" ", "_", "-"))
+            name_val = name_val.replace(" ", "_").strip("_ ")
+            if name_val:
+                break
+                
+    amount_val = ""
+    for k in ("amount", "sum"):
+        if k in check_values and check_values[k]:
+            amount_val = "".join(c for c in str(check_values[k]) if c.isdigit())
+            if amount_val:
+                break
+                
+    parts = [label_part, f"check_{idx+1}"]
+    if name_val:
+        parts.append(name_val)
+    if amount_val:
+        parts.append(amount_val)
+        
+    filename = "_".join(p for p in parts if p) + f".{ext}"
+    filename = "".join(c for c in filename if c.isalnum() or c in (".", "_", "-"))
+    return filename
+
+
+def find_item_hierarchy(geo: str, item_key: str) -> tuple[str, str]:
+    catalog = GEO_CATALOG.get(geo, {}).get("catalog", {})
+    for line_key, line in catalog.items():
+        line_label = line.get("label", line_key)
+        for sec_key, sec in line.get("sections", {}).items():
+            sec_label = sec.get("label", sec_key)
+            if item_key in sec.get("items", {}):
+                return line_label, sec_label
+    return "", ""
+
+
 @router.callback_query(F.data == "bulk_start", BulkStates.confirm)
 async def cb_bulk_start_execution(call: CallbackQuery, state: FSMContext):
     data = await state.get_data()
@@ -892,10 +945,25 @@ async def cb_bulk_start_execution(call: CallbackQuery, state: FSMContext):
         username=call.from_user.username
     )
 
+    line_label, sec_label = find_item_hierarchy(geo, item_key)
+    item_label = item.get("label", item_key)
+
+    progress_text_template = (
+        "⏳ <b>Выполняется генерация чеков...</b>\n\n"
+        f"🌍 <b>Регион:</b> {geo}\n"
+        f"📂 <b>Категория:</b> {line_label}\n"
+        f"🖼️ <b>Шаблон:</b> {item_label}\n\n"
+        "[ {bar} ] {percent}%\n"
+        "Выполнено: <b>{current}</b> из <b>{total}</b> чеков."
+    )
+
     progress_msg = await call.message.edit_text(
-        "⏳ <b>Выполняется генерация чеков...</b>\n"
-        f"[ {get_progress_bar(0)} ] 0%\n\n"
-        f"Выполнено: <b>0</b> из <b>{quantity}</b> чеков.",
+        progress_text_template.format(
+            bar=get_progress_bar(0),
+            percent=0,
+            current=0,
+            total=quantity
+        ),
         reply_markup=None,
         parse_mode="HTML"
     )
@@ -961,7 +1029,10 @@ async def cb_bulk_start_execution(call: CallbackQuery, state: FSMContext):
                 media_bytes = await loop.run_in_executor(None, render_video, item_key, check_values, geo, item)
             else:
                 media_bytes = await loop.run_in_executor(None, render_image, item_key, check_values, geo, item)
-            media_list.append(media_bytes)
+            
+            ext = "mp4" if render_mode == "video" else "png"
+            filename = get_clean_filename(idx, item_key, item, geo, check_values, ext)
+            media_list.append((media_bytes, filename))
         except Exception as e:
             log.render_error(user_id, item.get("label", item_key), f"Bulk rendering error at index {idx}: {e}", call.from_user.username)
         
@@ -969,10 +1040,11 @@ async def cb_bulk_start_execution(call: CallbackQuery, state: FSMContext):
         if now - last_update_time >= 2.0 or idx == quantity - 1:
             percent = int((idx + 1) / quantity * 100)
             bar = get_progress_bar(percent)
-            progress_text = (
-                "⏳ <b>Выполняется генерация чеков...</b>\n"
-                f"[ {bar} ] {percent}%\n\n"
-                f"Выполнено: <b>{idx + 1}</b> из <b>{quantity}</b> чеков."
+            progress_text = progress_text_template.format(
+                bar=bar,
+                percent=percent,
+                current=idx + 1,
+                total=quantity
             )
             try:
                 await progress_msg.edit_text(progress_text, parse_mode="HTML")
@@ -998,28 +1070,54 @@ async def cb_bulk_start_execution(call: CallbackQuery, state: FSMContext):
         pass
 
     if quantity <= 10:
-        await call.message.answer(f"✅ Массовая генерация завершена! Отправляю {len(media_list)} чеков по отдельности:")
-        for idx, media in enumerate(media_list):
+        await call.message.answer(
+            f"✅ <b>Массовая генерация завершена!</b>\n\n"
+            f"🌍 <b>Регион:</b> {geo}\n"
+            f"📂 <b>Категория:</b> {line_label}\n"
+            f"🖼️ <b>Шаблон:</b> {item_label}\n"
+            f"Сгенерировано чеков: <b>{len(media_list)} шт.</b>\n\n"
+            "Отправляю чеки по отдельности:",
+            parse_mode="HTML"
+        )
+        for idx, (media, filename) in enumerate(media_list):
             media.seek(0)
             if render_mode == "video":
                 await call.message.answer_video(
-                    video=BufferedInputFile(media.read(), filename=f"result_{idx+1}.mp4"),
+                    video=BufferedInputFile(media.read(), filename=filename),
                     caption=f"Чек {idx+1}/{len(media_list)}"
                 )
             else:
                 await call.message.answer_photo(
-                    photo=BufferedInputFile(media.read(), filename=f"result_{idx+1}.png"),
+                    photo=BufferedInputFile(media.read(), filename=filename),
                     caption=f"Чек {idx+1}/{len(media_list)}"
                 )
+        await call.message.answer(
+            "✅ Все чеки успешно отправлены!",
+            reply_markup=InlineKeyboardMarkup(
+                inline_keyboard=[
+                    [InlineKeyboardButton(text="◀️ В главное меню", callback_data="back:welcome")]
+                ]
+            )
+        )
     else:
         zip_msg = await call.message.answer("📦 Архивирую сгенерированные файлы...")
         
+        geo_clean = "".join(c for c in geo if c.isalnum() or c in (" ", "_", "-"))
+        geo_clean = geo_clean.replace(" ", "_").strip("_ ")
+        label_clean = item.get("label", item_key)
+        label_clean = "".join(c for c in label_clean if c.isalnum() or c in (" ", "_", "-"))
+        label_clean = label_clean.replace(" ", "_").strip("_ ")
+        if label_clean.lower().startswith(geo_clean.lower()):
+            label_part = label_clean
+        else:
+            label_part = f"{geo_clean}_{label_clean}"
+        zip_filename = f"{label_part}.zip"
+        
         zip_buffer = io.BytesIO()
         with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
-            for idx, media in enumerate(media_list):
-                ext = "mp4" if render_mode == "video" else "png"
+            for media, filename in media_list:
                 media.seek(0)
-                zip_file.writestr(f"check_{idx+1}.{ext}", media.read())
+                zip_file.writestr(filename, media.read())
         
         zip_buffer.seek(0)
         
@@ -1029,7 +1127,19 @@ async def cb_bulk_start_execution(call: CallbackQuery, state: FSMContext):
             pass
             
         await call.message.answer_document(
-            document=BufferedInputFile(zip_buffer.read(), filename="checks.zip"),
-            caption=f"✅ Массовая генерация завершена!\nСгенерировано чеков: <b>{len(media_list)} шт.</b>\nВсе файлы упакованы в ZIP-архив.",
-            parse_mode="HTML"
+            document=BufferedInputFile(zip_buffer.read(), filename=zip_filename),
+            caption=(
+                f"✅ <b>Массовая генерация завершена!</b>\n\n"
+                f"🌍 <b>Регион:</b> {geo}\n"
+                f"📂 <b>Категория:</b> {line_label}\n"
+                f"🖼️ <b>Шаблон:</b> {item_label}\n"
+                f"Сгенерировано чеков: <b>{len(media_list)} шт.</b>\n\n"
+                "Все файлы упакованы в ZIP-архив."
+            ),
+            parse_mode="HTML",
+            reply_markup=InlineKeyboardMarkup(
+                inline_keyboard=[
+                    [InlineKeyboardButton(text="◀️ В главное меню", callback_data="back:welcome")]
+                ]
+            )
         )

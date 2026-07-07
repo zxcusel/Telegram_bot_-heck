@@ -19,6 +19,32 @@ from handlers.render import _format_date_for_item, _format_name, _is_name_field,
 
 router = Router()
 
+async def edit_or_send_next(message: Message, state: FSMContext, text: str, reply_markup: InlineKeyboardMarkup):
+    data = await state.get_data()
+    last_msg_id = data.get("last_bot_msg_id")
+    sent_msg = None
+    if last_msg_id:
+        try:
+            sent_msg = await message.bot.edit_message_text(
+                chat_id=message.chat.id,
+                message_id=last_msg_id,
+                text=text,
+                reply_markup=reply_markup,
+                parse_mode="HTML"
+            )
+        except Exception:
+            pass
+    if not sent_msg:
+        sent_msg = await message.answer(text, reply_markup=reply_markup, parse_mode="HTML")
+        await state.update_data(last_bot_msg_id=sent_msg.message_id)
+    return sent_msg
+
+
+def get_progress_bar(percent: int) -> str:
+    filled_length = int(10 * percent // 100)
+    return "🟩" * filled_length + "⬜" * (10 - filled_length)
+
+
 class BulkStates(StatesGroup):
     choose_geo = State()
     choose_line = State()
@@ -30,6 +56,7 @@ class BulkStates(StatesGroup):
     choose_names_source = State()
     upload_names_file = State()
     enter_quantity = State()
+    configure_effects = State()
     confirm = State()
 
 
@@ -93,6 +120,41 @@ def bulk_items_menu(geo: str, line_key: str, sec_key: str) -> InlineKeyboardMark
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 
+def bulk_effects_menu(blur: int, jose_mode: str) -> InlineKeyboardMarkup:
+    blur_text = "💧 Размытие: ✅ ВКЛ" if blur == 1 else "💧 Размытие: ❌ ВЫКЛ"
+    
+    if jose_mode == "sender":
+        jose_text = "👤 Режим JOSE: 👨‍✈️ Отправитель"
+    elif jose_mode == "recipient":
+        jose_text = "👤 Режим JOSE: 👩‍💼 Получатель"
+    else:
+        jose_text = "👤 Режим JOSE: ❌ Отключен"
+        
+    buttons = [
+        [InlineKeyboardButton(text=blur_text, callback_data="bulk_toggle:blur")],
+        [InlineKeyboardButton(text=jose_text, callback_data="bulk_toggle:jose")],
+        [InlineKeyboardButton(text="➡️ Продолжить", callback_data="bulk_toggle:done")],
+        [InlineKeyboardButton(text="❌ Отмена", callback_data="bulk_cancel")]
+    ]
+    return InlineKeyboardMarkup(inline_keyboard=buttons)
+
+
+from handlers.render import JOSE_RULES
+
+def get_item_with_jose(item_key: str, geo: str, jose_mode: str) -> dict | None:
+    from utils.renderer import _find_item
+    item = _find_item(item_key, geo)
+    if not item:
+        return None
+    if jose_mode in ("sender", "recipient") and (item_key, jose_mode) in JOSE_RULES:
+        import copy
+        item = copy.deepcopy(item)
+        asset_path, excluded_fields = JOSE_RULES[(item_key, jose_mode)]
+        item["asset"] = asset_path
+        item["fields"] = [f for f in item["fields"] if f["key"] not in excluded_fields]
+    return item
+
+
 # ── Navigation & Initiation Handlers ──────────────────────────────────────────
 
 @router.callback_query(F.data == "start:bulk_gen")
@@ -101,7 +163,8 @@ async def cb_start_bulk_gen(call: CallbackQuery, state: FSMContext):
     role = get_role_string(call.from_user.id)
     kb = bulk_geo_menu(call.from_user.id, role)
     await state.set_state(BulkStates.choose_geo)
-    await call.message.edit_text("🌍 <b>[Массовая генерация]</b> Выберите регион:", reply_markup=kb, parse_mode="HTML")
+    sent_msg = await call.message.edit_text("🌍 <b>[Массовая генерация]</b> Выберите регион:", reply_markup=kb, parse_mode="HTML")
+    await state.update_data(last_bot_msg_id=sent_msg.message_id)
     await call.answer()
 
 
@@ -118,20 +181,23 @@ async def cb_bulk_back(call: CallbackQuery, state: FSMContext):
     elif dest == "geo":
         role = get_role_string(call.from_user.id)
         await state.set_state(BulkStates.choose_geo)
-        await call.message.edit_text("🌍 <b>[Массовая генерация]</b> Выберите регион:", reply_markup=bulk_geo_menu(call.from_user.id, role), parse_mode="HTML")
+        sent_msg = await call.message.edit_text("🌍 <b>[Массовая генерация]</b> Выберите регион:", reply_markup=bulk_geo_menu(call.from_user.id, role), parse_mode="HTML")
+        await state.update_data(last_bot_msg_id=sent_msg.message_id)
 
     elif dest == "main_menu":
         geo = parts[2]
         role = get_role_string(call.from_user.id)
         await state.set_state(BulkStates.choose_line)
         geo_label = GEO_CATALOG[geo]["label"]
-        await call.message.edit_text(f"{geo_label}\n📂 <b>[Массовая генерация]</b> Выберите категорию:", reply_markup=bulk_main_menu(role, geo), parse_mode="HTML")
+        sent_msg = await call.message.edit_text(f"{geo_label}\n📂 <b>[Массовая генерация]</b> Выберите категорию:", reply_markup=bulk_main_menu(role, geo), parse_mode="HTML")
+        await state.update_data(last_bot_msg_id=sent_msg.message_id)
 
     elif dest == "sections_menu":
         geo = parts[2]
         line_key = parts[3]
         await state.set_state(BulkStates.choose_section)
-        await call.message.edit_text("📂 <b>[Массовая генерация]</b> Выберите раздел:", reply_markup=bulk_sections_menu(geo, line_key), parse_mode="HTML")
+        sent_msg = await call.message.edit_text("📂 <b>[Массовая генерация]</b> Выберите раздел:", reply_markup=bulk_sections_menu(geo, line_key), parse_mode="HTML")
+        await state.update_data(last_bot_msg_id=sent_msg.message_id)
 
     await call.answer()
 
@@ -150,7 +216,8 @@ async def cb_bulk_geo(call: CallbackQuery, state: FSMContext):
     role = get_role_string(call.from_user.id)
     geo_label = GEO_CATALOG[geo]["label"]
     await state.set_state(BulkStates.choose_line)
-    await call.message.edit_text(f"{geo_label}\n📂 <b>[Массовая генерация]</b> Выберите категорию:", reply_markup=bulk_main_menu(role, geo), parse_mode="HTML")
+    sent_msg = await call.message.edit_text(f"{geo_label}\n📂 <b>[Массовая генерация]</b> Выберите категорию:", reply_markup=bulk_main_menu(role, geo), parse_mode="HTML")
+    await state.update_data(last_bot_msg_id=sent_msg.message_id)
     await call.answer()
 
 
@@ -161,7 +228,8 @@ async def cb_bulk_line(call: CallbackQuery, state: FSMContext):
     line_key = parts[2]
     await state.update_data(current_geo=geo, last_line=line_key, last_section=None)
     await state.set_state(BulkStates.choose_section)
-    await call.message.edit_text("📂 <b>[Массовая генерация]</b> Выберите раздел:", reply_markup=bulk_sections_menu(geo, line_key), parse_mode="HTML")
+    sent_msg = await call.message.edit_text("📂 <b>[Массовая генерация]</b> Выберите раздел:", reply_markup=bulk_sections_menu(geo, line_key), parse_mode="HTML")
+    await state.update_data(last_bot_msg_id=sent_msg.message_id)
     await call.answer()
 
 
@@ -170,7 +238,8 @@ async def cb_bulk_section(call: CallbackQuery, state: FSMContext):
     _, geo, line_key, sec_key = call.data.split(":")
     await state.update_data(current_geo=geo, last_line=line_key, last_section=sec_key)
     await state.set_state(BulkStates.choose_item)
-    await call.message.edit_text("📄 <b>[Массовая генерация]</b> Выберите шаблон:", reply_markup=bulk_items_menu(geo, line_key, sec_key), parse_mode="HTML")
+    sent_msg = await call.message.edit_text("📄 <b>[Массовая генерация]</b> Выберите шаблон:", reply_markup=bulk_items_menu(geo, line_key, sec_key), parse_mode="HTML")
+    await state.update_data(last_bot_msg_id=sent_msg.message_id)
     await call.answer()
 
 
@@ -184,13 +253,17 @@ async def cb_bulk_item(call: CallbackQuery, state: FSMContext):
 
     await state.update_data(current_geo=geo, item_key=item_key, item_label=item["label"])
     await state.set_state(BulkStates.enter_dates)
-    await call.message.edit_text(
-        "📅 <b>[Шаг 1 из 5]</b> Введите диапазон дат.\n"
-        "Формат: <code>ДД.ММ.ГГГГ-ДД.ММ.ГГГГ</code> (например, <code>01.07.2026-07.07.2026</code>) "
-        "или одну дату (например, <code>05.07.2026</code>):",
+    sent_msg = await call.message.edit_text(
+        "📅 <b>Шаг 1 из 6: Диапазон дат</b>\n"
+        "[ 🟩⬜⬜⬜⬜⬜ ]\n\n"
+        "Введите диапазон дат, за которые нужно сгенерировать чеки.\n"
+        "<i>Примеры форматов:</i>\n"
+        "• <code>01.07.2026-07.07.2026</code> (диапазон)\n"
+        "• <code>05.07.2026</code> (один конкретный день):",
         reply_markup=cancel_kb("bulk_cancel"),
         parse_mode="HTML"
     )
+    await state.update_data(last_bot_msg_id=sent_msg.message_id)
     await call.answer()
 
 
@@ -207,7 +280,6 @@ async def cb_bulk_cancel(call: CallbackQuery, state: FSMContext):
 @router.message(BulkStates.enter_dates, F.text)
 async def process_bulk_dates(message: Message, state: FSMContext):
     text = message.text.strip().replace(" ", "")
-    # Parse date or range
     try:
         if "-" in text:
             start_str, end_str = text.split("-", 1)
@@ -225,19 +297,20 @@ async def process_bulk_dates(message: Message, state: FSMContext):
     await state.update_data(start_date=start_date.strftime("%d.%m.%Y"), end_date=end_date.strftime("%d.%m.%Y"))
     await state.set_state(BulkStates.enter_times)
     
-    # Try deleting user message to keep chat clean
     try:
         await message.delete()
     except Exception:
         pass
 
-    data = await state.get_data()
-    # We update the original message if possible, or send new
-    await message.answer(
-        "🕐 <b>[Шаг 2 из 5]</b> Введите диапазон времени.\n"
-        "Формат: <code>ЧЧ:ММ-ЧЧ:ММ</code> (например, <code>09:00-18:00</code>) или точное время (например, <code>14:30</code>):",
-        reply_markup=cancel_kb("bulk_cancel"),
-        parse_mode="HTML"
+    await edit_or_send_next(
+        message, state,
+        "🕐 <b>Шаг 2 из 6: Диапазон времени</b>\n"
+        "[ 🟩🟩⬜⬜⬜⬜ ]\n\n"
+        "Введите диапазон времени для чеков.\n"
+        "<i>Примеры форматов:</i>\n"
+        "• <code>09:00-18:00</code> (диапазон)\n"
+        "• <code>14:30</code> (точное время):",
+        cancel_kb("bulk_cancel")
     )
 
 
@@ -264,11 +337,15 @@ async def process_bulk_times(message: Message, state: FSMContext):
     except Exception:
         pass
 
-    await message.answer(
-        "💰 <b>[Шаг 3 из 5]</b> Введите диапазон сумм.\n"
-        "Формат: <code>МИН-МАКС</code> (например, <code>10000-25000</code>) или фиксированная сумма (например, <code>15000</code>):",
-        reply_markup=cancel_kb("bulk_cancel"),
-        parse_mode="HTML"
+    await edit_or_send_next(
+        message, state,
+        "💰 <b>Шаг 3 из 6: Диапазон сумм</b>\n"
+        "[ 🟩🟩🟩⬜⬜⬜ ]\n\n"
+        "Введите сумму или диапазон сумм чеков.\n"
+        "<i>Примеры форматов:</i>\n"
+        "• <code>10000-25000</code> (диапазон)\n"
+        "• <code>15000</code> (фиксированная сумма):",
+        cancel_kb("bulk_cancel")
     )
 
 
@@ -303,10 +380,14 @@ async def process_bulk_amounts(message: Message, state: FSMContext):
         [InlineKeyboardButton(text="❌ Отмена", callback_data="bulk_cancel")]
     ])
 
-    await message.answer(
-        "👤 <b>[Шаг 4 из 5]</b> Выберите источник имён для чеков:",
-        reply_markup=kb,
-        parse_mode="HTML"
+    await edit_or_send_next(
+        message, state,
+        "👤 <b>Шаг 4 из 6: Источник имён</b>\n"
+        "[ 🟩🟩🟩🟩⬜⬜ ]\n\n"
+        "Выберите источник имён, которые будут случайно распределяться по чекам:\n"
+        "• <b>Системная база</b>: имена из встроенного файла name.json.\n"
+        "• <b>Свой файл</b>: загрузка текстового файла с именами.",
+        kb
     )
 
 
@@ -314,7 +395,6 @@ async def process_bulk_amounts(message: Message, state: FSMContext):
 async def cb_bulk_names_source(call: CallbackQuery, state: FSMContext):
     source = call.data.split(":")[1]
     if source == "system":
-        # Check system names
         names = get_available_names()
         if not names:
             names = get_all_names()
@@ -324,20 +404,26 @@ async def cb_bulk_names_source(call: CallbackQuery, state: FSMContext):
 
         await state.update_data(names_source="system", names_count=len(names), names_list=names)
         await state.set_state(BulkStates.enter_quantity)
-        await call.message.edit_text(
-            "🔢 <b>[Шаг 5 из 5]</b> Введите необходимое количество чеков для генерации (например, <code>50</code>, максимум 500):",
+        sent_msg = await call.message.edit_text(
+            "🔢 <b>Шаг 5 из 6: Количество чеков</b>\n"
+            "[ 🟩🟩🟩🟩🟩⬜ ]\n\n"
+            "Введите необходимое количество чеков для генерации (например, <code>50</code>, максимум 500):",
             reply_markup=cancel_kb("bulk_cancel"),
             parse_mode="HTML"
         )
+        await state.update_data(last_bot_msg_id=sent_msg.message_id)
     else:
         await state.update_data(names_source="file")
         await state.set_state(BulkStates.upload_names_file)
-        await call.message.edit_text(
-            "📎 Отправьте текстовый файл (<b>.txt</b> или <b>.csv</b>), где каждое имя написано с новой строки.\n"
+        sent_msg = await call.message.edit_text(
+            "📎 <b>Шаг 4 из 6: Загрузка файла имён</b>\n"
+            "[ 🟩🟩🟩🟩⬜⬜ ]\n\n"
+            "Отправьте текстовый файл (<b>.txt</b> или <b>.csv</b>), где каждое имя написано с новой строки.\n"
             "Бот будет случайно выбирать имена из этого файла при генерации.",
             reply_markup=cancel_kb("bulk_cancel"),
             parse_mode="HTML"
         )
+        await state.update_data(last_bot_msg_id=sent_msg.message_id)
     await call.answer()
 
 
@@ -368,10 +454,12 @@ async def process_names_file(message: Message, state: FSMContext):
     except Exception:
         pass
 
-    await message.answer(
-        "🔢 <b>[Шаг 5 из 5]</b> Введите необходимое количество чеков для генерации (например, <code>50</code>, максимум 500):",
-        reply_markup=cancel_kb("bulk_cancel"),
-        parse_mode="HTML"
+    await edit_or_send_next(
+        message, state,
+        "🔢 <b>Шаг 5 из 6: Количество чеков</b>\n"
+        "[ 🟩🟩🟩🟩🟩⬜ ]\n\n"
+        "Введите необходимое количество чеков для генерации (например, <code>50</code>, максимум 500):",
+        cancel_kb("bulk_cancel")
     )
 
 
@@ -387,35 +475,91 @@ async def process_bulk_quantity(message: Message, state: FSMContext):
         return
 
     await state.update_data(quantity=quantity)
-    await state.set_state(BulkStates.confirm)
     
     try:
         await message.delete()
     except Exception:
         pass
 
-    data = await state.get_data()
-    geo_label = GEO_CATALOG[data["current_geo"]]["label"]
-    names_src_display = "Системная база (name.json)" if data["names_source"] == "system" else "Загруженный файл"
+    user_settings = get_settings(message.from_user.id)
+    blur = user_settings.get("blur_enabled", 1)
+    jose_mode = "sender" if user_settings.get("jose_sender_enabled") else ("recipient" if user_settings.get("jose_recipient_enabled") else "none")
+    
+    await state.update_data(blur_enabled=blur, jose_mode=jose_mode)
+    await state.set_state(BulkStates.configure_effects)
 
-    kb = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="🚀 Начать генерацию", callback_data="bulk_start")],
-        [InlineKeyboardButton(text="❌ Отмена", callback_data="bulk_cancel")]
-    ])
-
-    confirm_text = (
-        "📋 <b>Подтверждение массовой генерации:</b>\n\n"
-        f"🌍 <b>Регион:</b> {geo_label}\n"
-        f"🖼 <b>Шаблон:</b> {data['item_label']}\n"
-        f"📅 <b>Диапазон дат:</b> {data['start_date']} — {data['end_date']}\n"
-        f"🕐 <b>Диапазон времени:</b> {data['start_time']} — {data['end_time']}\n"
-        f"💰 <b>Диапазон сумм:</b> {data['min_amount']} — {data['max_amount']}\n"
-        f"👤 <b>Источник имён:</b> {names_src_display} ({data['names_count']} шт.)\n"
-        f"🔢 <b>Количество чеков:</b> {quantity} шт.\n\n"
-        "<i>Генерация начнется в фоновом режиме, чеки будут запакованы в ZIP-архив.</i>"
+    await edit_or_send_next(
+        message, state,
+        "⚙️ <b>Шаг 6 из 6: Настройка эффектов</b>\n"
+        "[ 🟩🟩🟩🟩🟩🟩 ]\n\n"
+        "Настройте размытие и режим JOSE для этой генерации чеков:",
+        bulk_effects_menu(blur, jose_mode)
     )
 
-    await message.answer(confirm_text, reply_markup=kb, parse_mode="HTML")
+
+@router.callback_query(F.data.startswith("bulk_toggle:"), BulkStates.configure_effects)
+async def cb_bulk_toggle_effects(call: CallbackQuery, state: FSMContext):
+    action = call.data.split(":")[1]
+    data = await state.get_data()
+    
+    blur = data.get("blur_enabled", 1)
+    jose_mode = data.get("jose_mode", "none")
+    
+    if action == "blur":
+        blur = 1 if blur == 0 else 0
+        await state.update_data(blur_enabled=blur)
+        await call.message.edit_reply_markup(reply_markup=bulk_effects_menu(blur, jose_mode))
+        await call.answer("Размытие переключено")
+        
+    elif action == "jose":
+        if jose_mode == "none":
+            jose_mode = "sender"
+        elif jose_mode == "sender":
+            jose_mode = "recipient"
+        else:
+            jose_mode = "none"
+        await state.update_data(jose_mode=jose_mode)
+        await call.message.edit_reply_markup(reply_markup=bulk_effects_menu(blur, jose_mode))
+        await call.answer("Режим JOSE изменен")
+        
+    elif action == "done":
+        await state.set_state(BulkStates.confirm)
+        
+        geo_label = GEO_CATALOG[data["current_geo"]]["label"]
+        names_src_display = "Системная база (name.json)" if data["names_source"] == "system" else "Загруженный файл"
+        
+        blur_display = "✅ Включено" if blur == 1 else "❌ Выключено"
+        if jose_mode == "sender":
+            jose_display = "👨‍✈️ Отправитель JOSE"
+        elif jose_mode == "recipient":
+            jose_display = "👩‍💼 Получатель JOSE"
+        else:
+            jose_display = "❌ Отключен"
+
+        kb = InlineKeyboardMarkup(inline_keyboard=[
+            [InlineKeyboardButton(text="🚀 Начать генерацию", callback_data="bulk_start")],
+            [InlineKeyboardButton(text="❌ Отмена", callback_data="bulk_cancel")]
+        ])
+
+        confirm_text = (
+            "📋 <b>Подтверждение массовой генерации:</b>\n"
+            "══════════════════════\n"
+            f"🌍 <b>Регион:</b> <code>{geo_label}</code>\n"
+            f"🖼 <b>Шаблон:</b> <code>{data['item_label']}</code>\n"
+            f"📅 <b>Даты:</b> <code>{data['start_date']} — {data['end_date']}</code>\n"
+            f"🕐 <b>Время:</b> <code>{data['start_time']} — {data['end_time']}</code>\n"
+            f"💰 <b>Суммы:</b> <code>{data['min_amount']} — {data['max_amount']}</code>\n"
+            f"👤 <b>Имена:</b> <code>{names_src_display}</code> ({data['names_count']} шт.)\n"
+            f"🔢 <b>Количество:</b> <code>{data['quantity']} шт.</code>\n"
+            f"💧 <b>Размытие:</b> <code>{blur_display}</code>\n"
+            f"👤 <b>Режим JOSE:</b> <code>{jose_display}</code>\n"
+            "══════════════════════\n\n"
+            "<i>Генерация начнется в фоновом режиме. Чеки будут упакованы в ZIP-архив при большом количестве.</i>"
+        )
+
+        sent_msg = await call.message.edit_text(confirm_text, reply_markup=kb, parse_mode="HTML")
+        await state.update_data(last_bot_msg_id=sent_msg.message_id)
+        await call.answer()
 
 
 # ── Bulk Execution Helpers ────────────────────────────────────────────────────
@@ -665,15 +809,30 @@ async def cb_bulk_start_execution(call: CallbackQuery, state: FSMContext):
     
     name_pool = data["names_list"]
     
+    blur_override = data.get("blur_enabled", 1)
+    jose_mode_override = data.get("jose_mode", "none")
+    
     user_id = call.from_user.id
     user_settings = get_settings(user_id)
-    item = _get_item_for_user(item_key, geo, user_id)
+    
+    settings_override = user_settings.copy()
+    settings_override["blur_enabled"] = blur_override
+    settings_override["jose_sender_enabled"] = 1 if jose_mode_override == "sender" else 0
+    settings_override["jose_recipient_enabled"] = 1 if jose_mode_override == "recipient" else 0
+    
+    item = get_item_with_jose(item_key, geo, jose_mode_override)
     
     if not item:
         await call.message.edit_text("❌ Ошибка: шаблон более не доступен.")
         return
 
-    progress_msg = await call.message.edit_text(f"⏳ Начинаем генерацию чеков... 0/{quantity} (0%)", reply_markup=None)
+    progress_msg = await call.message.edit_text(
+        "⏳ <b>Выполняется генерация чеков...</b>\n"
+        f"[ {get_progress_bar(0)} ] 0%\n\n"
+        f"Выполнено: <b>0</b> из <b>{quantity}</b> чеков.",
+        reply_markup=None,
+        parse_mode="HTML"
+    )
     
     media_list = []
     render_mode = item.get("render_mode")
@@ -683,13 +842,11 @@ async def cb_bulk_start_execution(call: CallbackQuery, state: FSMContext):
     loop = asyncio.get_running_loop()
     
     for idx in range(quantity):
-        # Generate parameters for this check instance
         base_date = get_random_date(start_date, end_date)
         base_time = get_random_time(start_time, end_time)
         base_amount = random.randint(min_amt, max_amt) if min_amt != max_amt else min_amt
         
-        # Populate all template fields
-        check_values = {"_blur_mode": "with_blur" if user_settings.get("blur_enabled", 1) else "no_blur"}
+        check_values = {"_blur_mode": "with_blur" if settings_override.get("blur_enabled", 1) else "no_blur"}
         for field in item["fields"]:
             key = field["key"]
             check_values[key] = generate_field_val(
@@ -697,14 +854,13 @@ async def cb_bulk_start_execution(call: CallbackQuery, state: FSMContext):
                 prompt=field.get("prompt", ""),
                 item_key=item_key,
                 item=item,
-                s=user_settings,
+                s=settings_override,
                 base_date=base_date,
                 base_time=base_time,
                 base_amount=base_amount,
                 name_pool=name_pool
             )
 
-        # Run Pillow rendering in execution thread to keep bot responsive
         try:
             if render_mode == "video":
                 media_bytes = await loop.run_in_executor(None, render_video, item_key, check_values, geo, item)
@@ -714,12 +870,17 @@ async def cb_bulk_start_execution(call: CallbackQuery, state: FSMContext):
         except Exception as e:
             log.render_error(user_id, item.get("label", item_key), f"Bulk rendering error at index {idx}: {e}", call.from_user.username)
         
-        # Update progress message periodically, avoiding telegram rate limits
         now = asyncio.get_event_loop().time()
         if now - last_update_time >= 2.0 or idx == quantity - 1:
             percent = int((idx + 1) / quantity * 100)
+            bar = get_progress_bar(percent)
+            progress_text = (
+                "⏳ <b>Выполняется генерация чеков...</b>\n"
+                f"[ {bar} ] {percent}%\n\n"
+                f"Выполнено: <b>{idx + 1}</b> из <b>{quantity}</b> чеков."
+            )
             try:
-                await progress_msg.edit_text(f"⏳ Генерация чеков... Выполнено: {idx + 1}/{quantity} ({percent}%)")
+                await progress_msg.edit_text(progress_text, parse_mode="HTML")
             except TelegramBadRequest:
                 pass
             last_update_time = now
@@ -728,15 +889,12 @@ async def cb_bulk_start_execution(call: CallbackQuery, state: FSMContext):
         await progress_msg.edit_text("❌ Все попытки рендеринга завершились ошибкой. Проверьте логи.")
         return
 
-    # Delete progress message
     try:
         await progress_msg.delete()
     except Exception:
         pass
 
-    # Send generated media
     if quantity <= 10:
-        # Send individual files or albums
         await call.message.answer(f"✅ Массовая генерация завершена! Отправляю {len(media_list)} чеков по отдельности:")
         for idx, media in enumerate(media_list):
             media.seek(0)
@@ -751,7 +909,6 @@ async def cb_bulk_start_execution(call: CallbackQuery, state: FSMContext):
                     caption=f"Чек {idx+1}/{len(media_list)}"
                 )
     else:
-        # Build ZIP archive for larger quantities
         zip_msg = await call.message.answer("📦 Архивирую сгенерированные файлы...")
         
         zip_buffer = io.BytesIO()

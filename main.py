@@ -43,7 +43,7 @@ try:
         dp.include_router(settings.router)
         dp.include_router(admin.router)
         dp.include_router(catalog.router)
-        dp.include_router(bulk.router)
+        # dp.include_router(bulk.router)
         dp.include_router(render.router)
 
         from handlers import fallback

@@ -160,6 +160,7 @@ def get_item_with_jose(item_key: str, geo: str, jose_mode: str) -> dict | None:
 @router.callback_query(F.data == "start:bulk_gen")
 async def cb_start_bulk_gen(call: CallbackQuery, state: FSMContext):
     await state.clear()
+    log.bulk_started(call.from_user.id, call.from_user.username)
     role = get_role_string(call.from_user.id)
     kb = bulk_geo_menu(call.from_user.id, role)
     await state.set_state(BulkStates.choose_geo)
@@ -868,6 +869,29 @@ async def cb_bulk_start_execution(call: CallbackQuery, state: FSMContext):
         await call.message.edit_text("❌ Ошибка: шаблон более не доступен.")
         return
 
+    # Log user parameters configuration
+    log.bulk_params_configured(
+        uid=user_id,
+        geo=geo,
+        template=item_key,
+        quantity=quantity,
+        start_date=data["start_date"],
+        end_date=data["end_date"],
+        start_time=data["start_time"],
+        end_time=data["end_time"],
+        min_amt=min_amt,
+        max_amt=max_amt,
+        username=call.from_user.username
+    )
+
+    # Log render start
+    log.bulk_render_start(
+        uid=user_id,
+        template=item.get("label", item_key),
+        quantity=quantity,
+        username=call.from_user.username
+    )
+
     progress_msg = await call.message.edit_text(
         "⏳ <b>Выполняется генерация чеков...</b>\n"
         f"[ {get_progress_bar(0)} ] 0%\n\n"
@@ -959,6 +983,14 @@ async def cb_bulk_start_execution(call: CallbackQuery, state: FSMContext):
     if not media_list:
         await progress_msg.edit_text("❌ Все попытки рендеринга завершились ошибкой. Проверьте логи.")
         return
+
+    # Log render completion
+    log.bulk_render_done(
+        uid=user_id,
+        template=item.get("label", item_key),
+        quantity=len(media_list),
+        username=call.from_user.username
+    )
 
     try:
         await progress_msg.delete()

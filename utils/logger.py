@@ -91,6 +91,25 @@ class BotLogger:
     def render_error(self, uid: int, template: str, error: str, username: str | None = None):
         _logger.error(f"💥 Ошибка рендера [{template}]: {error}  {_u(uid, username, _is_admin(uid))}")
 
+    # ── Массовая генерация ──────────────────────────────────────────────────────
+    def bulk_started(self, uid: int, username: str | None = None):
+        _logger.info(f"📦 Запуск мастера массовой генерации  {_u(uid, username, _is_admin(uid))}")
+
+    def bulk_params_configured(self, uid: int, geo: str, template: str, quantity: int,
+                               start_date: str, end_date: str, start_time: str, end_time: str,
+                               min_amt: int, max_amt: int, username: str | None = None):
+        _logger.info(
+            f"⚙️  Настройка массовой генерации: GEO={geo}, Шаблон={template}, Кол-во={quantity}, "
+            f"Даты={start_date}-{end_date}, Время={start_time}-{end_time}, Суммы={min_amt}-{max_amt} "
+            f" {_u(uid, username, _is_admin(uid))}"
+        )
+
+    def bulk_render_start(self, uid: int, template: str, quantity: int, username: str | None = None):
+        _logger.info(f"⚡ Начало массового рендеринга [{template}] x{quantity}...  {_u(uid, username, _is_admin(uid))}")
+
+    def bulk_render_done(self, uid: int, template: str, quantity: int, username: str | None = None):
+        _logger.info(f"✅ Готово массовый рендеринг: {quantity} рендеров готово [{template}]  {_u(uid, username, _is_admin(uid))}")
+
     # ── Админ ──────────────────────────────────────────────────────────────────
     def admin_panel(self, uid: int, username: str | None = None):
         _logger.info(f"👨‍💼 Админ-панель  {_u(uid, username)}")

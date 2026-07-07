@@ -402,6 +402,12 @@ async def cb_bulk_names_source(call: CallbackQuery, state: FSMContext):
             await call.answer("❌ В базе name.json нет имён. Пожалуйста, выберите загрузку файла.", show_alert=True)
             return
 
+        # Deduplicate and preserve order
+        names = list(dict.fromkeys(name.strip() for name in names if name.strip()))
+        if not names:
+            await call.answer("❌ В базе name.json нет имён. Пожалуйста, выберите загрузку файла.", show_alert=True)
+            return
+
         await state.update_data(names_source="system", names_count=len(names), names_list=names)
         await state.set_state(BulkStates.enter_quantity)
         sent_msg = await call.message.edit_text(
@@ -439,6 +445,8 @@ async def process_names_file(message: Message, state: FSMContext):
         file_bytes = await message.bot.download_file(file.file_path)
         content = file_bytes.read().decode("utf-8")
         names = [line.strip() for line in content.splitlines() if line.strip()]
+        # Deduplicate and preserve order
+        names = list(dict.fromkeys(name.strip() for name in names if name.strip()))
         if not names:
             await message.answer("❌ Файл пуст или содержит некорректные символы. Попробуйте другой файл:")
             return
@@ -472,6 +480,40 @@ async def process_bulk_quantity(message: Message, state: FSMContext):
             raise ValueError()
     except ValueError:
         await message.answer("❌ Пожалуйста, введите корректное число от 1 до 500:")
+        return
+
+    data = await state.get_data()
+    geo = data.get("current_geo")
+    item_key = data.get("item_key")
+    jose_mode = data.get("jose_mode", "none")
+
+    item = get_item_with_jose(item_key, geo, jose_mode)
+    if not item:
+        await message.answer("❌ Шаблон не найден. Пожалуйста, начните заново.")
+        return
+
+    name_fields_count = sum(1 for f in item["fields"] if _is_name_field(f["key"]))
+    total_names_needed = quantity * name_fields_count
+
+    names_list = data.get("names_list", [])
+    names_count = len(names_list)
+
+    if total_names_needed > 0 and names_count < total_names_needed:
+        try:
+            await message.delete()
+        except Exception:
+            pass
+
+        error_text = (
+            f"❌ <b>Недостаточно уникальных имён в источнике!</b>\n"
+            f"Для выбранного шаблона требуется по {name_fields_count} имён на чек.\n"
+            f"Для генерации {quantity} чеков необходимо минимум <b>{total_names_needed}</b> уникальных имён.\n"
+            f"В вашем источнике доступно всего: <b>{names_count}</b> уникальных имён.\n\n"
+            f"🔢 <b>Шаг 5 из 6: Количество чеков</b>\n"
+            f"[ 🟩🟩🟩🟩🟩⬜ ]\n\n"
+            f"Пожалуйста, введите меньшее количество чеков (максимум {names_count // name_fields_count if name_fields_count > 0 else quantity}):"
+        )
+        await edit_or_send_next(message, state, error_text, cancel_kb("bulk_cancel"))
         return
 
     await state.update_data(quantity=quantity)
@@ -639,7 +681,7 @@ def format_bulk_time(tm: datetime.time, field_prompt: str, time_suffix: str = No
 def generate_field_val(key: str, prompt: str, item_key: str, item: dict, s: dict, 
                        base_date: datetime.date, base_time: datetime.time, 
                        base_amount: int, name_pool: list[str]) -> str:
-    # 1. Names
+    # 1. Names (Fallback only)
     if _is_name_field(key):
         val = random.choice(name_pool) if name_pool else "Juan Perez"
         if item_key == "check1_uy" and key == "name":
@@ -841,6 +883,10 @@ async def cb_bulk_start_execution(call: CallbackQuery, state: FSMContext):
     
     loop = asyncio.get_running_loop()
     
+    # Prepare unique names for the run and shuffle them
+    run_names = list(name_pool)
+    random.shuffle(run_names)
+    
     for idx in range(quantity):
         base_date = get_random_date(start_date, end_date)
         base_time = get_random_time(start_time, end_time)
@@ -849,17 +895,42 @@ async def cb_bulk_start_execution(call: CallbackQuery, state: FSMContext):
         check_values = {"_blur_mode": "with_blur" if settings_override.get("blur_enabled", 1) else "no_blur"}
         for field in item["fields"]:
             key = field["key"]
-            check_values[key] = generate_field_val(
-                key=key,
-                prompt=field.get("prompt", ""),
-                item_key=item_key,
-                item=item,
-                s=settings_override,
-                base_date=base_date,
-                base_time=base_time,
-                base_amount=base_amount,
-                name_pool=name_pool
-            )
+            if _is_name_field(key):
+                val = run_names.pop(0) if run_names else "Juan Perez"
+                if item_key == "check1_uy" and key == "name":
+                    name_parts = val.split()
+                    if len(name_parts) >= 3:
+                        val = name_parts[2]
+                check_values[key] = _format_name(val, item)
+            else:
+                val = generate_field_val(
+                    key=key,
+                    prompt=field.get("prompt", ""),
+                    item_key=item_key,
+                    item=item,
+                    s=settings_override,
+                    base_date=base_date,
+                    base_time=base_time,
+                    base_amount=base_amount,
+                    name_pool=[]
+                )
+                # Handle image_paste fields dynamically to prevent trying to open "0" as a path in Pillow.
+                if field.get("text_config", {}).get("image_paste"):
+                    if item_key == "check2_py" and key == "_bank_image":
+                        bank_val = check_values.get("bank", "ATLAS")
+                        val = f"assets/Paraguay/Чек/bank/{bank_val}.jpg"
+                    elif item_key == "check3_py" and key == "_bank_image":
+                        bank_val = check_values.get("bank", "ATLAS")
+                        val = f"assets/Paraguay/Чек/bank2/{bank_val}.png"
+                    elif item_key == "check3_py" and key == "_sender_bank_image":
+                        sender_bank_val = check_values.get("sender_bank", "ATLAS")
+                        val = f"assets/Paraguay/Чек/bank2/{sender_bank_val}.png"
+                    elif key in ("wifi", "network", "battery"):
+                        # Keep value generated by generate_field_val
+                        pass
+                    else:
+                        val = None if val == "0" else val
+                check_values[key] = val
 
         try:
             if render_mode == "video":

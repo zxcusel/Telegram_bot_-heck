@@ -18,6 +18,7 @@ router = Router()
 def _start_kb(user_id: int) -> InlineKeyboardMarkup:
     buttons = [
         [InlineKeyboardButton(text="▶️ Начать", callback_data="start:begin")],
+        [InlineKeyboardButton(text="🎲 Массовая генерация", callback_data="start:bulk_gen")],
         [InlineKeyboardButton(text="⚙️ Настройки", callback_data="start:settings")],
     ]
     if is_admin(user_id):

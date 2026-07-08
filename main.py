@@ -87,6 +87,9 @@ try:
     if __name__ == "__main__":
         asyncio.run(main())
 
+except KeyboardInterrupt:
+    print("\n🛑 Запуск бота прерван пользователем или системой.")
+    sys.exit(0)
 except Exception as e:
     with open("crash_log.txt", "w", encoding="utf-8") as f:
         traceback.print_exc(file=f)

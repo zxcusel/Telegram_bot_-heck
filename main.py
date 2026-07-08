@@ -51,17 +51,13 @@ try:
         log.startup()
 
         from aiogram.client.session.aiohttp import AiohttpSession
-        from aiohttp import TCPConnector
 
         while True:
             bot = None
             try:
                 # Настройка сессии с таймаутами и очисткой старых соединений
-                session = AiohttpSession(
-                    connector=TCPConnector(
-                        force_close=True
-                    )
-                )
+                session = AiohttpSession()
+                session._connector_init["force_close"] = True
                 bot = Bot(token=get_token(), session=session)
                 
                 # Удаляем вебхук перед стартом, не удаляя накопившиеся сообщения

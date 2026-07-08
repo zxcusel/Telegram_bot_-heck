@@ -33,7 +33,6 @@ try:
         init_db()
         log.db_ready()
 
-        bot = Bot(token=get_token())
         storage = MemoryStorage()
         dp = Dispatcher(storage=storage)
 
@@ -50,7 +49,43 @@ try:
         dp.include_router(fallback.router)
 
         log.startup()
-        await dp.start_polling(bot, allowed_updates=dp.resolve_used_update_types())
+
+        from aiogram.client.session.aiohttp import AiohttpSession
+        from aiohttp import TCPConnector
+
+        while True:
+            bot = None
+            try:
+                # Настройка сессии с таймаутами и очисткой старых соединений
+                session = AiohttpSession(
+                    connector=TCPConnector(
+                        keepalive_timeout=20,
+                        force_close=True
+                    )
+                )
+                bot = Bot(token=get_token(), session=session)
+                
+                # Удаляем вебхук перед стартом, не удаляя накопившиеся сообщения
+                await bot.delete_webhook(drop_pending_updates=False)
+                
+                # Запуск поллинга
+                await dp.start_polling(bot, allowed_updates=dp.resolve_used_update_types())
+            except (KeyboardInterrupt, SystemExit, asyncio.CancelledError):
+                break
+            except Exception as e:
+                import datetime
+                err_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                print(f"[{err_time}] Polling crashed with error: {e}. Reconnecting in 5 seconds...")
+                with open("polling_crash_log.txt", "a", encoding="utf-8") as f:
+                    f.write(f"[{err_time}] Error: {e}\n")
+                    traceback.print_exc(file=f)
+                await asyncio.sleep(5)
+            finally:
+                if bot:
+                    try:
+                        await bot.session.close()
+                    except Exception:
+                        pass
 
 
     if __name__ == "__main__":

@@ -1,0 +1,24 @@
+[2026-07-08 19:14:32] Error: BaseSession.__init__() got an unexpected keyword argument 'connector'
+Traceback (most recent call last):
+  File "D:\TELEGRAM BOT PROJECT\Octo\Telegram_bot_-heck\main.py", line 60, in main
+    session = AiohttpSession(
+        connector=TCPConnector(
+            force_close=True
+        )
+    )
+  File "C:\Users\genii\AppData\Roaming\Python\Python314\site-packages\aiogram\client\session\aiohttp.py", line 81, in __init__
+    super().__init__(**kwargs)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^
+TypeError: BaseSession.__init__() got an unexpected keyword argument 'connector'
+[2026-07-08 19:14:37] Error: BaseSession.__init__() got an unexpected keyword argument 'connector'
+Traceback (most recent call last):
+  File "D:\TELEGRAM BOT PROJECT\Octo\Telegram_bot_-heck\main.py", line 60, in main
+    session = AiohttpSession(
+        connector=TCPConnector(
+            force_close=True
+        )
+    )
+  File "C:\Users\genii\AppData\Roaming\Python\Python314\site-packages\aiogram\client\session\aiohttp.py", line 81, in __init__
+    super().__init__(**kwargs)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^
+TypeError: BaseSession.__init__() got an unexpected keyword argument 'connector'

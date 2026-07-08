@@ -59,7 +59,6 @@ try:
                 # Настройка сессии с таймаутами и очисткой старых соединений
                 session = AiohttpSession(
                     connector=TCPConnector(
-                        keepalive_timeout=20,
                         force_close=True
                     )
                 )

@@ -159,6 +159,8 @@ def get_item_with_jose(item_key: str, geo: str, jose_mode: str) -> dict | None:
 
 @router.callback_query(F.data == "start:bulk_gen")
 async def cb_start_bulk_gen(call: CallbackQuery, state: FSMContext):
+    try: await call.answer()
+    except Exception: pass
     await state.clear()
     log.bulk_started(call.from_user.id, call.from_user.username)
     role = get_role_string(call.from_user.id)
@@ -166,11 +168,12 @@ async def cb_start_bulk_gen(call: CallbackQuery, state: FSMContext):
     await state.set_state(BulkStates.choose_geo)
     sent_msg = await call.message.edit_text("🌍 <b>[Массовая генерация]</b> Выберите регион:", reply_markup=kb, parse_mode="HTML")
     await state.update_data(last_bot_msg_id=sent_msg.message_id)
-    await call.answer()
 
 
 @router.callback_query(F.data.startswith("bulk_back:"))
 async def cb_bulk_back(call: CallbackQuery, state: FSMContext):
+    try: await call.answer()
+    except Exception: pass
     parts = call.data.split(":")
     dest = parts[1]
 
@@ -200,8 +203,6 @@ async def cb_bulk_back(call: CallbackQuery, state: FSMContext):
         sent_msg = await call.message.edit_text("📂 <b>[Массовая генерация]</b> Выберите раздел:", reply_markup=bulk_sections_menu(geo, line_key), parse_mode="HTML")
         await state.update_data(last_bot_msg_id=sent_msg.message_id)
 
-    await call.answer()
-
 
 @router.callback_query(F.data.startswith("bulk_geo:"))
 async def cb_bulk_geo(call: CallbackQuery, state: FSMContext):
@@ -213,17 +214,20 @@ async def cb_bulk_geo(call: CallbackQuery, state: FSMContext):
         await call.answer("⛔ Нет доступа к этому региону", show_alert=True)
         return
 
+    try: await call.answer()
+    except Exception: pass
     await state.update_data(current_geo=geo)
     role = get_role_string(call.from_user.id)
     geo_label = GEO_CATALOG[geo]["label"]
     await state.set_state(BulkStates.choose_line)
     sent_msg = await call.message.edit_text(f"{geo_label}\n📂 <b>[Массовая генерация]</b> Выберите категорию:", reply_markup=bulk_main_menu(role, geo), parse_mode="HTML")
     await state.update_data(last_bot_msg_id=sent_msg.message_id)
-    await call.answer()
 
 
 @router.callback_query(F.data.startswith("bulk_line:"))
 async def cb_bulk_line(call: CallbackQuery, state: FSMContext):
+    try: await call.answer()
+    except Exception: pass
     parts = call.data.split(":")
     geo = parts[1]
     line_key = parts[2]
@@ -231,17 +235,17 @@ async def cb_bulk_line(call: CallbackQuery, state: FSMContext):
     await state.set_state(BulkStates.choose_section)
     sent_msg = await call.message.edit_text("📂 <b>[Массовая генерация]</b> Выберите раздел:", reply_markup=bulk_sections_menu(geo, line_key), parse_mode="HTML")
     await state.update_data(last_bot_msg_id=sent_msg.message_id)
-    await call.answer()
 
 
 @router.callback_query(F.data.startswith("bulk_section:"))
 async def cb_bulk_section(call: CallbackQuery, state: FSMContext):
+    try: await call.answer()
+    except Exception: pass
     _, geo, line_key, sec_key = call.data.split(":")
     await state.update_data(current_geo=geo, last_line=line_key, last_section=sec_key)
     await state.set_state(BulkStates.choose_item)
     sent_msg = await call.message.edit_text("📄 <b>[Массовая генерация]</b> Выберите шаблон:", reply_markup=bulk_items_menu(geo, line_key, sec_key), parse_mode="HTML")
     await state.update_data(last_bot_msg_id=sent_msg.message_id)
-    await call.answer()
 
 
 @router.callback_query(F.data.startswith("bulk_item:"))
@@ -252,6 +256,8 @@ async def cb_bulk_item(call: CallbackQuery, state: FSMContext):
         await call.answer("❌ Шаблон не найден.", show_alert=True)
         return
 
+    try: await call.answer()
+    except Exception: pass
     await state.update_data(current_geo=geo, item_key=item_key, item_label=item["label"])
     await state.set_state(BulkStates.enter_dates)
     sent_msg = await call.message.edit_text(
@@ -265,17 +271,17 @@ async def cb_bulk_item(call: CallbackQuery, state: FSMContext):
         parse_mode="HTML"
     )
     await state.update_data(last_bot_msg_id=sent_msg.message_id)
-    await call.answer()
 
 
 # ── FSM Text/File Input Handlers ──────────────────────────────────────────────
 
 @router.callback_query(F.data == "bulk_cancel")
 async def cb_bulk_cancel(call: CallbackQuery, state: FSMContext):
+    try: await call.answer("Отменено")
+    except Exception: pass
     await state.clear()
     from handlers.catalog import _start_kb
     await call.message.edit_text("👋 Добро пожаловать!", reply_markup=_start_kb(call.from_user.id))
-    await call.answer("Отменено")
 
 
 @router.message(BulkStates.enter_dates, F.text)
@@ -394,6 +400,8 @@ async def process_bulk_amounts(message: Message, state: FSMContext):
 
 @router.callback_query(F.data.startswith("bulk_names:"))
 async def cb_bulk_names_source(call: CallbackQuery, state: FSMContext):
+    try: await call.answer()
+    except Exception: pass
     source = call.data.split(":")[1]
     if source == "system":
         names = get_available_names()
@@ -431,7 +439,6 @@ async def cb_bulk_names_source(call: CallbackQuery, state: FSMContext):
             parse_mode="HTML"
         )
         await state.update_data(last_bot_msg_id=sent_msg.message_id)
-    await call.answer()
 
 
 @router.message(BulkStates.upload_names_file, F.document)
@@ -542,6 +549,8 @@ async def process_bulk_quantity(message: Message, state: FSMContext):
 
 @router.callback_query(F.data.startswith("bulk_toggle:"), BulkStates.configure_effects)
 async def cb_bulk_toggle_effects(call: CallbackQuery, state: FSMContext):
+    try: await call.answer()
+    except Exception: pass
     action = call.data.split(":")[1]
     data = await state.get_data()
     
@@ -552,7 +561,6 @@ async def cb_bulk_toggle_effects(call: CallbackQuery, state: FSMContext):
         blur = 1 if blur == 0 else 0
         await state.update_data(blur_enabled=blur)
         await call.message.edit_reply_markup(reply_markup=bulk_effects_menu(blur, jose_mode))
-        await call.answer("Размытие переключено")
         
     elif action == "jose":
         if jose_mode == "none":
@@ -887,6 +895,8 @@ def find_item_hierarchy(geo: str, item_key: str) -> tuple[str, str]:
 
 @router.callback_query(F.data == "bulk_start", BulkStates.confirm)
 async def cb_bulk_start_execution(call: CallbackQuery, state: FSMContext):
+    try: await call.answer()
+    except Exception: pass
     data = await state.get_data()
     await state.clear()
     

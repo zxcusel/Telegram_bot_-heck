@@ -74,27 +74,28 @@ async def cb_start_clear(call: CallbackQuery, state: FSMContext):
 
 @router.callback_query(F.data == "start:begin")
 async def cb_start_begin(call: CallbackQuery, state: FSMContext):
+    try: await call.answer()
+    except Exception: pass
     await state.clear()
     role = get_role_string(call.from_user.id)
     kb   = geo_menu_for(call.from_user.id, role)
     await _safe_edit(call, "🌍 Выберите регион:", kb)
-    await call.answer()
 
 
 @router.callback_query(F.data == "start:admin")
 async def cb_start_admin(call: CallbackQuery, state: FSMContext):
     if not is_admin(call.from_user.id):
         await call.answer("⛔ Нет доступа", show_alert=True); return
+    try: await call.answer()
+    except Exception: pass
     log.admin_panel(call.from_user.id, call.from_user.username)
     await show_admin_panel(call, state)
-    await call.answer()
 
 
 # ── Выбор гео → меню категорий ───────────────────────────────────────────────
 
 @router.callback_query(F.data.startswith("geo:"))
 async def cb_geo(call: CallbackQuery, state: FSMContext):
-    await state.clear()
     geo = call.data.split(":")[1]
     if geo not in GEO_CATALOG:
         await call.answer("⛔ Неизвестный регион", show_alert=True); return
@@ -102,18 +103,22 @@ async def cb_geo(call: CallbackQuery, state: FSMContext):
     if not is_admin(call.from_user.id) and geo not in get_geos(call.from_user.id):
         await call.answer("⛔ Нет доступа к этому региону", show_alert=True); return
 
+    try: await call.answer()
+    except Exception: pass
+    await state.clear()
     await state.update_data(current_geo=geo)
     role = get_role_string(call.from_user.id)
     geo_label = GEO_CATALOG[geo]["label"]
     log.open_category(call.from_user.id, geo, call.from_user.username)
     await _safe_edit(call, f"{geo_label}\n📂 Выберите категорию:", main_menu(role, geo))
-    await call.answer()
 
 
 # ── Выбор категории → разделы ─────────────────────────────────────────────────
 
 @router.callback_query(F.data.startswith("line:"))
 async def cb_line(call: CallbackQuery, state: FSMContext):
+    try: await call.answer()
+    except Exception: pass
     await state.clear()
     parts    = call.data.split(":")   # line:geo:line_key
     geo      = parts[1]
@@ -121,24 +126,26 @@ async def cb_line(call: CallbackQuery, state: FSMContext):
     await state.update_data(current_geo=geo, last_line=line_key, last_section=None)
     log.open_section(call.from_user.id, line_key, call.from_user.username)
     await _safe_edit(call, "📂 Выберите раздел:", sections_menu(geo, line_key))
-    await call.answer()
 
 
 # ── Выбор раздела → шаблоны ──────────────────────────────────────────────────
 
 @router.callback_query(F.data.startswith("section:"))
 async def cb_section(call: CallbackQuery, state: FSMContext):
+    try: await call.answer()
+    except Exception: pass
     await state.clear()
     _, geo, line_key, sec_key = call.data.split(":")
     await state.update_data(current_geo=geo, last_line=line_key, last_section=sec_key)
     await _safe_edit(call, "📄 Выберите шаблон:", items_menu(geo, line_key, sec_key))
-    await call.answer()
 
 
 # ── Кнопки Назад ─────────────────────────────────────────────────────────────
 
 @router.callback_query(F.data.startswith("back:"))
 async def cb_back(call: CallbackQuery, state: FSMContext):
+    try: await call.answer()
+    except Exception: pass
     parts = call.data.split(":")
     dest  = parts[1]
 
@@ -179,8 +186,6 @@ async def cb_back(call: CallbackQuery, state: FSMContext):
             await call.message.answer(
                 "🌍 Выберите регион:", reply_markup=geo_menu_for(call.from_user.id, role)
             )
-
-    await call.answer()
 
 
 @router.callback_query(F.data == "noop")

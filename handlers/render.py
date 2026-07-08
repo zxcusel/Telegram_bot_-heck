@@ -591,19 +591,20 @@ async def _finish_render(message: Message, item_key: str, values: dict, item: di
         wait_text = "🎞 Создание видео..." if render_mode == "video" else "🖼 Создание изображения..."
         wait_msg = await message.answer(wait_text)
         log.render_start(message.from_user.id, item.get("label", item_key), message.from_user.username)
+        import asyncio
         if render_mode == "support_bubbles":
             from utils.renderer import render_support, FONTS, BASE_DIR
             import os
             asset_path = item["asset"]
             asset_path = os.path.normpath(os.path.join(BASE_DIR, asset_path))
             font_path  = os.path.join(BASE_DIR, FONTS["montserrat"])
-            media_bytes  = render_support(values, asset_path, font_path, font_size_pt=20)
+            media_bytes  = await asyncio.to_thread(render_support, values, asset_path, font_path, font_size_pt=20)
         elif render_mode == "video":
             from utils.renderer import render_video
-            media_bytes = render_video(item_key, values, geo, item=item)
+            media_bytes = await asyncio.to_thread(render_video, item_key, values, geo, item=item)
         else:
             from utils.renderer import render_image
-            media_bytes = render_image(item_key, values, geo, item=item)
+            media_bytes = await asyncio.to_thread(render_image, item_key, values, geo, item=item)
 
         # Небольшая пауза чтобы пользователь увидел сообщение
         import asyncio
@@ -755,6 +756,9 @@ async def cb_item_selected(call: CallbackQuery, state: FSMContext):
     if not item:
         await call.answer("❌ Шаблон не найден.", show_alert=True)
         return
+
+    try: await call.answer()
+    except Exception: pass
 
     import copy
     askable = copy.deepcopy(_askable_fields(item["fields"], item_key, geo))
@@ -1141,6 +1145,8 @@ async def collect_photo_field(message: Message, state: FSMContext):
 
 @router.callback_query(F.data == "cancel")
 async def cb_cancel(call: CallbackQuery, state: FSMContext):
+    try: await call.answer()
+    except Exception: pass
     data = await state.get_data()
     has_photo = data.get("has_photo", False)
     msg_id    = data.get("checklist_msg_id")
@@ -1161,16 +1167,14 @@ async def cb_cancel(call: CallbackQuery, state: FSMContext):
         await call.message.answer("📂 Выберите категорию:", reply_markup=main_menu(role, geo))
     else:
         await call.message.answer("🌍 Выберите регион:", reply_markup=geo_menu_for(call.from_user.id, role))
-    try:
-        await call.answer()
-    except Exception:
-        pass
 
 
 # ── Главное меню после рендера ────────────────────────────────────────────────
 
 @router.callback_query(F.data == "back:main")
 async def cb_back_main_from_render(call: CallbackQuery, state: FSMContext):
+    try: await call.answer()
+    except Exception: pass
     data = await state.get_data()
     await state.clear()
     role = get_role_string(call.from_user.id)
@@ -1180,16 +1184,18 @@ async def cb_back_main_from_render(call: CallbackQuery, state: FSMContext):
         await call.message.answer("📂 Выберите категорию:", reply_markup=main_menu(role, geo))
     else:
         await call.message.answer("🌍 Выберите регион:", reply_markup=geo_menu_for(call.from_user.id, role))
-    try:
-        await call.answer()
-    except Exception:
-        pass
 
 
 # ── Shortcuts (Random, Pin, Suffix) ──────────────────────────────────────────
 
 @router.callback_query(F.data.startswith("render:"))
 async def cb_render_shortcuts(call: CallbackQuery, state: FSMContext):
+    parts = call.data.split(":")
+    action = parts[1]
+    if action not in ("perc_sign", "suffix", "random_name"):
+        try: await call.answer()
+        except Exception: pass
+
     data = await state.get_data()
     if not data or "askable" not in data:
         try:
@@ -1206,9 +1212,6 @@ async def cb_render_shortcuts(call: CallbackQuery, state: FSMContext):
     has_photo: bool = data["has_photo"]
     geo: str = data.get("current_geo", "bo")
     item = _get_item_for_user(item_key, geo, call.from_user.id)
-    
-    parts = call.data.split(":")
-    action = parts[1]
     
     val = None
     if action == "pin_date":

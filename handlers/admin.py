@@ -160,17 +160,19 @@ async def show_admin_panel(event, state: FSMContext):
 async def cb_back_main(call: CallbackQuery, state: FSMContext):
     if not is_admin(call.from_user.id):
         await call.answer("⛔ Нет доступа", show_alert=True); return
+    try: await call.answer()
+    except Exception: pass
     await state.clear()
     await _safe_edit(call.message, "👨‍💼 <b>Админ-панель</b>\n\nВыберите действие:", _admin_main_kb())
-    await call.answer()
 
 
 @router.callback_query(F.data == "admin:exit")
 async def cb_exit(call: CallbackQuery, state: FSMContext):
+    try: await call.answer()
+    except Exception: pass
     await state.clear()
     from handlers.catalog import _start_kb
     await _safe_edit(call.message, "👋 Добро пожаловать!", _start_kb(call.from_user.id))
-    await call.answer()
 
 
 # ── выдача ролей ──────────────────────────────────────────────────────────────
@@ -179,10 +181,11 @@ async def cb_exit(call: CallbackQuery, state: FSMContext):
 async def cb_set_role_start(call: CallbackQuery, state: FSMContext):
     if not is_admin(call.from_user.id):
         await call.answer("⛔ Нет доступа", show_alert=True); return
+    try: await call.answer()
+    except Exception: pass
     await _safe_edit(call.message, "🆔 Введите Telegram ID пользователя:", _back_to_main_kb())
     await state.set_state(AdminStates.wait_target_id)
     await state.update_data(prompt_msg_id=call.message.message_id)
-    await call.answer()
 
 
 @router.message(AdminStates.wait_target_id)
@@ -225,6 +228,8 @@ async def process_target_id(message: Message, state: FSMContext):
 async def cb_toggle_role(call: CallbackQuery, state: FSMContext):
     if not is_admin(call.from_user.id):
         await call.answer("⛔ Нет доступа", show_alert=True); return
+    try: await call.answer()
+    except Exception: pass
     parts     = call.data.split(":")
     role      = parts[2]
     target_id = int(parts[3])
@@ -239,13 +244,14 @@ async def cb_toggle_role(call: CallbackQuery, state: FSMContext):
         log.role_changed(call.from_user.id, target_id, role, "add", call.from_user.username)
     roles = get_roles(target_id)
     await _safe_edit(call.message, _role_info_text(target_id, roles, action), _roles_kb(target_id, roles))
-    await call.answer()
 
 
 @router.callback_query(F.data.startswith("admin:geo:"))
 async def cb_toggle_geo(call: CallbackQuery, state: FSMContext):
     if not is_admin(call.from_user.id):
         await call.answer("⛔ Нет доступа", show_alert=True); return
+    try: await call.answer()
+    except Exception: pass
     parts     = call.data.split(":")   # admin:geo:bo:12345
     geo       = parts[2]
     target_id = int(parts[3])
@@ -260,13 +266,14 @@ async def cb_toggle_geo(call: CallbackQuery, state: FSMContext):
     roles = get_roles(target_id)
     await _safe_edit(call.message, _role_info_text(target_id, roles, action),
                      _roles_kb(target_id, roles))
-    await call.answer()
 
 
 @router.callback_query(F.data.startswith("admin:clear:"))
 async def cb_clear_roles(call: CallbackQuery, state: FSMContext):
     if not is_admin(call.from_user.id):
         await call.answer("⛔ Нет доступа", show_alert=True); return
+    try: await call.answer()
+    except Exception: pass
     target_id = int(call.data.split(":")[2])
     clear_roles(target_id)
     clear_geos(target_id)
@@ -274,7 +281,6 @@ async def cb_clear_roles(call: CallbackQuery, state: FSMContext):
     roles = get_roles(target_id)
     await _safe_edit(call.message, _role_info_text(target_id, roles, "роли и регионы очищены 🗑"),
                      _roles_kb(target_id, roles))
-    await call.answer()
 
 
 @router.callback_query(F.data.startswith("admin:demote:"))
@@ -284,18 +290,21 @@ async def cb_demote_admin(call: CallbackQuery, state: FSMContext):
     target_id = int(call.data.split(":")[2])
     if target_id == call.from_user.id:
         await call.answer("⛔ Нельзя снять себя.", show_alert=True); return
+    try: await call.answer()
+    except Exception: pass
     remove_admin(target_id)
     log.admin_demoted(call.from_user.id, target_id, call.from_user.username)
     roles = get_roles(target_id)
     await _safe_edit(call.message, _role_info_text(target_id, roles, "администратор снят 🚫"),
                      _roles_kb(target_id, roles))
-    await call.answer()
 
 
 @router.callback_query(F.data.startswith("admin:promote:"))
 async def cb_promote_admin(call: CallbackQuery, state: FSMContext):
     if not is_admin(call.from_user.id):
         await call.answer("⛔ Нет доступа", show_alert=True); return
+    try: await call.answer()
+    except Exception: pass
     target_id = int(call.data.split(":")[2])
     await _fetch_and_save(call.bot, target_id)
     add_admin(target_id)
@@ -303,7 +312,6 @@ async def cb_promote_admin(call: CallbackQuery, state: FSMContext):
     roles = get_roles(target_id)
     await _safe_edit(call.message, _role_info_text(target_id, roles, "назначен администратором 👑"),
                      _roles_kb(target_id, roles))
-    await call.answer()
 
 
 # ── список пользователей ──────────────────────────────────────────────────────
@@ -312,6 +320,8 @@ async def cb_promote_admin(call: CallbackQuery, state: FSMContext):
 async def cb_user_list(call: CallbackQuery, state: FSMContext):
     if not is_admin(call.from_user.id):
         await call.answer("⛔ Нет доступа", show_alert=True); return
+    try: await call.answer()
+    except Exception: pass
 
     users = get_all_users_all()
     if not users:
@@ -346,7 +356,6 @@ async def cb_user_list(call: CallbackQuery, state: FSMContext):
         text = "📋 <b>Список пользователей</b>\n\n" + "\n\n".join(lines)
 
     await _safe_edit(call.message, text, _back_to_main_kb())
-    await call.answer()
 
 
 # ── Бан / ЧС ──────────────────────────────────────────────────────────────────
@@ -359,6 +368,8 @@ async def cb_ban_menu(call: CallbackQuery, state: FSMContext):
     if not candidates:
         await call.answer("Нет активных пользователей.", show_alert=True)
         return
+    try: await call.answer()
+    except Exception: pass
     
     buttons = []
     for uid in candidates:
@@ -367,7 +378,6 @@ async def cb_ban_menu(call: CallbackQuery, state: FSMContext):
     buttons.append([InlineKeyboardButton(text="🔙 Назад", callback_data="admin:back_main")])
     kb = InlineKeyboardMarkup(inline_keyboard=buttons)
     await _safe_edit(call.message, "🚫 Выберите пользователя для блокировки:", kb)
-    await call.answer()
 
 @router.callback_query(F.data == "admin:blacklist_menu")
 async def cb_blacklist_menu(call: CallbackQuery, state: FSMContext):
@@ -377,6 +387,8 @@ async def cb_blacklist_menu(call: CallbackQuery, state: FSMContext):
     if not candidates:
         await call.answer("ЧС пуст.", show_alert=True)
         return
+    try: await call.answer()
+    except Exception: pass
     
     buttons = []
     for uid in candidates:
@@ -385,7 +397,6 @@ async def cb_blacklist_menu(call: CallbackQuery, state: FSMContext):
     buttons.append([InlineKeyboardButton(text="🔙 Назад", callback_data="admin:back_main")])
     kb = InlineKeyboardMarkup(inline_keyboard=buttons)
     await _safe_edit(call.message, "⛔️ Черный список (ЧС):", kb)
-    await call.answer()
 
 @router.callback_query(F.data.startswith("admin:toggle_ban:"))
 async def cb_toggle_ban(call: CallbackQuery, state: FSMContext):
@@ -409,16 +420,19 @@ async def cb_toggle_ban(call: CallbackQuery, state: FSMContext):
 @router.callback_query(F.data == "admin:broadcast_menu")
 async def cb_broadcast_menu(call: CallbackQuery, state: FSMContext):
     if not is_admin(call.from_user.id): return
+    try: await call.answer()
+    except Exception: pass
     await _safe_edit(call.message, "📢 Выберите тип рассылки:", _broadcast_menu_kb())
-    await call.answer()
+
 
 @router.callback_query(F.data == "admin:broadcast_all")
 async def cb_broadcast_all(call: CallbackQuery, state: FSMContext):
     if not is_admin(call.from_user.id): return
+    try: await call.answer()
+    except Exception: pass
     await _safe_edit(call.message, "⌨️ Введите сообщение для рассылки ВСЕМ пользователям:\n\n(или нажмите Назад)", _back_to_main_kb())
     await state.set_state(AdminStates.wait_broadcast_text_all)
     await state.update_data(prompt_msg_id=call.message.message_id)
-    await call.answer()
 
 @router.message(AdminStates.wait_broadcast_text_all)
 async def process_broadcast_all(message: Message, state: FSMContext):
@@ -472,29 +486,34 @@ async def cb_broadcast_indiv(call: CallbackQuery, state: FSMContext):
     if not users:
         await call.answer("Нет пользователей", show_alert=True)
         return
+    try: await call.answer()
+    except Exception: pass
     kb = await _build_users_kb(call.bot, users, page=0)
     await _safe_edit(call.message, "👤 Выберите пользователя для отправки сообщения:", kb)
-    await call.answer()
+
 
 @router.callback_query(F.data.startswith("admin:bc_page:"))
 async def cb_broadcast_indiv_page(call: CallbackQuery, state: FSMContext):
     if not is_admin(call.from_user.id): return
+    try: await call.answer()
+    except Exception: pass
     page = int(call.data.split(":")[2])
     users = get_all_users_all()
     kb = await _build_users_kb(call.bot, users, page)
     await _safe_edit(call.message, "👤 Выберите пользователя для отправки сообщения:", kb)
-    await call.answer()
+
 
 @router.callback_query(F.data.startswith("admin:bc_to:"))
 async def cb_broadcast_indiv_target(call: CallbackQuery, state: FSMContext):
     if not is_admin(call.from_user.id): return
+    try: await call.answer()
+    except Exception: pass
     target_id = int(call.data.split(":")[2])
     await state.update_data(target_id=target_id, prompt_msg_id=call.message.message_id)
     
     uname = await _fetch_and_save(call.bot, target_id) or "none"
     await _safe_edit(call.message, f"⌨️ Введите сообщение для пользователя {target_id} (@{uname}):", _back_to_main_kb())
     await state.set_state(AdminStates.wait_broadcast_text_indiv)
-    await call.answer()
 
 
 @router.message(AdminStates.wait_broadcast_text_indiv)

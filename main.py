@@ -65,6 +65,7 @@ try:
                 
                 # Запуск поллинга
                 await dp.start_polling(bot, allowed_updates=dp.resolve_used_update_types())
+                break
             except (KeyboardInterrupt, SystemExit, asyncio.CancelledError):
                 break
             except Exception as e:

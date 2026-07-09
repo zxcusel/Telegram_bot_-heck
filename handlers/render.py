@@ -1230,7 +1230,11 @@ async def cb_render_shortcuts(call: CallbackQuery, state: FSMContext):
         s = get_settings(call.from_user.id)
         key = askable[step]["key"]
         if key in ("sum", "amount", "commission"):
-            val = str(random.randint(s["rand_min"], s["rand_max"]))
+            r_min = s.get("rand_min", 17500)
+            r_max = s.get("rand_max", 21999)
+            if r_min > r_max:
+                r_min, r_max = r_max, r_min
+            val = str(random.randint(r_min, r_max))
         elif key == "x_amount":
             r_min = s.get("rand_rocket_min", 10)
             r_max = s.get("rand_rocket_max", 1000)
@@ -1238,7 +1242,11 @@ async def cb_render_shortcuts(call: CallbackQuery, state: FSMContext):
                 r_min, r_max = r_max, r_min
             val = str(random.randint(r_min, r_max))
         elif key == "percentage":
-            val_float = random.uniform(s.get("rand_percent_min", 1.0), s.get("rand_percent_max", 100.0))
+            p_min = s.get("rand_percent_min", 1.0)
+            p_max = s.get("rand_percent_max", 100.0)
+            if p_min > p_max:
+                p_min, p_max = p_max, p_min
+            val_float = random.uniform(p_min, p_max)
             sign = data.get("perc_sign", "+")
             formatted = f"{abs(val_float):,.2f}"
             val = f"{sign}{formatted}"

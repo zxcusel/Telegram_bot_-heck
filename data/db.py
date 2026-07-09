@@ -5,7 +5,7 @@
 geo: 'bo' (Bolivia) | 'pe' (Peru)
 Пользователь должен иметь минимум 1 роль И минимум 1 гео для доступа.
 """
-import json, os, sqlite3
+import json, os, sqlite3, threading
 from contextlib import contextmanager
 
 BASE_DIR  = os.path.normpath(os.path.join(os.path.dirname(__file__), ".."))
@@ -15,19 +15,23 @@ DB_PATH   = os.path.join(BASE_DIR, "bot.db")
 VALID_ROLES = ("fd", "rd", "cr")
 VALID_GEOS  = ("bo", "pe", "uy", "py", "ma")
 
+_local = threading.local()
+
 
 @contextmanager
 def _conn():
-    con = sqlite3.connect(DB_PATH)
-    con.row_factory = sqlite3.Row
-    con.execute("PRAGMA journal_mode=WAL")
-    con.execute("PRAGMA foreign_keys=ON")
+    global _local
+    if not hasattr(_local, "conn") or _local.conn is None:
+        _local.conn = sqlite3.connect(DB_PATH, check_same_thread=False)
+        _local.conn.row_factory = sqlite3.Row
+        _local.conn.execute("PRAGMA journal_mode=WAL")
+        _local.conn.execute("PRAGMA foreign_keys=ON")
     try:
-        yield con; con.commit()
+        yield _local.conn
+        _local.conn.commit()
     except Exception:
-        con.rollback(); raise
-    finally:
-        con.close()
+        _local.conn.rollback()
+        raise
 
 
 MIGRATIONS: list[tuple[str, str]] = [

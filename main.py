@@ -55,9 +55,8 @@ try:
         while True:
             bot = None
             try:
-                # Настройка сессии с таймаутами и очисткой старых соединений
+                # Настройка сессии с таймаутами и поддержкой Keep-Alive соединений
                 session = AiohttpSession()
-                session._connector_init["force_close"] = True
                 bot = Bot(token=get_token(), session=session)
                 
                 # Удаляем вебхук перед стартом, не удаляя накопившиеся сообщения

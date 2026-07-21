@@ -15,6 +15,35 @@ DB_PATH   = os.path.join(BASE_DIR, "bot.db")
 VALID_ROLES = ("fd", "rd", "cr")
 VALID_GEOS  = ("bo", "pe", "uy", "py", "ma")
 
+import time
+from threading import Lock
+
+def ttl_cache(ttl_seconds=5):
+    def decorator(func):
+        cache = {}
+        lock = Lock()
+        
+        def wrapped(*args, **kwargs):
+            key = (args, tuple(sorted(kwargs.items())))
+            now = time.time()
+            with lock:
+                if key in cache:
+                    val, timestamp = cache[key]
+                    if now - timestamp < ttl_seconds:
+                        return val
+            val = func(*args, **kwargs)
+            with lock:
+                cache[key] = (val, now)
+            return val
+            
+        def cache_clear():
+            with lock:
+                cache.clear()
+                
+        wrapped.cache_clear = cache_clear
+        return wrapped
+    return decorator
+
 _local = threading.local()
 
 
@@ -234,8 +263,11 @@ def upsert_user(user_id: int, username: str | None, first_name: str | None = Non
                 first_name = COALESCE(excluded.first_name, first_name),
                 last_seen  = excluded.last_seen
         """, (user_id, username, first_name))
+    get_username.cache_clear()
+    get_settings.cache_clear()
 
 
+@ttl_cache(ttl_seconds=5)
 def get_username(user_id: int) -> str | None:
     with _conn() as con:
         row = con.execute("SELECT username FROM users WHERE user_id = ?", (user_id,)).fetchone()
@@ -249,22 +281,30 @@ def get_user_display(user_id: int) -> str:
 fmt_user = get_user_display
 
 
-
-
 # ── Admins ────────────────────────────────────────────────────────────────────
 
+@ttl_cache(ttl_seconds=5)
 def is_admin(user_id: int) -> bool:
     with _conn() as con:
         return con.execute("SELECT 1 FROM admins WHERE user_id = ?", (user_id,)).fetchone() is not None
+
 
 def add_admin(user_id: int):
     with _conn() as con:
         con.execute("INSERT OR IGNORE INTO users (user_id) VALUES (?)", (user_id,))
         con.execute("INSERT OR IGNORE INTO admins (user_id) VALUES (?)", (user_id,))
+    is_admin.cache_clear()
+    get_role_string.cache_clear()
+    has_any_access.cache_clear()
+
 
 def remove_admin(user_id: int):
     with _conn() as con:
         con.execute("DELETE FROM admins WHERE user_id = ?", (user_id,))
+    is_admin.cache_clear()
+    get_role_string.cache_clear()
+    has_any_access.cache_clear()
+
 
 def get_all_admins() -> list[int]:
     with _conn() as con:
@@ -273,27 +313,39 @@ def get_all_admins() -> list[int]:
 
 # ── Roles ─────────────────────────────────────────────────────────────────────
 
+@ttl_cache(ttl_seconds=5)
 def get_roles(user_id: int) -> list[str]:
     with _conn() as con:
         return [r["role"] for r in con.execute(
             "SELECT role FROM roles WHERE user_id = ? ORDER BY role", (user_id,)).fetchall()]
 
+
+@ttl_cache(ttl_seconds=5)
 def is_banned(user_id: int) -> bool:
     with _conn() as con:
         return con.execute("SELECT 1 FROM banned_users WHERE user_id = ?", (user_id,)).fetchone() is not None
 
+
 def ban_user(user_id: int):
     with _conn() as con:
         con.execute("INSERT OR IGNORE INTO banned_users (user_id) VALUES (?)", (user_id,))
+    is_banned.cache_clear()
+    has_any_access.cache_clear()
+
 
 def unban_user(user_id: int):
     with _conn() as con:
         con.execute("DELETE FROM banned_users WHERE user_id = ?", (user_id,))
+    is_banned.cache_clear()
+    has_any_access.cache_clear()
+
 
 def get_banned_users() -> list[int]:
     with _conn() as con:
         return [r["user_id"] for r in con.execute("SELECT user_id FROM banned_users").fetchall()]
 
+
+@ttl_cache(ttl_seconds=5)
 def has_any_access(user_id: int) -> bool:
     """Доступ = есть роль И есть гео (или администратор). Забаненным доступ закрыт."""
     if is_banned(user_id):
@@ -302,6 +354,8 @@ def has_any_access(user_id: int) -> bool:
         return True
     return bool(get_roles(user_id)) and bool(get_geos(user_id))
 
+
+@ttl_cache(ttl_seconds=5)
 def get_role_string(user_id: int) -> str | None:
     """Возвращает строку ролей через '+': 'fd', 'rd+cr', 'all' и т.д."""
     if is_admin(user_id):
@@ -315,28 +369,42 @@ def get_role_string(user_id: int) -> str | None:
     if "cr" in roles: parts.append("cr")
     return "+".join(parts) if parts else None
 
+
 def add_role(user_id: int, role: str):
     if role not in VALID_ROLES: return
     with _conn() as con:
         con.execute("INSERT OR IGNORE INTO users (user_id) VALUES (?)", (user_id,))
         con.execute("INSERT OR IGNORE INTO roles (user_id, role) VALUES (?,?)", (user_id, role))
+    get_roles.cache_clear()
+    get_role_string.cache_clear()
+    has_any_access.cache_clear()
+
 
 def remove_role(user_id: int, role: str):
     if role not in VALID_ROLES: return
     with _conn() as con:
         con.execute("DELETE FROM roles WHERE user_id = ? AND role = ?", (user_id, role))
+    get_roles.cache_clear()
+    get_role_string.cache_clear()
+    has_any_access.cache_clear()
+
 
 def clear_roles(user_id: int):
     with _conn() as con:
         con.execute("DELETE FROM roles WHERE user_id = ?", (user_id,))
+    get_roles.cache_clear()
+    get_role_string.cache_clear()
+    has_any_access.cache_clear()
 
 
-# ── Geos ─────────────────────────────────────────────────────────────────────
+# ── Geos ──────────────────────────────────────────────────────────────────────
 
+@ttl_cache(ttl_seconds=5)
 def get_geos(user_id: int) -> list[str]:
     with _conn() as con:
         return [r["geo"] for r in con.execute(
             "SELECT geo FROM geos WHERE user_id = ? ORDER BY geo", (user_id,)).fetchall()]
+
 
 def add_geo(user_id: int, geo: str):
     if geo not in VALID_GEOS: return
@@ -346,15 +414,23 @@ def add_geo(user_id: int, geo: str):
             con.execute("INSERT INTO geos (user_id, geo) VALUES (?,?)", (user_id, geo))
         except sqlite3.IntegrityError:
             pass
+    get_geos.cache_clear()
+    has_any_access.cache_clear()
+
 
 def remove_geo(user_id: int, geo: str):
     if geo not in VALID_GEOS: return
     with _conn() as con:
         con.execute("DELETE FROM geos WHERE user_id = ? AND geo = ?", (user_id, geo))
+    get_geos.cache_clear()
+    has_any_access.cache_clear()
+
 
 def clear_geos(user_id: int):
     with _conn() as con:
         con.execute("DELETE FROM geos WHERE user_id = ?", (user_id,))
+    get_geos.cache_clear()
+    has_any_access.cache_clear()
 
 
 # ── User lists ────────────────────────────────────────────────────────────────
@@ -375,6 +451,7 @@ def get_all_users_with_roles() -> list[int]:
 
 # ── Settings ──────────────────────────────────────────────────────────────────
 
+@ttl_cache(ttl_seconds=5)
 def get_settings(user_id: int) -> dict:
     with _conn() as con:
         row = con.execute("""
@@ -410,6 +487,7 @@ def update_setting(user_id: int, key: str, value):
     if key not in valid_keys: return
     with _conn() as con:
         con.execute(f"UPDATE users SET {key} = ? WHERE user_id = ?", (value, user_id))
+    get_settings.cache_clear()
 
 
 # ── Name Randomizer & Blacklist ───────────────────────────────────────────────

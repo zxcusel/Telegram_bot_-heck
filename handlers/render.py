@@ -18,6 +18,10 @@ from aiogram.filters import CommandStart, Command
 
 from data.config import GEO_CATALOG
 from data.db import get_role_string, get_settings
+
+# Кэш последнего использованного времени и суффикса для каждого пользователя,
+# чтобы при следующем чеке выставить +1 мин (Bug #4).
+_LAST_TIME: dict[int, tuple[str, str | None]] = {}
 from keyboards.inline import cancel_kb, after_render_kb, main_menu, sections_menu, items_menu, geo_menu, geo_menu_for
 from utils.logger import log
 import random
@@ -73,15 +77,71 @@ def _format_date_for_item(val: str, item: dict) -> str:
         return val
     return val
 
-def _advance_steps(askable: list, start_step: int, values: dict, s: dict, item: dict, item_key: str) -> int:
+def _advance_steps(askable: list, start_step: int, values: dict, s: dict, item: dict, item_key: str, user_id: int | None = None) -> int:
     import random
     done_step = start_step
+    # Подготовим список ключей отправителя/получателя для текущего item_key,
+    # чтобы автозаполнить ФИО через custom_name_val (если включено).
+    target_keys_map = {}
+    if s.get("custom_name_enabled") and s.get("custom_name_val"):
+        # SENDER_NAME_MAP / RECIPIENT_NAME_MAP определены ниже — используем глобальные имена модуля  # локальный импорт, избегаем циклов
+        for t in ("sender", "recipient"):
+            tkeys = (SENDER_NAME_MAP.get(item_key) if t == "sender" else RECIPIENT_NAME_MAP.get(item_key)) or []
+            target_keys_map[t] = list(tkeys)
+
+    # Если в этом рендере ещё не встречался transaction — добавляем автогенерацию
+    # (используем длину по item_key, как в cb_render_shortcuts для transaction)
     while done_step < len(askable):
         if s.get("pinned_date") and "date" in askable[done_step]["key"]:
             values[askable[done_step]["key"]] = _format_date_for_item(s["pinned_date"], item)
             done_step += 1
             continue
         key = askable[done_step]["key"]
+
+        # Авто-ФИО (отправитель/получатель): заполняем поля, которые в мапе для item_key,
+        # значением custom_name_val; помечаем шаги как выполненные.
+        custom_val = s.get("custom_name_val") if s.get("custom_name_enabled") else None
+        if custom_val and (key in target_keys_map.get("sender", []) or key in target_keys_map.get("recipient", [])):
+            values[key] = custom_val
+            done_step += 1
+            continue
+
+        # Авто-номер транзакции (если включен рандомайзер счетов)
+        if key == "transaction" and s.get("rand_acc_enabled") and "transaction" not in values:
+            if item_key == "check_pe":
+                digits = 8
+            elif item_key == "check2_py":
+                val = "".join(random.choices("0123456789abcdef", k=24))
+            elif item_key == "check1_py":
+                digits = 13
+            elif item_key == "check4_bo":
+                val = "1" + "".join([str(random.randint(0, 9)) for _ in range(18)])
+            else:
+                digits = 9
+            if "val" not in locals():
+                val = "".join([str(random.randint(0, 9)) for _ in range(digits)])
+            values["transaction"] = val
+            done_step += 1
+            continue
+
+        # Авто-инкремент времени: +1 мин от прошлого last_time последнего чека пользователя,
+        # AM/PM переносится автоматически (12:59 AM → 01:00 AM, 11:59 PM → 12:00 AM → 01:00 AM).
+        # 24-часовой формат пропускаем — там суффикса нет и пользователь управляет иначе.
+        if "time" in key and item_key not in ("rd6", "rd7", "qr_pe", "check1_py"):
+            prompt_text = askable[done_step].get("prompt", "")
+            is_24h = "(24-часовой формат)" in prompt_text
+            if not is_24h and "time" not in values:
+                _uid = user_id if user_id is not None else s.get("_user_id")
+                prev = _LAST_TIME.get(_uid) if _uid is not None else None
+                base_time, base_suffix = prev if prev else ("09:00", "A.M.")
+                new_time, new_suffix = _bump_time(base_time, base_suffix)
+                values[key] = new_time
+                # Запомним в кэше процесса, чтобы при следующем чеке шло +1 мин от текущего.
+                if _uid is not None:
+                    _LAST_TIME[_uid] = (new_time, new_suffix)
+                done_step += 1
+                continue
+
         if key == "bank" and s.get("rand_bank_enabled") and not item_key.startswith("rd") and item_key not in ("check2_py", "check3_py", "check2_uy", "check3_uy", "check4_uy", "check3_bo", "payment1_uy", "payment1_py"):
             val_rand = random.choice(item.get("banks", ["Banco"]))
             values["bank"] = val_rand
@@ -93,6 +153,90 @@ def _advance_steps(askable: list, start_step: int, values: dict, s: dict, item: 
         else:
             break
     return done_step
+
+
+def _parse_time_value(t: str | None, suf: str | None) -> tuple[str, str | None]:
+    """Возвращает (HH:MM, suffix) из прошлого значения. Если нет — отдает дефолт 09:00 A.M."""
+    if not t:
+        return ("09:00", "A.M.")
+    import re as _re
+    m = _re.match(r"^(\d{1,2}):(\d{2})$", t.strip())
+    if not m:
+        return ("09:00", "A.M.")
+    hh, mm = int(m.group(1)), int(m.group(2))
+    if not (0 <= hh <= 23 and 0 <= mm <= 59):
+        return ("09:00", "A.M.")
+    suffix = suf if suf in ("A.M.", "P.M.") else None
+    if suffix is None and hh > 12:
+        suffix = "P.M."
+        hh -= 12
+    if suffix is None and hh == 0:
+        hh = 12
+    return (f"{hh:02d}:{mm:02d}", suffix)
+
+
+def _bump_time(t: str, suf: str | None) -> tuple[str, str]:
+    """Возвращает (HH:MM с переносом, новый suffix) — +1 минута от заданного.
+    Правила AM/PM:
+      12:00–12:59 AM → 01:00 AM (после 12 AM идёт 1 AM)
+      01:00–11:59 AM → +1 мин в AM
+      12:00–12:59 PM → 01:00 PM
+      01:00–11:59 PM → +1 мин в PM
+      23:59 → 00:00 (без суффикса), конвертируем в 12:00 AM
+      24-часовой формат: 12:00 → 13:00 → ... → 23:59 → 00:00 → 01:00
+    """
+    import re as _re
+    m = _re.match(r"^(\d{1,2}):(\d{2})$", (t or "").strip())
+    if not m:
+        return ("09:00", "A.M.")
+    hh, mm = int(m.group(1)), int(m.group(2))
+    is_24h = suf is None
+    if is_24h:
+        hh += (mm + 1) // 60
+        mm = (mm + 1) % 60
+        hh = hh % 24
+        return (f"{hh:02d}:{mm:02d}", None) if hh > 0 and hh < 12 else _format_12((hh, mm))
+    # 12-часовой формат
+    cur_suffix = suf or "A.M."
+    mm += 1
+    if mm >= 60:
+        mm = 0
+        # Переход AM→PM в 12:59 AM, AM остаётся в 12:00 PM (т.е. полдень)?? Правильно:
+        # после 12:59 AM идёт 01:00 AM; в полдень (12 PM) переходим на 01 PM;
+        # в полночь (12 AM) остаёмся AM, но уже через 12 часов 12 PM.
+        if cur_suffix == "A.M.":
+            # 12:59 AM → 01:00 AM
+            if hh == 12:
+                hh = 1
+            # иначе hh += 1 (1..11 AM → 2..12 AM, последнее 12 PM)
+            else:
+                hh += 1
+                if hh == 12:
+                    cur_suffix = "P.M."
+        else:  # P.M.
+            if hh == 12:
+                hh = 1
+            else:
+                hh += 1
+                if hh == 12:
+                    cur_suffix = "A.M."  # 11:59 PM → 12:00 AM
+    return (f"{hh:02d}:{mm:02d}", cur_suffix)
+
+
+def _format_12(hh_mm: tuple[int, int]) -> tuple[str, str]:
+    """Конвертирует (hh, mm) в 12-часовой формат. Для hh=0→12:00 A.M., 12→12:00, 13-23→ P.M."""
+    hh, mm = hh_mm
+    suffix = "A.M."
+    if hh == 0:
+        hh12 = 12
+    elif hh == 12:
+        hh12 = 12
+    elif hh > 12:
+        hh12 = hh - 12
+        suffix = "P.M."
+    else:
+        hh12 = hh
+    return (f"{hh12:02d}:{mm:02d}", suffix)
 
 # ── Испанские сокращения месяцев ──────────────────────────────────────────────
 _ES_MONTHS = {
@@ -317,6 +461,8 @@ def _get_field_keyboard(field_key: str, s: dict, item_key: str = None) -> Inline
         return False
 
     if "time" in field_key and item_key not in ("rd6", "rd7", "qr_pe", "check1_py") and not _is_24h(item_key, field_key):
+
+        # Bug #4: авто-инкремент времени работает в _advance_steps; кнопки не нужны
         row = []
         am_label = "☀️ A.M."
         pm_label = "🌙 P.M."
@@ -450,6 +596,32 @@ def _get_field_keyboard(field_key: str, s: dict, item_key: str = None) -> Inline
 
 
 # ─────────────────────────── helpers ─────────────────────────────────────────
+
+def _extract_time_value(val: str, prompt_text: str = "") -> tuple[str | None, str | None]:
+    """Извлечь (HH:MM, suffix) из введённой пользователем строки времени.
+    Поддерживает: '09:30', '9:30 AM', '9:30 PM', '9:30 a. m.', '9:30 p. m.', '09:30 a.m.', '09:30 p.m.'.
+    Возвращает (None, None), если не удалось распарсить.
+    """
+    import re as _re
+    m = _re.match(r"^\s*(\d{1,2})[:.](\d{2})\s*([apAP]\.?\s*[mM]\.?)?", val)
+    if not m:
+        return (None, None)
+    hh, mm = int(m.group(1)), int(m.group(2))
+    suf = (m.group(3) or "").upper().replace(".", "").replace(" ", "")
+    if suf in ("AM", "PM"):
+        suffix = suf + "."
+    else:
+        suffix = None
+    if suffix and suffix == "PM." and hh < 12:
+        hh_24 = (hh % 12) + 12
+    elif suffix and suffix == "AM." and hh == 12:
+        hh_24 = 0
+    elif suffix and suffix == "AM.":
+        hh_24 = hh
+    else:
+        hh_24 = hh
+    return (f"{hh_24:02d}:{mm:02d}", suffix)
+
 
 def _find_item(item_key: str, geo: str = "bo") -> dict | None:
     from data.config import GEO_CATALOG
@@ -827,7 +999,7 @@ async def cb_item_selected(call: CallbackQuery, state: FSMContext):
             auto_values["account"] = "922" + "".join([str(random.randint(0, 9)) for _ in range(8)])
         
     try:
-        start_step = _advance_steps(askable, 0, auto_values, s, item, item_key)
+        start_step = _advance_steps(askable, 0, auto_values, s, item, item_key, user_id=call.from_user.id)
     except ValueError:
         await call.answer("❌ В списке name.json не осталось имен! Пополните список или отключите 'Рандом имен' в настройках.", show_alert=True, parse_mode=PM)
         return
@@ -1021,6 +1193,11 @@ async def collect_text_field(message: Message, state: FSMContext):
                 val = data.get("perc_sign", "+") + val
 
         values[askable[step]["key"]] = val
+        # Bug #4: запоминаем вручную введённое время, чтобы следующий чек пошёл от него +1 мин
+        if "time" in askable[step]["key"]:
+            _tt, _ss = _extract_time_value(val)
+            if _tt is not None:
+                _LAST_TIME[message.from_user.id] = (_tt, _ss)
         if item_key == "check2_py" and askable[step]["key"] == "bank":
             values["_bank_image"] = f"assets/Paraguay/Чек/bank/{val}.jpg"
         if item_key == "check3_py" and askable[step]["key"] == "bank":
@@ -1034,7 +1211,7 @@ async def collect_text_field(message: Message, state: FSMContext):
         s_temp["perc_sign"] = data.get("perc_sign", "+")
 
         try:
-            done_step = _advance_steps(askable, done_step, values, s, item, item_key)
+            done_step = _advance_steps(askable, done_step, values, s, item, item_key, user_id=message.from_user.id)
         except ValueError:
             await message.answer("❌ В списке name.json не осталось имен! Пополните список или отключите 'Рандом имен' в настройках.", parse_mode=PM)
             await state.clear()
@@ -1121,7 +1298,7 @@ async def collect_photo_field(message: Message, state: FSMContext):
 
         s = get_settings(message.from_user.id)
         try:
-            done_step = _advance_steps(askable, done_step, values, s, item, item_key)
+            done_step = _advance_steps(askable, done_step, values, s, item, item_key, user_id=message.from_user.id)
         except ValueError:
             await message.answer("❌ В списке name.json не осталось имен! Пополните список или отключите 'Рандом имен' в настройках.", parse_mode=PM)
             await state.clear()
@@ -1333,6 +1510,13 @@ async def cb_render_shortcuts(call: CallbackQuery, state: FSMContext):
                 val = f"+{''.join([str(random.randint(0, 9)) for _ in range(11)])}"
         else:
             val = "0"
+    elif action == "time_plus_one":
+        # Bug #4: принудительно +1 мин от текущего last_time; пишем в values и обновляем кэш
+        prev = _LAST_TIME.get(call.from_user.id)
+        base_t, base_s = prev if prev else ("09:00", "A.M.")
+        new_t, new_s = _bump_time(base_t, base_s)
+        val = f"{new_t} {new_s}".strip() if new_s else new_t
+        _LAST_TIME[call.from_user.id] = (new_t, new_s)
     elif action == "random_name":
         from data.db import get_and_blacklist_random_name
         try:
@@ -1412,6 +1596,11 @@ async def cb_render_shortcuts(call: CallbackQuery, state: FSMContext):
     if item_key == "check3_py" and askable[step]["key"] == "date":
         val = _to_es_date_py_check3(val)
     values[askable[step]["key"]] = val
+    # Bug #4: запоминаем выбранное время (через 🎲 или set:*), чтобы следующий чек +1 мин
+    if "time" in askable[step]["key"]:
+        _tt, _ss = _extract_time_value(val)
+        if _tt is not None:
+            _LAST_TIME[call.from_user.id] = (_tt, _ss)
     if item_key == "check2_py" and askable[step]["key"] == "bank":
         values["_bank_image"] = f"assets/Paraguay/Чек/bank/{val}.jpg"
     if item_key == "check3_py" and askable[step]["key"] == "bank":
@@ -1422,7 +1611,7 @@ async def cb_render_shortcuts(call: CallbackQuery, state: FSMContext):
 
     s = get_settings(call.from_user.id)
     try:
-        done_step = _advance_steps(askable, done_step, values, s, item, item_key)
+        done_step = _advance_steps(askable, done_step, values, s, item, item_key, user_id=call.from_user.id)
     except ValueError:
         await call.answer("❌ В списке name.json не осталось имен! Пополните список или отключите 'Рандом имен' в настройках.", show_alert=True, parse_mode=PM)
         await state.clear()

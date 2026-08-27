@@ -12,7 +12,8 @@ from data.db import (
     is_admin, add_admin, remove_admin, add_role, remove_role, clear_roles,
     get_roles, get_geos, add_geo, remove_geo, clear_geos,
     get_all_admins, get_all_users_all, get_username, upsert_user,
-    is_banned, ban_user, unban_user, get_banned_users
+    is_banned, ban_user, unban_user, get_banned_users,
+    _conn,
 )
 
 router = Router()
@@ -21,6 +22,21 @@ router = Router()
 PM = ParseMode.HTML
 DIV = "━━━━━━━━━━━━━━━━━━━━"
 BULLET = "▫️"
+
+USERS_PER_PAGE = 8
+
+ROLE_LABELS: dict[str, str] = {
+    "fd": "FD",
+    "rd": "RD",
+    "cr": "Контентщик",
+}
+GEO_LABELS: dict[str, str] = {
+    "bo": "🇧🇴 Bolivia",
+    "pe": "🇵🇪 Peru",
+    "uy": "🇺🇾 Uruguay",
+    "py": "🇵🇾 Paraguay",
+    "ma": "🇲🇦 Morocco",
+}
 
 
 class AdminStates(StatesGroup):
@@ -36,13 +52,14 @@ class AdminStates(StatesGroup):
 
 def _admin_main_kb() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="🎭 Выдать роль пользователю", callback_data="admin:set_role")],
-        [InlineKeyboardButton(text="📋 Список пользователей",      callback_data="admin:user_list")],
-        [InlineKeyboardButton(text="🚫 Забанить",                 callback_data="admin:ban_menu")],
-        [InlineKeyboardButton(text="⛔️ ЧС",                        callback_data="admin:blacklist_menu")],
-        [InlineKeyboardButton(text="📢 Отправить сообщение",      callback_data="admin:broadcast_menu")],
-        [InlineKeyboardButton(text="🔙 Назад",                     callback_data="admin:exit")],
+        [InlineKeyboardButton(text="👥 Управление ролями", callback_data="admin:manage_users:0")],
+        [InlineKeyboardButton(text="🎭 Выдать роль по ID", callback_data="admin:set_role")],
+        [InlineKeyboardButton(text="🚫 Забанить",          callback_data="admin:ban_menu")],
+        [InlineKeyboardButton(text="⛔️ ЧС",                  callback_data="admin:blacklist_menu")],
+        [InlineKeyboardButton(text="📢 Отправить сообщение", callback_data="admin:broadcast_menu")],
+        [InlineKeyboardButton(text="🔙 Назад",              callback_data="admin:exit")],
     ])
+
 
 def _broadcast_menu_kb() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=[
@@ -52,492 +69,507 @@ def _broadcast_menu_kb() -> InlineKeyboardMarkup:
     ])
 
 
-# Карта гео-кодов → отображаемые названия
-_GEO_LABELS: dict[str, str] = {
-    "bo": "🇧🇴 Bolivia",
-    "pe": "🇵🇪 Peru",
-    "uy": "🇺🇾 Uruguay",
-    "py": "🇵🇾 Paraguay",
-    "ma": "🇲🇦 Morocco",
-}
-
-
-def _roles_kb(target_id: int, roles: list[str]) -> InlineKeyboardMarkup:
-    fd_icon  = "✅" if "fd" in roles else "🚫"
-    rd_icon  = "✅" if "rd" in roles else "🚫"
-    cr_icon  = "✅" if "cr" in roles else "🚫"
-    ow_icon  = "👑" if is_admin(target_id) else "🚫"
-    ow_label = f"{ow_icon} Администратор"
-    ow_cb    = f"admin:demote:{target_id}" if is_admin(target_id) else f"admin:promote:{target_id}"
-    geos     = get_geos(target_id)
-    bo_icon  = "✅" if "bo" in geos else "🚫"
-    pe_icon  = "✅" if "pe" in geos else "🚫"
-    uy_icon  = "✅" if "uy" in geos else "🚫"
-    py_icon  = "✅" if "py" in geos else "🚫"
-    ma_icon  = "✅" if "ma" in geos else "🚫"
-    return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text=f"{fd_icon} FD",            callback_data=f"admin:toggle:fd:{target_id}")],
-        [InlineKeyboardButton(text=f"{rd_icon} RD",            callback_data=f"admin:toggle:rd:{target_id}")],
-        [InlineKeyboardButton(text=f"{cr_icon} Контентщик",    callback_data=f"admin:toggle:cr:{target_id}")],
-        [InlineKeyboardButton(text=f"{bo_icon} 🇧🇴 Bolivia",  callback_data=f"admin:geo:bo:{target_id}")],
-        [InlineKeyboardButton(text=f"{pe_icon} 🇵🇪 Peru",     callback_data=f"admin:geo:pe:{target_id}")],
-        [InlineKeyboardButton(text=f"{uy_icon} 🇺🇾 Uruguay",  callback_data=f"admin:geo:uy:{target_id}")],
-        [InlineKeyboardButton(text=f"{py_icon} 🇵🇾 Paraguay", callback_data=f"admin:geo:py:{target_id}")],
-        [InlineKeyboardButton(text=f"{ma_icon} 🇲🇦 Morocco",  callback_data=f"admin:geo:ma:{target_id}")],
-        [InlineKeyboardButton(text=ow_label,                    callback_data=ow_cb)],
-        [InlineKeyboardButton(text="🗑 Очистить всё",          callback_data=f"admin:clear:{target_id}")],
-        [InlineKeyboardButton(text="🔙 Назад",                 callback_data="admin:back_main")],
-    ])
-
-
 def _back_to_main_kb() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="🔙 Назад", callback_data="admin:back_main")]
     ])
 
 
+def _user_card_kb(target_id: int) -> InlineKeyboardMarkup:
+    roles = get_roles(target_id)
+    geos = get_geos(target_id)
+    admin_flag = is_admin(target_id)
+    banned = is_banned(target_id)
+
+    def icon(on: bool) -> str:
+        return "✅" if on else "🚫"
+
+    ow_label = "👑 Снять админа" if admin_flag else "👑 Выдать админа"
+    ow_cb = f"admin:demote:{target_id}" if admin_flag else f"admin:promote:{target_id}"
+
+    ban_label = "✅ Разбанить" if banned else "🚫 Забанить"
+    ban_cb = f"admin:toggle_ban:{target_id}:{0 if banned else 1}"
+
+    rows = [
+        [
+            InlineKeyboardButton(text=f"{icon('fd' in roles)} FD",          callback_data=f"admin:toggle:fd:{target_id}"),
+            InlineKeyboardButton(text=f"{icon('rd' in roles)} RD",          callback_data=f"admin:toggle:rd:{target_id}"),
+            InlineKeyboardButton(text=f"{icon('cr' in roles)} Контентщик",  callback_data=f"admin:toggle:cr:{target_id}"),
+        ],
+        [
+            InlineKeyboardButton(text=f"{icon('bo' in geos)} 🇧🇴 BO",  callback_data=f"admin:geo:bo:{target_id}"),
+            InlineKeyboardButton(text=f"{icon('pe' in geos)} 🇵🇪 PE",  callback_data=f"admin:geo:pe:{target_id}"),
+            InlineKeyboardButton(text=f"{icon('uy' in geos)} 🇺🇾 UY",  callback_data=f"admin:geo:uy:{target_id}"),
+        ],
+        [
+            InlineKeyboardButton(text=f"{icon('py' in geos)} 🇵🇾 PY",  callback_data=f"admin:geo:py:{target_id}"),
+            InlineKeyboardButton(text=f"{icon('ma' in geos)} 🇲🇦 MA",  callback_data=f"admin:geo:ma:{target_id}"),
+            InlineKeyboardButton(text="🗑 Сброс прав",                  callback_data=f"admin:clear:{target_id}"),
+        ],
+        [InlineKeyboardButton(text=ow_label, callback_data=ow_cb)],
+        [InlineKeyboardButton(text=ban_label, callback_data=ban_cb)],
+        [InlineKeyboardButton(text="🔙 К списку", callback_data="admin:manage_users:0")],
+    ]
+    return InlineKeyboardMarkup(inline_keyboard=rows)
+
+
 # ── helpers ───────────────────────────────────────────────────────────────────
 
-def _roles_text(roles: list[str]) -> str:
-    return ", ".join(r.upper() for r in roles) if roles else "нет"
+def _first_name(uid: int) -> str | None:
+    with _conn() as con:
+        row = con.execute("SELECT first_name FROM users WHERE user_id = ?", (uid,)).fetchone()
+    return row["first_name"] if row else None
 
 
-def _role_info_text(target_id: int, roles: list[str], extra: str = "") -> str:
-    uname    = get_username(target_id) or "none"
-    ow_str   = "👑 Администратор" if is_admin(target_id) else "🚫 Не администратор"
-    geos     = get_geos(target_id)
-    geo_str  = ", ".join(_GEO_LABELS.get(g, g.upper()) for g in geos) or "нет"
-    text     = (
-        f"👤 <code>{target_id} - @{uname}</code>\n"
-        f"Роли: <b>{_roles_text(roles)}</b>  |  {ow_str}\n"
-        f"Регионы: <b>{geo_str}</b>\n"
+def _short_name(uid: int) -> str:
+    name = _first_name(uid) or ""
+    uname = get_username(uid) or ""
+    if name and uname:
+        return f"{name} (@{uname})"
+    if name:
+        return name
+    if uname:
+        return f"@{uname}"
+    return f"id{uid}"
+
+
+def _user_row_icons(uid: int) -> str:
+    parts = []
+    if is_admin(uid):
+        parts.append("👑")
+    roles = get_roles(uid)
+    if "fd" in roles:
+        parts.append("FD")
+    if "rd" in roles:
+        parts.append("RD")
+    if "cr" in roles:
+        parts.append("CR")
+    if get_geos(uid):
+        parts.append(f"{len(get_geos(uid))}🗺")
+    if is_banned(uid):
+        parts.append("⛔️")
+    return " ".join(parts) if parts else "—"
+
+
+def _user_card_text(uid: int) -> str:
+    name = _first_name(uid) or "—"
+    uname = get_username(uid) or "—"
+    roles = get_roles(uid)
+    geos = get_geos(uid)
+    admin_flag = is_admin(uid)
+    banned = is_banned(uid)
+
+    roles_str = ", ".join(ROLE_LABELS[r] for r in roles) if roles else "нет"
+    geos_str = ", ".join(GEO_LABELS[g] for g in geos) if geos else "нет"
+    ow_str = "👑 Админ" if admin_flag else "обычный"
+    ban_str = "⛔️ Забанен" if banned else "✅ Активен"
+
+    return (
+        f"👤 <b>{name}</b>\n"
+        f"🆔 <code>{uid}</code>  ·  @{uname}\n"
+        f"{DIV}\n"
+        f"Статус: {ban_str}\n"
+        f"Доступ: {ow_str}\n"
+        f"Роли: <b>{roles_str}</b>\n"
+        f"Регионы: <b>{geos_str}</b>\n"
+        f"{DIV}\n"
+        f"Нажмите кнопку, чтобы изменить:"
     )
-    if extra:
-        text += f"✅ {extra}\n"
-    text += "\nНажмите чтобы изменить:"
-    return text
 
 
-async def _safe_edit(msg: Message, text: str, kb=None):
+def _edit_or_answer(call: CallbackQuery, text: str, kb: InlineKeyboardMarkup):
     try:
-        await msg.edit_text(text, parse_mode="HTML", reply_markup=kb)
+        return call.message.edit_text(text, parse_mode=PM, reply_markup=kb)
     except TelegramBadRequest:
-        await msg.answer(text, parse_mode="HTML", reply_markup=kb)
+        return call.message.answer(text, parse_mode=PM, reply_markup=kb)
 
 
-async def _try_delete(msg: Message):
+def _build_users_kb(users: list[int], page: int) -> InlineKeyboardMarkup:
+    total = len(users)
+    total_pages = max(1, (total + USERS_PER_PAGE - 1) // USERS_PER_PAGE)
+    page = max(0, min(page, total_pages - 1))
+    start = page * USERS_PER_PAGE
+    chunk = users[start:start + USERS_PER_PAGE]
+
+    rows: list[list[InlineKeyboardButton]] = []
+    for uid in chunk:
+        icon = _user_row_icons(uid)
+        label = f"{uid} · {icon}\n{_short_name(uid)}"[:64]
+        rows.append([InlineKeyboardButton(text=label, callback_data=f"admin:user_card:{uid}")])
+
+    nav: list[InlineKeyboardButton] = []
+    if page > 0:
+        nav.append(InlineKeyboardButton(text="◀️", callback_data=f"admin:manage_users:{page - 1}"))
+    nav.append(InlineKeyboardButton(text=f"{page + 1}/{total_pages}", callback_data="noop"))
+    if page < total_pages - 1:
+        nav.append(InlineKeyboardButton(text="▶️", callback_data=f"admin:manage_users:{page + 1}"))
+    rows.append(nav)
+    rows.append([InlineKeyboardButton(text="🔙 Назад", callback_data="admin:back_main")])
+    return InlineKeyboardMarkup(inline_keyboard=rows)
+
+
+# ── admin entry ───────────────────────────────────────────────────────────────
+
+async def admin_entry(message: Message, state: FSMContext) -> None:
+    await state.clear()
+    await message.answer(
+        f"⚙️ <b>Админ-панель</b>\n{DIV}\nВыберите действие:",
+        parse_mode=PM,
+        reply_markup=_admin_main_kb(),
+    )
+
+
+# ── manage users (paginated list → user card) ─────────────────────────────────
+
+async def cb_manage_users(call: CallbackQuery, state: FSMContext) -> None:
+    await state.clear()
+    page = 0
     try:
-        await msg.delete()
+        page = int(call.data.split(":")[-1])
+    except (ValueError, IndexError):
+        page = 0
+
+    users = get_all_users_all()
+    if not users:
+        return await _edit_or_answer(
+            call,
+            "👥 <b>Управление ролями</b>\n\nПока нет пользователей.",
+            _back_to_main_kb(),
+        )
+
+    total = len(users)
+    total_pages = max(1, (total + USERS_PER_PAGE - 1) // USERS_PER_PAGE)
+    page = max(0, min(page, total_pages - 1))
+    start = page * USERS_PER_PAGE
+    end = start + USERS_PER_PAGE
+
+    text = (
+        f"👥 <b>Управление ролями</b>\n"
+        f"{DIV}\n"
+        f"Всего: <b>{total}</b>  ·  страница <b>{page + 1}/{total_pages}</b>\n"
+        f"Показываю: <b>{start + 1}–{min(end, total)}</b>\n"
+        f"{DIV}\n"
+        f"👑 — админ   FD/RD/CR — роли   N🗺 — кол-во регионов   ⛔️ — бан\n"
+        f"Выберите пользователя:"
+    )
+    await _edit_or_answer(call, text, _build_users_kb(users, page))
+
+
+async def cb_user_card(call: CallbackQuery, state: FSMContext) -> None:
+    await state.clear()
+    try:
+        uid = int(call.data.split(":")[-1])
+    except (ValueError, IndexError):
+        return await call.answer("❌ Ошибка ID", show_alert=True)
+
+    text = _user_card_text(uid)
+    await _edit_or_answer(call, text, _user_card_kb(uid))
+
+
+# ── existing set_role FSM (kept) ──────────────────────────────────────────────
+
+async def cb_set_role_start(call: CallbackQuery, state: FSMContext) -> None:
+    await state.set_state(AdminStates.wait_target_id)
+    await _edit_or_answer(
+        call,
+        "🎭 <b>Выдать роль по ID</b>\n\nВведите <code>user_id</code> пользователя:",
+        InlineKeyboardMarkup(inline_keyboard=[
+            [InlineKeyboardButton(text="🔙 Назад", callback_data="admin:back_main")]
+        ]),
+    )
+
+
+async def process_target_id(message: Message, state: FSMContext) -> None:
+    raw = (message.text or "").strip()
+    if not raw.isdigit():
+        await message.answer("❌ ID должен быть числом. Введите ещё раз:")
+        return
+    uid = int(raw)
+    await state.clear()
+    await message.answer(
+        _user_card_text(uid),
+        parse_mode=PM,
+        reply_markup=_user_card_kb(uid),
+    )
+
+
+# ── role toggles (reused for both FSM and card) ──────────────────────────────
+
+async def cb_toggle_role(call: CallbackQuery) -> None:
+    parts = call.data.split(":")
+    # admin:toggle:{role}:{id}
+    if len(parts) < 4:
+        return await call.answer("❌ Ошибка")
+    role = parts[2]
+    try:
+        uid = int(parts[3])
+    except ValueError:
+        return await call.answer("❌ Ошибка ID")
+
+    if role not in ("fd", "rd", "cr"):
+        return await call.answer("❌ Неизвестная роль")
+
+    roles = get_roles(uid)
+    if role in roles:
+        remove_role(uid, role)
+        await call.answer(f"➖ {ROLE_LABELS[role]} снята")
+    else:
+        add_role(uid, role)
+        await call.answer(f"➕ {ROLE_LABELS[role]} выдана")
+
+    await cb_user_card(call, None)  # type: ignore[arg-type]
+
+
+async def cb_toggle_geo(call: CallbackQuery) -> None:
+    parts = call.data.split(":")
+    # admin:geo:{code}:{id}
+    if len(parts) < 4:
+        return await call.answer("❌ Ошибка")
+    geo = parts[2]
+    try:
+        uid = int(parts[3])
+    except ValueError:
+        return await call.answer("❌ Ошибка ID")
+
+    if geo not in GEO_LABELS:
+        return await call.answer("❌ Неизвестный регион")
+
+    geos = get_geos(uid)
+    if geo in geos:
+        remove_geo(uid, geo)
+        await call.answer(f"➖ {GEO_LABELS[geo]} снят")
+    else:
+        add_geo(uid, geo)
+        await call.answer(f"➕ {GEO_LABELS[geo]} добавлен")
+
+    await cb_user_card(call, None)  # type: ignore[arg-type]
+
+
+async def cb_clear_roles(call: CallbackQuery) -> None:
+    try:
+        uid = int(call.data.split(":")[-1])
+    except (ValueError, IndexError):
+        return await call.answer("❌ Ошибка ID")
+
+    clear_roles(uid)
+    clear_geos(uid)
+    await call.answer("🗑 Все права и регионы сброшены")
+    await cb_user_card(call, None)  # type: ignore[arg-type]
+
+
+async def cb_promote_admin(call: CallbackQuery) -> None:
+    try:
+        uid = int(call.data.split(":")[-1])
+    except (ValueError, IndexError):
+        return await call.answer("❌ Ошибка ID")
+    add_admin(uid)
+    await call.answer("👑 Админ выдан")
+    await cb_user_card(call, None)  # type: ignore[arg-type]
+
+
+async def cb_demote_admin(call: CallbackQuery) -> None:
+    try:
+        uid = int(call.data.split(":")[-1])
+    except (ValueError, IndexError):
+        return await call.answer("❌ Ошибка ID")
+    remove_admin(uid)
+    await call.answer("👑 Админ снят")
+    await cb_user_card(call, None)  # type: ignore[arg-type]
+
+
+# ── ban / blacklist menus (kept, but also reflect in card) ───────────────────
+
+async def cb_toggle_ban(call: CallbackQuery) -> None:
+    parts = call.data.split(":")
+    # admin:toggle_ban:{id}:{0|1}
+    if len(parts) < 4:
+        return await call.answer("❌ Ошибка")
+    try:
+        uid = int(parts[2])
+        flag = int(parts[3])
+    except ValueError:
+        return await call.answer("❌ Ошибка ID")
+    if flag == 1:
+        ban_user(uid)
+        await call.answer("🚫 Забанен")
+    else:
+        unban_user(uid)
+        await call.answer("✅ Разбанен")
+    await cb_user_card(call, None)  # type: ignore[arg-type]
+
+
+async def cb_ban_menu(call: CallbackQuery) -> None:
+    users = [u for u in get_all_users_all() if not is_banned(u)]
+    if not users:
+        await _edit_or_answer(
+            call,
+            "🚫 <b>Забанить</b>\n\nНет доступных пользователей.",
+            _back_to_main_kb(),
+        )
+        return
+    rows: list[list[InlineKeyboardButton]] = []
+    for uid in users:
+        rows.append([
+            InlineKeyboardButton(
+                text=f"{uid} · {_short_name(uid)} · 🚫",
+                callback_data=f"admin:toggle_ban:{uid}:1",
+            )
+        ])
+    rows.append([InlineKeyboardButton(text="🔙 Назад", callback_data="admin:back_main")])
+    await _edit_or_answer(
+        call,
+        "🚫 <b>Забанить</b>\n\nВыберите пользователя:",
+        InlineKeyboardMarkup(inline_keyboard=rows),
+    )
+
+
+async def cb_blacklist_menu(call: CallbackQuery) -> None:
+    banned = get_banned_users()
+    if not banned:
+        await _edit_or_answer(
+            call,
+            "⛔️ <b>Чёрный список</b>\n\nПусто.",
+            _back_to_main_kb(),
+        )
+        return
+    rows: list[list[InlineKeyboardButton]] = []
+    for uid in banned:
+        rows.append([
+            InlineKeyboardButton(
+                text=f"{uid} · {_short_name(uid)} · ✅ разбанить",
+                callback_data=f"admin:toggle_ban:{uid}:0",
+            )
+        ])
+    rows.append([InlineKeyboardButton(text="🔙 Назад", callback_data="admin:back_main")])
+    await _edit_or_answer(
+        call,
+        "⛔️ <b>Чёрный список</b>\n\nВыберите пользователя для разбана:",
+        InlineKeyboardMarkup(inline_keyboard=rows),
+    )
+
+
+# ── broadcast menu (kept) ─────────────────────────────────────────────────────
+
+async def cb_broadcast_menu(call: CallbackQuery) -> None:
+    await _edit_or_answer(
+        call,
+        "📢 <b>Рассылка</b>\n\nВыберите режим:",
+        _broadcast_menu_kb(),
+    )
+
+
+async def cb_broadcast_all(call: CallbackQuery, state: FSMContext) -> None:
+    await state.set_state(AdminStates.wait_broadcast_text_all)
+    await _edit_or_answer(
+        call,
+        "📢 Введите текст для рассылки всем пользователям:",
+        InlineKeyboardMarkup(inline_keyboard=[
+            [InlineKeyboardButton(text="🔙 Отмена", callback_data="admin:broadcast_menu")]
+        ]),
+    )
+
+
+async def cb_broadcast_indiv(call: CallbackQuery, state: FSMContext) -> None:
+    await state.set_state(AdminStates.wait_broadcast_id_indiv)
+    await _edit_or_answer(
+        call,
+        "👤 Введите <code>user_id</code> получателя:",
+        InlineKeyboardMarkup(inline_keyboard=[
+            [InlineKeyboardButton(text="🔙 Отмена", callback_data="admin:broadcast_menu")]
+        ]),
+    )
+
+
+async def process_broadcast_text_all(message: Message, state: FSMContext) -> None:
+    text = message.text or ""
+    users = get_all_users_all()
+    sent = 0
+    for uid in users:
+        try:
+            await message.bot.send_message(uid, text)
+            sent += 1
+        except Exception:
+            continue
+    await state.clear()
+    await message.answer(
+        f"📢 Рассылка завершена.\nДоставлено: <b>{sent}/{len(users)}</b>",
+        reply_markup=_admin_main_kb(),
+    )
+
+
+async def process_broadcast_id_indiv(message: Message, state: FSMContext) -> None:
+    raw = (message.text or "").strip()
+    if not raw.isdigit():
+        await message.answer("❌ ID должен быть числом.")
+        return
+    uid = int(raw)
+    await state.update_data(target_id=uid)
+    await state.set_state(AdminStates.wait_broadcast_text_indiv)
+    await message.answer(
+        f"👤 Получатель: <code>{uid}</code>\nВведите текст сообщения:",
+        reply_markup=InlineKeyboardMarkup(inline_keyboard=[
+            [InlineKeyboardButton(text="🔙 Отмена", callback_data="admin:broadcast_menu")]
+        ]),
+    )
+
+
+async def process_broadcast_text_indiv(message: Message, state: FSMContext) -> None:
+    data = await state.get_data()
+    uid = data.get("target_id")
+    text = message.text or ""
+    if not uid:
+        await state.clear()
+        return await message.answer("❌ Ошибка состояния.")
+    try:
+        await message.bot.send_message(int(uid), text)
+        await message.answer(f"✅ Отправлено <code>{uid}</code>")
+    except Exception as e:
+        await message.answer(f"❌ Не удалось: <code>{e}</code>")
+    await state.clear()
+    await message.answer("📢 Готово", reply_markup=_admin_main_kb())
+
+
+# ── back / exit ───────────────────────────────────────────────────────────────
+
+async def cb_back_main(call: CallbackQuery, state: FSMContext) -> None:
+    await state.clear()
+    await _edit_or_answer(
+        call,
+        f"⚙️ <b>Админ-панель</b>\n{DIV}\nВыберите действие:",
+        _admin_main_kb(),
+    )
+
+
+async def cb_admin_exit(call: CallbackQuery, state: FSMContext) -> None:
+    await state.clear()
+    try:
+        await call.message.delete()
     except TelegramBadRequest:
         pass
 
 
-async def _fetch_and_save(bot, user_id: int) -> str | None:
-    try:
-        chat = await bot.get_chat(user_id)
-        upsert_user(user_id, chat.username, chat.first_name)
-        return chat.username
-    except Exception:
-        return get_username(user_id)
+# ── router registration ──────────────────────────────────────────────────────
 
-
-async def _admin_list_lines(bot) -> str:
-    lines = []
-    for uid in get_all_admins():
-        uname = await _fetch_and_save(bot, uid)
-        lines.append(f"👑 {uid} - @{uname}" if uname else f"👑 {uid} - @none")
-    return "\n".join(lines) if lines else "Список пуст"
-
-
-# ── entry point ───────────────────────────────────────────────────────────────
-
-async def show_admin_panel(event, state: FSMContext):
-    await state.clear()
-    text = "👨‍💼 <b>Админ-панель</b>\n\nВыберите действие:"
-    kb   = _admin_main_kb()
-    if isinstance(event, Message):
-        await event.answer(text, parse_mode="HTML", reply_markup=kb)
-    else:
-        await _safe_edit(event.message, text, kb)
-
-
-# ── navigation ────────────────────────────────────────────────────────────────
-
-@router.callback_query(F.data == "admin:back_main")
-async def cb_back_main(call: CallbackQuery, state: FSMContext):
-    if not is_admin(call.from_user.id):
-        await call.answer("⛔ Нет доступа", show_alert=True, parse_mode=PM); return
-    try: await call.answer()
-    except Exception: pass
-    await state.clear()
-    await _safe_edit(call.message, "👨‍💼 <b>Админ-панель</b>\n\nВыберите действие:", _admin_main_kb())
-
-
-@router.callback_query(F.data == "admin:exit")
-async def cb_exit(call: CallbackQuery, state: FSMContext):
-    try: await call.answer()
-    except Exception: pass
-    await state.clear()
-    from handlers.catalog import _start_kb
-    await _safe_edit(call.message, "👋 Добро пожаловать!", _start_kb(call.from_user.id))
-
-
-# ── выдача ролей ──────────────────────────────────────────────────────────────
-
-@router.callback_query(F.data == "admin:set_role")
-async def cb_set_role_start(call: CallbackQuery, state: FSMContext):
-    if not is_admin(call.from_user.id):
-        await call.answer("⛔ Нет доступа", show_alert=True, parse_mode=PM); return
-    try: await call.answer()
-    except Exception: pass
-    await _safe_edit(call.message, "🆔 Введите Telegram ID пользователя:", _back_to_main_kb())
-    await state.set_state(AdminStates.wait_target_id)
-    await state.update_data(prompt_msg_id=call.message.message_id)
-
-
-@router.message(AdminStates.wait_target_id)
-async def process_target_id(message: Message, state: FSMContext):
-    if not is_admin(message.from_user.id): return
-    data = await state.get_data()
-    prompt_msg_id = data.get("prompt_msg_id")
-    await _try_delete(message)
-
-    if not message.text or not message.text.strip().lstrip("-").isdigit():
-        try:
-            await message.bot.edit_message_text(
-                chat_id=message.chat.id, message_id=prompt_msg_id,
-                text="❌ Некорректный ID. Введите числовой Telegram ID:",
-                reply_markup=_back_to_main_kb()
-            )
-        except TelegramBadRequest:
-            pass
-        return
-
-    target_id = int(message.text.strip())
-    await _fetch_and_save(message.bot, target_id)
-    roles = get_roles(target_id)
-
-    try:
-        await message.bot.edit_message_text(
-            chat_id=message.chat.id, message_id=prompt_msg_id,
-            text=_role_info_text(target_id, roles),
-            parse_mode="HTML",
-            reply_markup=_roles_kb(target_id, roles)
-        )
-    except TelegramBadRequest:
-        await message.answer(_role_info_text(target_id, roles), parse_mode="HTML",
-                             reply_markup=_roles_kb(target_id, roles))
-    await state.set_state(AdminStates.managing_roles)
-    await state.update_data(target_id=target_id)
-
-
-@router.callback_query(F.data.startswith("admin:toggle:"))
-async def cb_toggle_role(call: CallbackQuery, state: FSMContext):
-    if not is_admin(call.from_user.id):
-        await call.answer("⛔ Нет доступа", show_alert=True, parse_mode=PM); return
-    try: await call.answer()
-    except Exception: pass
-    parts     = call.data.split(":")
-    role      = parts[2]
-    target_id = int(parts[3])
-    roles = get_roles(target_id)
-    if role in roles:
-        remove_role(target_id, role)
-        action = f"убрана <b>{role.upper()}</b>"
-        log.role_changed(call.from_user.id, target_id, role, "remove", call.from_user.username)
-    else:
-        add_role(target_id, role)
-        action = f"выдана <b>{role.upper()}</b>"
-        log.role_changed(call.from_user.id, target_id, role, "add", call.from_user.username)
-    roles = get_roles(target_id)
-    await _safe_edit(call.message, _role_info_text(target_id, roles, action), _roles_kb(target_id, roles))
-
-
-@router.callback_query(F.data.startswith("admin:geo:"))
-async def cb_toggle_geo(call: CallbackQuery, state: FSMContext):
-    if not is_admin(call.from_user.id):
-        await call.answer("⛔ Нет доступа", show_alert=True, parse_mode=PM); return
-    try: await call.answer()
-    except Exception: pass
-    parts     = call.data.split(":")   # admin:geo:bo:12345
-    geo       = parts[2]
-    target_id = int(parts[3])
-    geos = get_geos(target_id)
-    geo_label = _GEO_LABELS.get(geo, geo.upper())
-    if geo in geos:
-        remove_geo(target_id, geo)
-        action = f"регион {geo_label} убран 🚫"
-    else:
-        add_geo(target_id, geo)
-        action = f"регион {geo_label} выдан ✅"
-    roles = get_roles(target_id)
-    await _safe_edit(call.message, _role_info_text(target_id, roles, action),
-                     _roles_kb(target_id, roles))
-
-
-@router.callback_query(F.data.startswith("admin:clear:"))
-async def cb_clear_roles(call: CallbackQuery, state: FSMContext):
-    if not is_admin(call.from_user.id):
-        await call.answer("⛔ Нет доступа", show_alert=True, parse_mode=PM); return
-    try: await call.answer()
-    except Exception: pass
-    target_id = int(call.data.split(":")[2])
-    clear_roles(target_id)
-    clear_geos(target_id)
-    log.roles_cleared(call.from_user.id, target_id, call.from_user.username)
-    roles = get_roles(target_id)
-    await _safe_edit(call.message, _role_info_text(target_id, roles, "роли и регионы очищены 🗑"),
-                     _roles_kb(target_id, roles))
-
-
-@router.callback_query(F.data.startswith("admin:demote:"))
-async def cb_demote_admin(call: CallbackQuery, state: FSMContext):
-    if not is_admin(call.from_user.id):
-        await call.answer("⛔ Нет доступа", show_alert=True, parse_mode=PM); return
-    target_id = int(call.data.split(":")[2])
-    if target_id == call.from_user.id:
-        await call.answer("⛔ Нельзя снять себя.", show_alert=True, parse_mode=PM); return
-    try: await call.answer()
-    except Exception: pass
-    remove_admin(target_id)
-    log.admin_demoted(call.from_user.id, target_id, call.from_user.username)
-    roles = get_roles(target_id)
-    await _safe_edit(call.message, _role_info_text(target_id, roles, "администратор снят 🚫"),
-                     _roles_kb(target_id, roles))
-
-
-@router.callback_query(F.data.startswith("admin:promote:"))
-async def cb_promote_admin(call: CallbackQuery, state: FSMContext):
-    if not is_admin(call.from_user.id):
-        await call.answer("⛔ Нет доступа", show_alert=True, parse_mode=PM); return
-    try: await call.answer()
-    except Exception: pass
-    target_id = int(call.data.split(":")[2])
-    await _fetch_and_save(call.bot, target_id)
-    add_admin(target_id)
-    log.admin_promoted(call.from_user.id, target_id, call.from_user.username)
-    roles = get_roles(target_id)
-    await _safe_edit(call.message, _role_info_text(target_id, roles, "назначен администратором 👑"),
-                     _roles_kb(target_id, roles))
-
-
-# ── список пользователей ──────────────────────────────────────────────────────
-
-@router.callback_query(F.data == "admin:user_list")
-async def cb_user_list(call: CallbackQuery, state: FSMContext):
-    if not is_admin(call.from_user.id):
-        await call.answer("⛔ Нет доступа", show_alert=True, parse_mode=PM); return
-    try: await call.answer()
-    except Exception: pass
-
-    users = get_all_users_all()
-    if not users:
-        text = "📋 <b>Список пользователей</b>\n\nПользователей нет."
-    else:
-        lines = []
-        for uid in users:
-            if is_banned(uid):
-                continue
-            # Подтягиваем актуальный username через Telegram API
-            uname = await _fetch_and_save(call.bot, uid) or "none"
-            roles  = get_roles(uid)
-            geos   = get_geos(uid)
-            
-            role_strs = []
-            if is_admin(uid): role_strs.append("🛠 Админ")
-            if "fd" in roles: role_strs.append("⭐️ FD")
-            if "rd" in roles: role_strs.append("⚡ RD")
-            if "cr" in roles: role_strs.append("🧾 CR")
-            roles_text = ", ".join(role_strs) if role_strs else "👤 Без роли"
-            
-            geo_strs = []
-            if "bo" in geos: geo_strs.append("🇧🇴 BO")
-            if "pe" in geos: geo_strs.append("🇵🇪 PE")
-            if "uy" in geos: geo_strs.append("🇺🇾 UY")
-            if "py" in geos: geo_strs.append("🇵🇾 PY")
-            if "ma" in geos: geo_strs.append("🇲🇦 MA")
-            geos_text = ", ".join(geo_strs) if geo_strs else "Нет гео"
-            
-            icon = "🛠" if is_admin(uid) else ("⭐️" if "fd" in roles else ("⚡" if "rd" in roles else ("🧾" if "cr" in roles else "👤")))
-            lines.append(f"{icon} <b>{uid} | @{uname}</b>\n   ├ {roles_text}\n   └ {geos_text}")
-        text = "📋 <b>Список пользователей</b>\n\n" + "\n\n".join(lines)
-
-    await _safe_edit(call.message, text, _back_to_main_kb())
-
-
-# ── Бан / ЧС ──────────────────────────────────────────────────────────────────
-
-@router.callback_query(F.data == "admin:ban_menu")
-async def cb_ban_menu(call: CallbackQuery, state: FSMContext):
-    if not is_admin(call.from_user.id): return
-    users = get_all_users_all()
-    candidates = [u for u in users if u != call.from_user.id and not is_banned(u)]
-    if not candidates:
-        await call.answer("Нет активных пользователей.", show_alert=True, parse_mode=PM)
-        return
-    try: await call.answer()
-    except Exception: pass
-    
-    buttons = []
-    for uid in candidates:
-        uname = get_username(uid) or "none"
-        buttons.append([InlineKeyboardButton(text=f"👤 {uid} - @{uname} — 🚫 Забанить", callback_data=f"admin:toggle_ban:{uid}:1")])
-    buttons.append([InlineKeyboardButton(text="🔙 Назад", callback_data="admin:back_main")])
-    kb = InlineKeyboardMarkup(inline_keyboard=buttons)
-    await _safe_edit(call.message, "🚫 Выберите пользователя для блокировки:", kb)
-
-@router.callback_query(F.data == "admin:blacklist_menu")
-async def cb_blacklist_menu(call: CallbackQuery, state: FSMContext):
-    if not is_admin(call.from_user.id): return
-    users = get_all_users_all()
-    candidates = [u for u in users if u != call.from_user.id and is_banned(u)]
-    if not candidates:
-        await call.answer("ЧС пуст.", show_alert=True, parse_mode=PM)
-        return
-    try: await call.answer()
-    except Exception: pass
-    
-    buttons = []
-    for uid in candidates:
-        uname = get_username(uid) or "none"
-        buttons.append([InlineKeyboardButton(text=f"👤 {uid} - @{uname} — 🔓 Разбанить", callback_data=f"admin:toggle_ban:{uid}:0")])
-    buttons.append([InlineKeyboardButton(text="🔙 Назад", callback_data="admin:back_main")])
-    kb = InlineKeyboardMarkup(inline_keyboard=buttons)
-    await _safe_edit(call.message, "⛔️ Черный список (ЧС):", kb)
-
-@router.callback_query(F.data.startswith("admin:toggle_ban:"))
-async def cb_toggle_ban(call: CallbackQuery, state: FSMContext):
-    if not is_admin(call.from_user.id): return
-    parts = call.data.split(":")
-    target_id = int(parts[2])
-    do_ban = int(parts[3])
-    
-    if do_ban:
-        ban_user(target_id)
-        await call.answer("Пользователь забанен!", parse_mode=PM)
-    else:
-        unban_user(target_id)
-        await call.answer("Пользователь разбанен!", parse_mode=PM)
-    
-    await _safe_edit(call.message, "✅ Успешно обновлено.", _back_to_main_kb())
-
-
-# ── Рассылка сообщений ────────────────────────────────────────────────────────
-
-@router.callback_query(F.data == "admin:broadcast_menu")
-async def cb_broadcast_menu(call: CallbackQuery, state: FSMContext):
-    if not is_admin(call.from_user.id): return
-    try: await call.answer()
-    except Exception: pass
-    await _safe_edit(call.message, "📢 Выберите тип рассылки:", _broadcast_menu_kb())
-
-
-@router.callback_query(F.data == "admin:broadcast_all")
-async def cb_broadcast_all(call: CallbackQuery, state: FSMContext):
-    if not is_admin(call.from_user.id): return
-    try: await call.answer()
-    except Exception: pass
-    await _safe_edit(call.message, "⌨️ Введите сообщение для рассылки ВСЕМ пользователям:\n\n(или нажмите Назад)", _back_to_main_kb())
-    await state.set_state(AdminStates.wait_broadcast_text_all)
-    await state.update_data(prompt_msg_id=call.message.message_id)
-
-@router.message(AdminStates.wait_broadcast_text_all)
-async def process_broadcast_all(message: Message, state: FSMContext):
-    if not is_admin(message.from_user.id): return
-    data = await state.get_data()
-    await _try_delete(message)
-    users = get_all_users_all()
-    success = 0
-    for uid in users:
-        try:
-            await message.bot.send_message(uid, message.text, parse_mode=None)
-            success += 1
-        except Exception:
-            pass
-    log.broadcast(message.from_user.id, message.text, f"all, sent: {success}", message.from_user.username)
-    text = f"✅ Сообщение отправлено {success} пользователям.\n\n👨‍💼 <b>Админ-панель</b>"
-    
-    try:
-        await message.bot.edit_message_text(chat_id=message.chat.id, message_id=data.get("prompt_msg_id"), text=text, parse_mode="HTML", reply_markup=_admin_main_kb())
-    except Exception:
-        await message.answer(text, parse_mode="HTML", reply_markup=_admin_main_kb())
-    await state.clear()
-
-
-async def _build_users_kb(bot, users: list[int], page: int = 0) -> InlineKeyboardMarkup:
-    start_idx = page * 10
-    end_idx = start_idx + 10
-    page_users = users[start_idx:end_idx]
-    
-    buttons = []
-    for uid in page_users:
-        uname = await _fetch_and_save(bot, uid) or "none"
-        buttons.append([InlineKeyboardButton(text=f"👤 {uid} - @{uname}", callback_data=f"admin:bc_to:{uid}")])
-        
-    nav_row = []
-    if page > 0:
-        nav_row.append(InlineKeyboardButton(text="◀️", callback_data=f"admin:bc_page:{page-1}"))
-    if end_idx < len(users):
-        nav_row.append(InlineKeyboardButton(text="▶️", callback_data=f"admin:bc_page:{page+1}"))
-        
-    if nav_row:
-        buttons.append(nav_row)
-        
-    buttons.append([InlineKeyboardButton(text="🔙 Назад", callback_data="admin:broadcast_menu")])
-    return InlineKeyboardMarkup(inline_keyboard=buttons)
-
-@router.callback_query(F.data == "admin:broadcast_indiv")
-async def cb_broadcast_indiv(call: CallbackQuery, state: FSMContext):
-    if not is_admin(call.from_user.id): return
-    users = get_all_users_all()
-    if not users:
-        await call.answer("Нет пользователей", show_alert=True, parse_mode=PM)
-        return
-    try: await call.answer()
-    except Exception: pass
-    kb = await _build_users_kb(call.bot, users, page=0)
-    await _safe_edit(call.message, "👤 Выберите пользователя для отправки сообщения:", kb)
-
-
-@router.callback_query(F.data.startswith("admin:bc_page:"))
-async def cb_broadcast_indiv_page(call: CallbackQuery, state: FSMContext):
-    if not is_admin(call.from_user.id): return
-    try: await call.answer()
-    except Exception: pass
-    page = int(call.data.split(":")[2])
-    users = get_all_users_all()
-    kb = await _build_users_kb(call.bot, users, page)
-    await _safe_edit(call.message, "👤 Выберите пользователя для отправки сообщения:", kb)
-
-
-@router.callback_query(F.data.startswith("admin:bc_to:"))
-async def cb_broadcast_indiv_target(call: CallbackQuery, state: FSMContext):
-    if not is_admin(call.from_user.id): return
-    try: await call.answer()
-    except Exception: pass
-    target_id = int(call.data.split(":")[2])
-    await state.update_data(target_id=target_id, prompt_msg_id=call.message.message_id)
-    
-    uname = await _fetch_and_save(call.bot, target_id) or "none"
-    await _safe_edit(call.message, f"⌨️ Введите сообщение для пользователя {target_id} (@{uname}):", _back_to_main_kb())
-    await state.set_state(AdminStates.wait_broadcast_text_indiv)
-
-
-@router.message(AdminStates.wait_broadcast_text_indiv)
-async def process_broadcast_text_indiv(message: Message, state: FSMContext):
-    if not is_admin(message.from_user.id): return
-    data = await state.get_data()
-    await _try_delete(message)
-    target_id = data.get("target_id")
-    try:
-        await message.bot.send_message(target_id, message.text, parse_mode=None)
-        text = f"✅ Сообщение отправлено пользователю {target_id}.\n\n👨‍💼 <b>Админ-панель</b>"
-        log.broadcast(message.from_user.id, message.text, f"indiv: {target_id}", message.from_user.username)
-    except Exception as e:
-        text = f"❌ Ошибка отправки пользователю {target_id}: {e}\n\n👨‍💼 <b>Админ-панель</b>"
-        
-    try:
-        await message.bot.edit_message_text(chat_id=message.chat.id, message_id=data.get("prompt_msg_id"), text=text, parse_mode="HTML", reply_markup=_admin_main_kb())
-    except Exception:
-        await message.answer(text, parse_mode="HTML", reply_markup=_admin_main_kb())
-    await state.clear()
+def register(r: Router) -> None:
+    r.include_router(router)
+    router.message.register(admin_entry, F.text == "⚙️ Настройки")
+    router.callback_query.register(cb_manage_users, F.data.startswith("admin:manage_users:"))
+    router.callback_query.register(cb_user_card, F.data.startswith("admin:user_card:"))
+    router.callback_query.register(cb_set_role_start, F.data == "admin:set_role")
+    router.message.register(process_target_id, AdminStates.wait_target_id)
+    router.callback_query.register(cb_toggle_role, F.data.startswith("admin:toggle:"))
+    router.callback_query.register(cb_toggle_geo, F.data.startswith("admin:geo:"))
+    router.callback_query.register(cb_clear_roles, F.data.startswith("admin:clear:"))
+    router.callback_query.register(cb_demote_admin, F.data.startswith("admin:demote:"))
+    router.callback_query.register(cb_promote_admin, F.data.startswith("admin:promote:"))
+    router.callback_query.register(cb_toggle_ban, F.data.startswith("admin:toggle_ban:"))
+    router.callback_query.register(cb_ban_menu, F.data == "admin:ban_menu")
+    router.callback_query.register(cb_blacklist_menu, F.data == "admin:blacklist_menu")
+    router.callback_query.register(cb_broadcast_menu, F.data == "admin:broadcast_menu")
+    router.callback_query.register(cb_broadcast_all, F.data == "admin:broadcast_all")
+    router.callback_query.register(cb_broadcast_indiv, F.data == "admin:broadcast_indiv")
+    router.message.register(process_broadcast_text_all, AdminStates.wait_broadcast_text_all)
+    router.message.register(process_broadcast_id_indiv, AdminStates.wait_broadcast_id_indiv)
+    router.message.register(process_broadcast_text_indiv, AdminStates.wait_broadcast_text_indiv)
+    router.callback_query.register(cb_back_main, F.data == "admin:back_main")
+    router.callback_query.register(cb_admin_exit, F.data == "admin:exit")

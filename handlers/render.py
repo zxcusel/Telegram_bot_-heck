@@ -7,7 +7,8 @@ FSM-рендеринг: превью + интерактивный чеклист
 """
 import os
 import io
-from aiogram import Router, F
+from aiogram import Router
+from aiogram.enums import ParseMode, F
 from aiogram.types import CallbackQuery, Message, BufferedInputFile, FSInputFile, InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
@@ -21,6 +22,11 @@ from utils.logger import log
 import random
 
 router = Router()
+
+# ── Дизайн-токены ──────────────────────────────────────────────────────────────
+PM = ParseMode.HTML
+DIV = "━━━━━━━━━━━━━━━━━━━━"
+BULLET = "▫️"
 
 
 def _is_name_field(field_key: str) -> bool:
@@ -589,7 +595,7 @@ async def _finish_render(message: Message, item_key: str, values: dict, item: di
 
         render_mode = item.get("render_mode")
         wait_text = "🎞 Создание видео..." if render_mode == "video" else "🖼 Создание изображения..."
-        wait_msg = await message.answer(wait_text)
+        wait_msg = await message.answer(wait_text, parse_mode=PM)
         log.render_start(message.from_user.id, item.get("label", item_key), message.from_user.username)
         import asyncio
         if render_mode == "support_bubbles":
@@ -641,7 +647,7 @@ async def _finish_render(message: Message, item_key: str, values: dict, item: di
     except Exception as e:
         lbl = item.get("label", item_key) if item else item_key
         log.render_error(message.from_user.id, lbl, str(e), message.from_user.username)
-        await message.answer(f"❌ Ошибка рендеринга: {e}")
+        await message.answer(f"❌ Ошибка рендеринга: {e}", parse_mode=PM)
 
 
 async def _return_to_last_section(call: CallbackQuery, state: FSMContext):
@@ -665,7 +671,7 @@ async def _return_to_last_section(call: CallbackQuery, state: FSMContext):
         text = "🌍 Выберите регион:"
         kb   = geo_menu_for(call.from_user.id, role)
 
-    await call.message.answer(text, reply_markup=kb)
+    await call.message.answer(text, reply_markup=kb, parse_mode=PM)
 
 
 # ─────────────────────────── handlers ────────────────────────────────────────
@@ -754,7 +760,7 @@ async def cb_item_selected(call: CallbackQuery, state: FSMContext):
     item = _get_item_for_user(item_key, geo, call.from_user.id)
 
     if not item:
-        await call.answer("❌ Шаблон не найден.", show_alert=True)
+        await call.answer("❌ Шаблон не найден.", show_alert=True, parse_mode=PM)
         return
 
     try: await call.answer()
@@ -821,7 +827,7 @@ async def cb_item_selected(call: CallbackQuery, state: FSMContext):
     try:
         start_step = _advance_steps(askable, 0, auto_values, s, item, item_key)
     except ValueError:
-        await call.answer("❌ В списке name.json не осталось имен! Пополните список или отключите 'Рандом имен' в настройках.", show_alert=True)
+        await call.answer("❌ В списке name.json не осталось имен! Пополните список или отключите 'Рандом имен' в настройках.", show_alert=True, parse_mode=PM)
         return
 
     if start_step >= len(askable):
@@ -854,7 +860,7 @@ async def cb_item_selected(call: CallbackQuery, state: FSMContext):
                     reply_markup=kb
                 )
             else:
-                msg = await call.message.answer("⏳ Загружаю превью видео, подождите...")
+                msg = await call.message.answer("⏳ Загружаю превью видео, подождите...", parse_mode=PM)
                 try:
                     sent = await call.message.answer_video(
                         video=FSInputFile(preview_path),
@@ -865,7 +871,7 @@ async def cb_item_selected(call: CallbackQuery, state: FSMContext):
                     )
                     PREVIEW_FILE_IDS[item_key] = sent.video.file_id
                 except Exception as e:
-                    await call.message.answer(f"❌ Ошибка загрузки превью: {e}")
+                    await call.message.answer(f"❌ Ошибка загрузки превью: {e}", parse_mode=PM)
                     return
                 finally:
                     await _try_delete(call.bot, call.message.chat.id, msg.message_id)
@@ -923,7 +929,7 @@ async def cmd_start_in_render(message: Message, state: FSMContext):
     from data.db import is_admin as _is_admin_check
     from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
     from handlers.catalog import _start_kb
-    await message.answer("👋 Добро пожаловать!", reply_markup=_start_kb(message.from_user.id))
+    await message.answer("👋 Добро пожаловать!", reply_markup=_start_kb(message.from_user.id), parse_mode=PM)
 
 
 @router.message(RenderStates.collecting, F.text, ~Command(commands=["start"]))
@@ -935,7 +941,7 @@ async def collect_text_field(message: Message, state: FSMContext):
         if not data:
             import logging
             logging.warning(f"collect_text: пустые данные state для {message.from_user.id}")
-            await message.answer("⚠️ Ошибка: состояние пусто. Начните заново.")
+            await message.answer("⚠️ Ошибка: состояние пусто. Начните заново.", parse_mode=PM)
             return
             
         askable: list = data.get("askable")
@@ -949,7 +955,7 @@ async def collect_text_field(message: Message, state: FSMContext):
         if not all([askable, isinstance(step, int), values is not None, item_key, msg_id is not None]):
             import logging
             logging.warning(f"collect_text: неполные данные state для {message.from_user.id}: {list(data.keys())}")
-            await message.answer("⚠️ Ошибка: некорректное состояние. Начните заново с /start")
+            await message.answer("⚠️ Ошибка: некорректное состояние. Начните заново с /start", parse_mode=PM)
             await state.clear()
             return
         
@@ -957,7 +963,7 @@ async def collect_text_field(message: Message, state: FSMContext):
         if not item:
             import logging
             logging.warning(f"collect_text: шаблон {item_key} не найден для {message.from_user.id}")
-            await message.answer(f"⚠️ Ошибка: шаблон {item_key} не найден")
+            await message.answer(f"⚠️ Ошибка: шаблон {item_key} не найден", parse_mode=PM)
             await state.clear()
             return
 
@@ -1028,7 +1034,7 @@ async def collect_text_field(message: Message, state: FSMContext):
         try:
             done_step = _advance_steps(askable, done_step, values, s, item, item_key)
         except ValueError:
-            await message.answer("❌ В списке name.json не осталось имен! Пополните список или отключите 'Рандом имен' в настройках.")
+            await message.answer("❌ В списке name.json не осталось имен! Пополните список или отключите 'Рандом имен' в настройках.", parse_mode=PM)
             await state.clear()
             return
 
@@ -1049,7 +1055,7 @@ async def collect_text_field(message: Message, state: FSMContext):
         logging.exception(f"Error in collect_text_field for user {message.from_user.id}: {e}")
         await state.clear()
         try:
-            await message.answer(f"❌ Произошла ошибка: {e}\n\nНажмите /start и попробуйте снова.")
+            await message.answer(f"❌ Произошла ошибка: {e}\n\nНажмите /start и попробуйте снова.", parse_mode=PM)
         except Exception as send_err:
             logging.exception(f"Ошибка при отправке сообщения об ошибке: {send_err}")
 
@@ -1063,7 +1069,7 @@ async def collect_photo_field(message: Message, state: FSMContext):
         if not data:
             import logging
             logging.warning(f"collect_photo: пустые данные state для {message.from_user.id}")
-            await message.answer("⚠️ Ошибка: состояние пусто. Начните заново.")
+            await message.answer("⚠️ Ошибка: состояние пусто. Начните заново.", parse_mode=PM)
             return
             
         askable: list = data.get("askable")
@@ -1077,7 +1083,7 @@ async def collect_photo_field(message: Message, state: FSMContext):
         if not all([askable, isinstance(step, int), values is not None, item_key, msg_id is not None]):
             import logging
             logging.warning(f"collect_photo: неполные данные state для {message.from_user.id}")
-            await message.answer("⚠️ Ошибка: некорректное состояние. Начните заново с /start")
+            await message.answer("⚠️ Ошибка: некорректное состояние. Начните заново с /start", parse_mode=PM)
             await state.clear()
             return
             
@@ -1085,7 +1091,7 @@ async def collect_photo_field(message: Message, state: FSMContext):
         if not item:
             import logging
             logging.warning(f"collect_photo: шаблон {item_key} не найден для {message.from_user.id}")
-            await message.answer(f"⚠️ Ошибка: шаблон {item_key} не найден")
+            await message.answer(f"⚠️ Ошибка: шаблон {item_key} не найден", parse_mode=PM)
             await state.clear()
             return
 
@@ -1115,7 +1121,7 @@ async def collect_photo_field(message: Message, state: FSMContext):
         try:
             done_step = _advance_steps(askable, done_step, values, s, item, item_key)
         except ValueError:
-            await message.answer("❌ В списке name.json не осталось имен! Пополните список или отключите 'Рандом имен' в настройках.")
+            await message.answer("❌ В списке name.json не осталось имен! Пополните список или отключите 'Рандом имен' в настройках.", parse_mode=PM)
             await state.clear()
             return
 
@@ -1136,7 +1142,7 @@ async def collect_photo_field(message: Message, state: FSMContext):
         logging.exception(f"Error in collect_photo_field for user {message.from_user.id}: {e}")
         await state.clear()
         try:
-            await message.answer(f"❌ Произошла ошибка при обработке фото: {e}\n\nНажмите /start и попробуйте снова.")
+            await message.answer(f"❌ Произошла ошибка при обработке фото: {e}\n\nНажмите /start и попробуйте снова.", parse_mode=PM)
         except Exception as send_err:
             logging.exception(f"Ошибка при отправке сообщения об ошибке: {send_err}")
 
@@ -1164,9 +1170,9 @@ async def cb_cancel(call: CallbackQuery, state: FSMContext):
     role = get_role_string(call.from_user.id)
     geo: str | None = data.get("current_geo")
     if geo:
-        await call.message.answer("📂 Выберите категорию:", reply_markup=main_menu(role, geo))
+        await call.message.answer("📂 Выберите категорию:", reply_markup=main_menu(role, geo), parse_mode=PM)
     else:
-        await call.message.answer("🌍 Выберите регион:", reply_markup=geo_menu_for(call.from_user.id, role))
+        await call.message.answer("🌍 Выберите регион:", reply_markup=geo_menu_for(call.from_user.id, role), parse_mode=PM)
 
 
 # ── Главное меню после рендера ────────────────────────────────────────────────
@@ -1181,9 +1187,9 @@ async def cb_back_main_from_render(call: CallbackQuery, state: FSMContext):
     geo: str | None = data.get("current_geo")
     # Всегда отправляем новое сообщение — не трогаем фото с результатом
     if geo:
-        await call.message.answer("📂 Выберите категорию:", reply_markup=main_menu(role, geo))
+        await call.message.answer("📂 Выберите категорию:", reply_markup=main_menu(role, geo), parse_mode=PM)
     else:
-        await call.message.answer("🌍 Выберите регион:", reply_markup=geo_menu_for(call.from_user.id, role))
+        await call.message.answer("🌍 Выберите регион:", reply_markup=geo_menu_for(call.from_user.id, role), parse_mode=PM)
 
 
 # ── Shortcuts (Random, Pin, Suffix) ──────────────────────────────────────────
@@ -1337,7 +1343,7 @@ async def cb_render_shortcuts(call: CallbackQuery, state: FSMContext):
             val = _format_name(val, item)
         except ValueError:
             try:
-                await call.answer("❌ В списке name.json не осталось доступных имен!", show_alert=True)
+                await call.answer("❌ В списке name.json не осталось доступных имен!", show_alert=True, parse_mode=PM)
             except Exception:
                 pass
             return
@@ -1352,7 +1358,7 @@ async def cb_render_shortcuts(call: CallbackQuery, state: FSMContext):
         except Exception:
             pass
         try:
-            await call.answer(f"Знак изменен на {new_sign}")
+            await call.answer(f"Знак изменен на {new_sign}", parse_mode=PM)
         except Exception:
             pass
         return
@@ -1376,7 +1382,7 @@ async def cb_render_shortcuts(call: CallbackQuery, state: FSMContext):
         except Exception:
             pass
         try:
-            await call.answer(f"Выбрано: {new_suffix or 'Без суффикса'}")
+            await call.answer(f"Выбрано: {new_suffix or 'Без суффикса'}", parse_mode=PM)
         except Exception:
             pass
         return
@@ -1416,7 +1422,7 @@ async def cb_render_shortcuts(call: CallbackQuery, state: FSMContext):
     try:
         done_step = _advance_steps(askable, done_step, values, s, item, item_key)
     except ValueError:
-        await call.answer("❌ В списке name.json не осталось имен! Пополните список или отключите 'Рандом имен' в настройках.", show_alert=True)
+        await call.answer("❌ В списке name.json не осталось имен! Пополните список или отключите 'Рандом имен' в настройках.", show_alert=True, parse_mode=PM)
         await state.clear()
         return
 

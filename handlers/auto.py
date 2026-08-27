@@ -1,23 +1,19 @@
 """handlers/auto.py — автоматизация создания чеков по расписанию.
 
 Изолировано от ручного режима: отдельная таблица `automation_presets`
-и отдельная кнопка входа в меню «▶️ Автоматизация».
+и отдельная кнопка входа в меню «� Автоматизация».
 
 Сценарий:
-  1. Пользователь жмёт «▶️ Автоматизация» → бот показывает пресет
-     (если есть) и кнопки: «Изменить настройки» / «Запустить».
-  2. В настройках автоматизации (auto:menu) — отдельное FSM-подменю:
-       auto:geo     — выбор гео (из доступных)
-       auto:line    — выбор линейки (внутри гео)
-       auto:items   — мультивыбор типов чеков (item_key)
-       auto:sum     — мин/макс сумма (текстом «1000-5000»)
-       auto:date    — дата dd.mm.yyyy
-       auto:slots   — расписание слотов текстом:
-                      14:30x3
-                      15:00x2
-                      16:30x4
-                      19:30x1
-  3. Кнопка «🚀 Запустить» — генерация медиагруппы.
+  1. Пользователь жмёт «� Автоматизация» → бот показывает пресет
+     (если есть) и кнопки: «⚙️ Изменить настройки» / «🚀 Запустить».
+  2. В настройках автоматизации (auto:settings) — отдельное FSM-подменю:
+       1. ГЕО
+       2. Линейка
+       3. Типы чеков (мультивыбор)
+       4. Мин / Макс суммы
+       5. Дата
+       6. Расписание слотов «ЧЧ:ММxN» по строкам
+  3. Кнопка «🚀 Запустить автоматизацию» — генерация медиагруппы.
 """
 from __future__ import annotations
 
@@ -29,6 +25,7 @@ from datetime import datetime
 from io import BytesIO
 
 from aiogram import Bot, F, Router
+from aiogram.enums import ParseMode
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
@@ -58,6 +55,12 @@ from utils.renderer import render_image
 
 router = Router()
 
+# ── Дизайн-токены ──────────────────────────────────────────────────────────────
+PM = ParseMode.HTML  # parse_mode по умолчанию для всех сообщений модуля
+DIV = "━━━━━━━━━━━━━━━━━━━━"  # горизонтальный разделитель
+BULLET = "�️"  # маркер списка
+
+
 # ── FSM состояния автоматизации ────────────────────────────────────────────────
 class AutoFSM(StatesGroup):
     picking_geo = State()
@@ -76,52 +79,74 @@ async def auto_open(call: CallbackQuery, state: FSMContext):
     if not has_any_access(user_id):
         await call.answer("⛔ Доступ запрещён", show_alert=True)
         return
+    await state.clear()
 
     preset = _load_preset(user_id)
-    text_lines = ["🤖 <b>Автоматизация создания чеков</b>\n"]
     if preset:
-        text_lines.append(_format_preset(preset))
+        text = (
+            f"🤖 <b>Автоматизация чеков</b>\n"
+            f"{DIV}\n"
+            f"✨ <i>Сохранённый пресет готов к запуску</i>\n\n"
+            f"{_format_preset(preset)}\n\n"
+            f"{DIV}\n"
+            f"<i>Можно изменить настройки или сразу запустить.</i>"
+        )
     else:
-        text_lines.append("Пресет не настроен. Нажмите «⚙️ Настройки».")
+        text = (
+            f"🤖 <b>Автоматизация чеков</b>\n"
+            f"{DIV}\n"
+            f"⚠️ <i>Пресет ещё не настроен.</i>\n\n"
+            f"Нажмите <b>«⚙️ Настроить автоматизацию»</b> чтобы задать:\n"
+            f"{BULLET} гео и линейку шаблонов\n"
+            f"{BULLET} типы чеков\n"
+            f"{BULLET} диапазон сумм\n"
+            f"{BULLET} дату\n"
+            f"{BULLET} расписание слотов"
+        )
 
-    await call.message.edit_text("\n".join(text_lines), reply_markup=auto_main_kb(has_preset=bool(preset)))
+    await call.message.edit_text(text, reply_markup=auto_main_kb(has_preset=bool(preset)), parse_mode=PM)
     await call.answer()
 
 
-# ── Меню настроек ─────────────────────────────────────────────────────────────
+# ── Настройки: выбор гео ──────────────────────────────────────────────────────
 @router.callback_query(F.data == "auto:settings")
 async def auto_settings(call: CallbackQuery, state: FSMContext):
-    geos = get_geos(call.from_user.id)
-    if is_admin(call.from_user.id):
+    user_id = call.from_user.id
+    geos = get_geos(user_id)
+    if is_admin(user_id):
         geos = list(GEO_CATALOG.keys())
     if not geos:
         await call.answer("⛔ Нет доступных гео", show_alert=True)
         return
     await state.set_state(AutoFSM.picking_geo)
-    if not geos:
-        await call.answer("⛔ Нет доступных гео", show_alert=True)
-        return
-    await call.message.edit_text(
-        "1️⃣ Выберите <b>ГЕО</b> для автоматизации:",
-        reply_markup=auto_pick_geo_kb(geos),
+
+    text = (
+        f"⚙️ <b>Настройка автоматизации</b>\n"
+        f"{DIV}\n"
+        f"📍 <b>Шаг 1 / 6 — ГЕО</b>\n\n"
+        f"Выберите <b>гео</b>, под которым будут создаваться чеки:"
     )
+    await call.message.edit_text(text, reply_markup=auto_pick_geo_kb(geos), parse_mode=PM)
     await call.answer()
 
 
-# ── Выбор гео ─────────────────────────────────────────────────────────────────
 @router.callback_query(AutoFSM.picking_geo, F.data.startswith("auto:geo:"))
 async def auto_geo_picked(call: CallbackQuery, state: FSMContext):
     geo = call.data.split(":", 2)[2]
     if geo not in GEO_CATALOG:
-        await call.answer("Неизвестное гео", show_alert=True)
+        await call.answer("⛔ Неизвестное гео", show_alert=True)
         return
     await state.update_data(geo=geo)
     await state.set_state(AutoFSM.picking_line)
-    await call.message.edit_text(
-        f"2️⃣ ГЕО: <b>{GEO_CATALOG[geo]['label']}</b>\n"
-        "Выберите <b>линейку</b> шаблонов:",
-        reply_markup=auto_pick_line_kb(geo, call.from_user.id),
+    label = GEO_CATALOG[geo]["label"]
+    text = (
+        f"⚙️ <b>Настройка автоматизации</b>\n"
+        f"{DIV}\n"
+        f"📍 <b>Шаг 2 / 6 — Линейка шаблонов</b>\n\n"
+        f"✅ Выбрано ГЕО: <b>{label}</b>\n\n"
+        f"Выберите <b>линейку</b> шаблонов:"
     )
+    await call.message.edit_text(text, reply_markup=auto_pick_line_kb(geo, call.from_user.id), parse_mode=PM)
     await call.answer()
 
 
@@ -131,15 +156,23 @@ async def auto_line_picked(call: CallbackQuery, state: FSMContext):
     _, _, geo, line_key = call.data.split(":", 3)
     line = GEO_CATALOG[geo]["catalog"].get(line_key)
     if not line:
-        await call.answer("Неизвестная линейка", show_alert=True)
+        await call.answer("� Неизвестная линейка", show_alert=True)
         return
     await state.update_data(line_key=line_key)
     await state.set_state(AutoFSM.picking_items)
+    text = (
+        f"⚙️ <b>Настройка автоматизации</b>\n"
+        f"{DIV}\n"
+        f"🎨 <b>Шаг 3 / 6 — Типы чеков</b>\n\n"
+        f"✅ Линейка: <b>{line['label']}</b>\n\n"
+        f"Отметьте <b>типы чеков</b>, которые нужно использовать "
+        f"(мультивыбор).\n"
+        f"Когда всё выбрано — нажмите <b>«✅ Готово»</b>."
+    )
     await call.message.edit_text(
-        f"3️⃣ Линейка: <b>{line['label']}</b>\n"
-        "Выберите <b>типы чеков</b> (мультивыбор).\n"
-        "Нажмите «✅ Готово» когда выберете все нужные:",
+        text,
         reply_markup=auto_pick_items_kb(geo, line_key, selected=set()),
+        parse_mode=PM,
     )
     await call.answer()
 
@@ -155,9 +188,12 @@ async def auto_item_toggle(call: CallbackQuery, state: FSMContext):
     else:
         selected.add(item_key)
     await state.update_data(items=list(selected))
-    await call.message.edit_reply_markup(
-        reply_markup=auto_pick_items_kb(geo, line_key, selected=selected)
-    )
+    try:
+        await call.message.edit_reply_markup(
+            reply_markup=auto_pick_items_kb(geo, line_key, selected=selected)
+        )
+    except TelegramBadRequest:
+        pass
     await call.answer()
 
 
@@ -166,15 +202,18 @@ async def auto_items_done(call: CallbackQuery, state: FSMContext):
     data = await state.get_data()
     items = data.get("items") or []
     if not items:
-        await call.answer("Выберите хотя бы 1 тип чека", show_alert=True)
+        await call.answer("⚠️ Выберите хотя бы 1 тип чека", show_alert=True)
         return
     await state.set_state(AutoFSM.entering_sum)
-    await call.message.edit_text(
-        "4️⃣ <b>Мин / Макс суммы</b> для одного чека.\n"
-        "Отправьте два числа через дефис, например:\n"
-        "<code>1000-5000</code>",
-        reply_markup=auto_back_kb(),
+    text = (
+        f"⚙️ <b>Настройка автоматизации</b>\n"
+        f"{DIV}\n"
+        f"💰 <b>Шаг 4 / 6 — Диапазон сумм</b>\n\n"
+        f"✅ Выбрано типов: <b>{len(items)}</b>\n\n"
+        f"Отправьте <b>мин</b> и <b>макс</b> сумму одного чека через дефис.\n\n"
+        f"Пример: <code>1000-5000</code>"
     )
+    await call.message.edit_text(text, reply_markup=auto_back_kb(), parse_mode=PM)
     await call.answer()
 
 
@@ -184,18 +223,26 @@ async def auto_sum_entered(message: Message, state: FSMContext):
     raw = (message.text or "").strip()
     m = re.fullmatch(r"\s*(\d{1,9})\s*[-–]\s*(\d{1,9})\s*", raw)
     if not m:
-        await message.answer("❌ Неверный формат. Пример: <code>1000-5000</code>")
+        await message.answer(
+            f"❌ <b>Неверный формат</b>\n\n"
+            f"Нужны два числа через дефис, например:\n<code>1000-5000</code>",
+            parse_mode=PM,
+        )
         return
     lo, hi = int(m.group(1)), int(m.group(2))
     if lo > hi:
         lo, hi = hi, lo
     await state.update_data(sum_min=lo, sum_max=hi)
     await state.set_state(AutoFSM.entering_date)
-    await message.answer(
-        "5️⃣ <b>Дата</b> чеков в формате <code>dd.mm.yyyy</code>.\n"
-        "Например: <code>26.08.2026</code>",
-        reply_markup=auto_back_kb(),
+    text = (
+        f"⚙️ <b>Настройка автоматизации</b>\n"
+        f"{DIV}\n"
+        f"📅 <b>Шаг 5 / 6 — Дата чеков</b>\n\n"
+        f"✅ Суммы: <b>{lo}–{hi}</b>\n\n"
+        f"Отправьте дату в формате <code>dd.mm.yyyy</code>\n"
+        f"Пример: <code>26.08.2026</code>"
     )
+    await message.answer(text, reply_markup=auto_back_kb(), parse_mode=PM)
 
 
 # ── Дата ──────────────────────────────────────────────────────────────────────
@@ -205,18 +252,24 @@ async def auto_date_entered(message: Message, state: FSMContext):
     try:
         datetime.strptime(raw, "%d.%m.%Y")
     except ValueError:
-        await message.answer("❌ Неверный формат даты. Пример: <code>26.08.2026</code>")
+        await message.answer(
+            f"❌ <b>Неверный формат даты</b>\n\n"
+            f"Используйте <code>dd.mm.yyyy</code>, например <code>26.08.2026</code>",
+            parse_mode=PM,
+        )
         return
     await state.update_data(date=raw)
     await state.set_state(AutoFSM.entering_slots)
-    await message.answer(
-        "6️⃣ <b>Расписание слотов</b>.\n"
-        "Каждый слот — строка <code>ЧЧ:ММxN</code>, где N — сколько чеков в это время.\n"
-        "Слоты по одному на строку, время должно идти на <b>увеличение</b>.\n\n"
-        "Пример:\n"
-        "<code>14:30x3\n15:30x2\n17:00x4\n19:30x1</code>",
-        reply_markup=auto_back_kb(),
+    text = (
+        f"⚙️ <b>Настройка автоматизации</b>\n"
+        f"{DIV}\n"
+        f"⏰ <b>Шаг 6 / 6 — Расписание слотов</b>\n\n"
+        f"✅ Дата: <b>{raw}</b>\n\n"
+        f"Каждый слот — строка <code>ЧЧ:ММxN</code>, где N — сколько чеков в это время.\n"
+        f"Слоты по одному на строку. <b>Время должно возрастать</b>.\n\n"
+        f"<b>Пример:</b>\n<code>14:30x3\n15:30x2\n17:00x4\n19:30x1</code>"
     )
+    await message.answer(text, reply_markup=auto_back_kb(), parse_mode=PM)
 
 
 # ── Слоты → пресет ────────────────────────────────────────────────────────────
@@ -225,15 +278,21 @@ async def auto_slots_entered(message: Message, state: FSMContext):
     slots = _parse_slots(message.text or "")
     if not slots:
         await message.answer(
-            "❌ Не удалось разобрать расписание.\n"
-            "Каждая строка: <code>ЧЧ:ММxN</code>. Пример:\n"
-            "<code>14:30x3\n15:30x2</code>"
+            f"❌ <b>Не удалось разобрать расписание</b>\n\n"
+            f"Каждая строка: <code>ЧЧ:ММxN</code>. Пример:\n"
+            f"<code>14:30x3\n15:30x2</code>",
+            parse_mode=PM,
         )
         return
     # Проверка возрастания времени
     for i in range(1, len(slots)):
         if slots[i]["minutes"] <= slots[i - 1]["minutes"]:
-            await message.answer("❌ Время должно идти на увеличение (от меньшего к большему).")
+            await message.answer(
+                f"� <b>Время должно возрастать</b>\n\n"
+                f"Строка <code>{slots[i]['time']}</code> идёт раньше или равна "
+                f"<code>{slots[i - 1]['time']}</code>.",
+                parse_mode=PM,
+            )
             return
 
     data = await state.get_data()
@@ -249,10 +308,16 @@ async def auto_slots_entered(message: Message, state: FSMContext):
     _save_preset(message.from_user.id, preset)
     await state.clear()
 
-    await message.answer(
-        "✅ Пресет сохранён:\n\n" + _format_preset(preset),
-        reply_markup=auto_run_kb(),
+    total = sum(s["count"] for s in slots)
+    text = (
+        f"🎉 <b>Пресет сохранён!</b>\n"
+        f"{DIV}\n"
+        f"{_format_preset(preset)}\n\n"
+        f"{DIV}\n"
+        f"📦 Всего чеков: <b>{total}</b> в <b>{len(slots)}</b> слотов\n\n"
+        f"▶️ Нажмите <b>«🚀 Запустить автоматизацию»</b> для старта."
     )
+    await message.answer(text, reply_markup=auto_run_kb(), parse_mode=PM)
 
 
 # ── Запуск ────────────────────────────────────────────────────────────────────
@@ -264,15 +329,28 @@ async def auto_run(call: CallbackQuery, state: FSMContext):
         return
     preset = _load_preset(user_id)
     if not preset:
-        await call.answer("Сначала настройте пресет", show_alert=True)
+        await call.answer("⚠️ Сначала настройте пресет", show_alert=True)
         return
 
-    await call.message.edit_text("⏳ Генерирую чеки…")
+    total = sum(s["count"] for s in preset["slots"])
+    await call.message.edit_text(
+        f"⏳ <b>Генерация запущена…</b>\n"
+        f"{DIV}\n"
+        f"Будет создано <b>{total}</b> чеков в <b>{len(preset['slots'])}</b> слотов.\n\n"
+        f"<i>Это может занять несколько секунд.</i>",
+        parse_mode=PM,
+    )
     await call.answer()
 
     bot: Bot = call.bot
-    n = sum(s["count"] for s in preset["slots"])
-    await call.message.answer(f"🚀 Запущено: {n} чеков в {len(preset['slots'])} слотов.")
+    # Краткое уведомление в чат, чтобы пользователь видел, что процесс пошёл
+    await call.message.answer(
+        f"🚀 <b>Автоматизация запущена</b>\n"
+        f"{DIV}\n"
+        f"📦 Чеков: <b>{total}</b>\n"
+        f"⏰ Слотов: <b>{len(preset['slots'])}</b>",
+        parse_mode=PM,
+    )
 
     for slot in preset["slots"]:
         time_str = slot["time"]
@@ -295,11 +373,14 @@ async def auto_run(call: CallbackQuery, state: FSMContext):
             except Exception as e:
                 log.error(f"auto_run render error: {e}")
                 continue
-            caption = f"{time_str} — чек {i + 1}/{count} ({item_key})"
+            caption = (
+                f"⏰ <b>{time_str}</b>  ·  чек <b>{i + 1}/{count}</b>  ·  <code>{item_key}</code>"
+            )
             media.append(
                 InputMediaPhoto(
                     media=BufferedInputFile(png_bytes, filename="check.png"),
                     caption=caption if i == 0 else None,
+                    parse_mode=PM if i == 0 else None,
                 )
             )
         if media:
@@ -309,6 +390,12 @@ async def auto_run(call: CallbackQuery, state: FSMContext):
                 log.error(f"auto_run send_media_group error: {e}")
         # Небольшая пауза между слотами, чтобы Telegram не считал спамом
         await asyncio.sleep(1.5)
+
+    # Финальное уведомление
+    await call.message.answer(
+        f"✅ <b>Готово!</b>\n{DIV}\nВсе слоты отработаны. 🎉",
+        parse_mode=PM,
+    )
 
 
 # ── Утилиты ───────────────────────────────────────────────────────────────────
@@ -331,21 +418,23 @@ def _parse_slots(text: str) -> list[dict]:
 
 def _format_preset(p: dict) -> str:
     geo_label = GEO_CATALOG.get(p["geo"], {}).get("label", p["geo"])
+    items_str = ", ".join(f"<code>{x}</code>" for x in p["items"])
+    total = sum(s["count"] for s in p["slots"])
     lines = [
-        f"🌍 ГЕО: <b>{geo_label}</b>",
-        f"📂 Линейка: <b>{p['line_key']}</b>",
-        f"🎯 Типы: <code>{', '.join(p['items'])}</code>",
-        f"💰 Суммы: <b>{p['sum_min']}–{p['sum_max']}</b>",
-        f"📅 Дата: <b>{p['date']}</b>",
-        "⏰ Слоты:",
+        f"🌍 <b>ГЕО:</b> {geo_label}",
+        f"📂 <b>Линейка:</b> <code>{p['line_key']}</code>",
+        f"🎯 <b>Типы чеков:</b> {items_str}",
+        f"💰 <b>Суммы:</b> <b>{p['sum_min']}–{p['sum_max']}</b>",
+        f"📅 <b>Дата:</b> <b>{p['date']}</b>",
+        f"⏰ <b>Слоты ({len(p['slots'])} · {total} чеков):</b>",
     ]
     for s in p["slots"]:
-        lines.append(f"   • <b>{s['time']}</b> × {s['count']}")
+        lines.append(f"   {BULLET} <b>{s['time']}</b> × <b>{s['count']}</b>")
     return "\n".join(lines)
 
 
 # ── Хранение пресетов (SQLite рядом с bot.db) ─────────────────────────────────
-# Мы добавим таблицу automation_presets миграцией 027 в data/db.py,
+# Мы добавим таблицу automation_presets миграцией в data/db.py,
 # а здесь работаем через голый sqlite3, чтобы не зависеть от внутреннего _conn.
 import sqlite3
 import threading
@@ -444,10 +533,13 @@ async def auto_reset(call: CallbackQuery, state: FSMContext):
         return
     await state.clear()
     clear_preset(call.from_user.id)
-    await call.message.edit_text(
-        "🤖 <b>Автоматизация создания чеков</b>\n\nПресет удалён. Настройте новый.",
-        reply_markup=auto_main_kb(has_preset=False),
+    text = (
+        f"🤖 <b>Автоматизация чеков</b>\n"
+        f"{DIV}\n"
+        f"🗑 Пресет <b>удалён</b>.\n\n"
+        f"Нажмите <b>«⚙️ Настроить автоматизацию»</b> чтобы задать новый."
     )
+    await call.message.edit_text(text, reply_markup=auto_main_kb(has_preset=False), parse_mode=PM)
     await call.answer()
 
 

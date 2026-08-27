@@ -6,7 +6,7 @@ from data.db import get_geos, is_admin
 def geo_menu() -> InlineKeyboardMarkup:
     """Выбор геолокации — первый экран после 'Начать'."""
     buttons = [
-        [InlineKeyboardButton(text=info["label"], callback_data=f"geo:{gk}")]
+        [InlineKeyboardButton(text=f"🌍 {info['label']}", callback_data=f"geo:{gk}")]
         for gk, info in GEO_CATALOG.items()
     ]
     buttons.append([InlineKeyboardButton(text="🔙 Назад", callback_data="back:welcome")])
@@ -19,7 +19,7 @@ def geo_menu_for(user_id: int, role: str | None) -> InlineKeyboardMarkup:
     allowed_geos = get_geos(user_id)
     buttons = [
         [InlineKeyboardButton(
-            text=GEO_CATALOG[gk]["label"],
+            text=f"🌍 {GEO_CATALOG[gk]['label']}",
             callback_data=f"geo:{gk}"
         )]
         for gk in allowed_geos if gk in GEO_CATALOG
@@ -58,7 +58,7 @@ def main_menu(role: str | None, geo: str) -> InlineKeyboardMarkup:
 def sections_menu(geo: str, line_key: str) -> InlineKeyboardMarkup:
     line = GEO_CATALOG[geo]["catalog"][line_key]
     buttons = [
-        [InlineKeyboardButton(text=sec["label"],
+        [InlineKeyboardButton(text=f"📂 {sec['label']}",
                               callback_data=f"section:{geo}:{line_key}:{sec_key}")]
         for sec_key, sec in line["sections"].items()
         if sec.get("items")
@@ -70,7 +70,7 @@ def sections_menu(geo: str, line_key: str) -> InlineKeyboardMarkup:
 def items_menu(geo: str, line_key: str, sec_key: str) -> InlineKeyboardMarkup:
     section = GEO_CATALOG[geo]["catalog"][line_key]["sections"][sec_key]
     buttons = [
-        [InlineKeyboardButton(text=item["label"],
+        [InlineKeyboardButton(text=f"📄 {item['label']}",
                               callback_data=f"item:{geo}:{item_key}")]
         for item_key, item in section["items"].items()
     ]

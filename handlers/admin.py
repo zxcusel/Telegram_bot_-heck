@@ -1,5 +1,6 @@
 """Админ-панель."""
-from aiogram import Router, F
+from aiogram import Router
+from aiogram.enums import ParseMode, F
 from aiogram.types import Message, CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
@@ -14,6 +15,11 @@ from data.db import (
 )
 
 router = Router()
+
+# ── Дизайн-токены ──────────────────────────────────────────────────────────────
+PM = ParseMode.HTML
+DIV = "━━━━━━━━━━━━━━━━━━━━"
+BULLET = "▫️"
 
 
 class AdminStates(StatesGroup):
@@ -159,7 +165,7 @@ async def show_admin_panel(event, state: FSMContext):
 @router.callback_query(F.data == "admin:back_main")
 async def cb_back_main(call: CallbackQuery, state: FSMContext):
     if not is_admin(call.from_user.id):
-        await call.answer("⛔ Нет доступа", show_alert=True); return
+        await call.answer("⛔ Нет доступа", show_alert=True, parse_mode=PM); return
     try: await call.answer()
     except Exception: pass
     await state.clear()
@@ -180,7 +186,7 @@ async def cb_exit(call: CallbackQuery, state: FSMContext):
 @router.callback_query(F.data == "admin:set_role")
 async def cb_set_role_start(call: CallbackQuery, state: FSMContext):
     if not is_admin(call.from_user.id):
-        await call.answer("⛔ Нет доступа", show_alert=True); return
+        await call.answer("⛔ Нет доступа", show_alert=True, parse_mode=PM); return
     try: await call.answer()
     except Exception: pass
     await _safe_edit(call.message, "🆔 Введите Telegram ID пользователя:", _back_to_main_kb())
@@ -227,7 +233,7 @@ async def process_target_id(message: Message, state: FSMContext):
 @router.callback_query(F.data.startswith("admin:toggle:"))
 async def cb_toggle_role(call: CallbackQuery, state: FSMContext):
     if not is_admin(call.from_user.id):
-        await call.answer("⛔ Нет доступа", show_alert=True); return
+        await call.answer("⛔ Нет доступа", show_alert=True, parse_mode=PM); return
     try: await call.answer()
     except Exception: pass
     parts     = call.data.split(":")
@@ -249,7 +255,7 @@ async def cb_toggle_role(call: CallbackQuery, state: FSMContext):
 @router.callback_query(F.data.startswith("admin:geo:"))
 async def cb_toggle_geo(call: CallbackQuery, state: FSMContext):
     if not is_admin(call.from_user.id):
-        await call.answer("⛔ Нет доступа", show_alert=True); return
+        await call.answer("⛔ Нет доступа", show_alert=True, parse_mode=PM); return
     try: await call.answer()
     except Exception: pass
     parts     = call.data.split(":")   # admin:geo:bo:12345
@@ -271,7 +277,7 @@ async def cb_toggle_geo(call: CallbackQuery, state: FSMContext):
 @router.callback_query(F.data.startswith("admin:clear:"))
 async def cb_clear_roles(call: CallbackQuery, state: FSMContext):
     if not is_admin(call.from_user.id):
-        await call.answer("⛔ Нет доступа", show_alert=True); return
+        await call.answer("⛔ Нет доступа", show_alert=True, parse_mode=PM); return
     try: await call.answer()
     except Exception: pass
     target_id = int(call.data.split(":")[2])
@@ -286,10 +292,10 @@ async def cb_clear_roles(call: CallbackQuery, state: FSMContext):
 @router.callback_query(F.data.startswith("admin:demote:"))
 async def cb_demote_admin(call: CallbackQuery, state: FSMContext):
     if not is_admin(call.from_user.id):
-        await call.answer("⛔ Нет доступа", show_alert=True); return
+        await call.answer("⛔ Нет доступа", show_alert=True, parse_mode=PM); return
     target_id = int(call.data.split(":")[2])
     if target_id == call.from_user.id:
-        await call.answer("⛔ Нельзя снять себя.", show_alert=True); return
+        await call.answer("⛔ Нельзя снять себя.", show_alert=True, parse_mode=PM); return
     try: await call.answer()
     except Exception: pass
     remove_admin(target_id)
@@ -302,7 +308,7 @@ async def cb_demote_admin(call: CallbackQuery, state: FSMContext):
 @router.callback_query(F.data.startswith("admin:promote:"))
 async def cb_promote_admin(call: CallbackQuery, state: FSMContext):
     if not is_admin(call.from_user.id):
-        await call.answer("⛔ Нет доступа", show_alert=True); return
+        await call.answer("⛔ Нет доступа", show_alert=True, parse_mode=PM); return
     try: await call.answer()
     except Exception: pass
     target_id = int(call.data.split(":")[2])
@@ -319,7 +325,7 @@ async def cb_promote_admin(call: CallbackQuery, state: FSMContext):
 @router.callback_query(F.data == "admin:user_list")
 async def cb_user_list(call: CallbackQuery, state: FSMContext):
     if not is_admin(call.from_user.id):
-        await call.answer("⛔ Нет доступа", show_alert=True); return
+        await call.answer("⛔ Нет доступа", show_alert=True, parse_mode=PM); return
     try: await call.answer()
     except Exception: pass
 
@@ -366,7 +372,7 @@ async def cb_ban_menu(call: CallbackQuery, state: FSMContext):
     users = get_all_users_all()
     candidates = [u for u in users if u != call.from_user.id and not is_banned(u)]
     if not candidates:
-        await call.answer("Нет активных пользователей.", show_alert=True)
+        await call.answer("Нет активных пользователей.", show_alert=True, parse_mode=PM)
         return
     try: await call.answer()
     except Exception: pass
@@ -385,7 +391,7 @@ async def cb_blacklist_menu(call: CallbackQuery, state: FSMContext):
     users = get_all_users_all()
     candidates = [u for u in users if u != call.from_user.id and is_banned(u)]
     if not candidates:
-        await call.answer("ЧС пуст.", show_alert=True)
+        await call.answer("ЧС пуст.", show_alert=True, parse_mode=PM)
         return
     try: await call.answer()
     except Exception: pass
@@ -407,10 +413,10 @@ async def cb_toggle_ban(call: CallbackQuery, state: FSMContext):
     
     if do_ban:
         ban_user(target_id)
-        await call.answer("Пользователь забанен!")
+        await call.answer("Пользователь забанен!", parse_mode=PM)
     else:
         unban_user(target_id)
-        await call.answer("Пользователь разбанен!")
+        await call.answer("Пользователь разбанен!", parse_mode=PM)
     
     await _safe_edit(call.message, "✅ Успешно обновлено.", _back_to_main_kb())
 
@@ -484,7 +490,7 @@ async def cb_broadcast_indiv(call: CallbackQuery, state: FSMContext):
     if not is_admin(call.from_user.id): return
     users = get_all_users_all()
     if not users:
-        await call.answer("Нет пользователей", show_alert=True)
+        await call.answer("Нет пользователей", show_alert=True, parse_mode=PM)
         return
     try: await call.answer()
     except Exception: pass

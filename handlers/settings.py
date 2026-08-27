@@ -1,7 +1,8 @@
 """
 Управление настройками пользователя: рандомайзер, закрепление даты, AM/PM.
 """
-from aiogram import Router, F
+from aiogram import Router
+from aiogram.enums import ParseMode, F
 from aiogram.types import CallbackQuery, Message, InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
@@ -11,6 +12,11 @@ from keyboards.inline import cancel_kb
 from utils.logger import log
 
 router = Router()
+
+# ── Дизайн-токены ──────────────────────────────────────────────────────────────
+PM = ParseMode.HTML
+DIV = "━━━━━━━━━━━━━━━━━━━━"
+BULLET = "▫️"
 
 class SettingStates(StatesGroup):
     wait_min = State()
@@ -113,7 +119,7 @@ async def cb_settings_main(call: CallbackQuery, state: FSMContext):
 
 @router.callback_query(F.data == "set:toggle_rand")
 async def cb_toggle_rand(call: CallbackQuery):
-    try: await call.answer("Рандомайзер сумм изменен")
+    try: await call.answer("Рандомайзер сумм изменен", parse_mode=PM)
     except Exception: pass
     s = get_settings(call.from_user.id)
     new_val = 0 if s["rand_enabled"] else 1
@@ -124,7 +130,7 @@ async def cb_toggle_rand(call: CallbackQuery):
 
 @router.callback_query(F.data == "set:toggle_rand_percent")
 async def cb_toggle_rand_percent(call: CallbackQuery):
-    try: await call.answer("Рандомайзер процентов изменен")
+    try: await call.answer("Рандомайзер процентов изменен", parse_mode=PM)
     except Exception: pass
     s = get_settings(call.from_user.id)
     new_val = 0 if s.get("rand_percent_enabled") else 1
@@ -135,7 +141,7 @@ async def cb_toggle_rand_percent(call: CallbackQuery):
 
 @router.callback_query(F.data == "set:toggle_rand_bank")
 async def cb_toggle_rand_bank(call: CallbackQuery):
-    try: await call.answer("Рандомайзер банков изменен")
+    try: await call.answer("Рандомайзер банков изменен", parse_mode=PM)
     except Exception: pass
     s = get_settings(call.from_user.id)
     new_val = 0 if s.get("rand_bank_enabled") else 1
@@ -146,7 +152,7 @@ async def cb_toggle_rand_bank(call: CallbackQuery):
 
 @router.callback_query(F.data == "set:toggle_rand_acc")
 async def cb_toggle_rand_acc(call: CallbackQuery):
-    try: await call.answer("Рандомайзер счетов изменен")
+    try: await call.answer("Рандомайзер счетов изменен", parse_mode=PM)
     except Exception: pass
     s = get_settings(call.from_user.id)
     new_val = 0 if s.get("rand_acc_enabled") else 1
@@ -157,7 +163,7 @@ async def cb_toggle_rand_acc(call: CallbackQuery):
 
 @router.callback_query(F.data == "set:toggle_rand_name")
 async def cb_toggle_rand_name(call: CallbackQuery):
-    try: await call.answer("Рандомайзер имен изменен")
+    try: await call.answer("Рандомайзер имен изменен", parse_mode=PM)
     except Exception: pass
     s = get_settings(call.from_user.id)
     new_val = 0 if s.get("rand_name_enabled") else 1
@@ -168,7 +174,7 @@ async def cb_toggle_rand_name(call: CallbackQuery):
 
 @router.callback_query(F.data == "set:toggle_blur_checks")
 async def cb_toggle_blur_checks(call: CallbackQuery):
-    try: await call.answer("Блюр чеков изменен")
+    try: await call.answer("Блюр чеков изменен", parse_mode=PM)
     except Exception: pass
     s = get_settings(call.from_user.id)
     new_val = 0 if s.get("blur_enabled", 1) else 1
@@ -179,7 +185,7 @@ async def cb_toggle_blur_checks(call: CallbackQuery):
 
 @router.callback_query(F.data == "set:toggle_blur_qr")
 async def cb_toggle_blur_qr(call: CallbackQuery):
-    try: await call.answer("Блюр КР / счета изменен")
+    try: await call.answer("Блюр КР / счета изменен", parse_mode=PM)
     except Exception: pass
     s = get_settings(call.from_user.id)
     new_val = 0 if s.get("blur_qr_enabled", 1) else 1
@@ -190,7 +196,7 @@ async def cb_toggle_blur_qr(call: CallbackQuery):
 
 @router.callback_query(F.data.in_({"set:toggle_jose", "set:toggle_jose_sender"}))
 async def cb_toggle_jose_sender(call: CallbackQuery):
-    try: await call.answer("Отправитель JOSE изменен")
+    try: await call.answer("Отправитель JOSE изменен", parse_mode=PM)
     except Exception: pass
     s = get_settings(call.from_user.id)
     new_val = 0 if s.get("jose_sender_enabled") else 1
@@ -210,7 +216,7 @@ async def cb_toggle_jose_sender(call: CallbackQuery):
 
 @router.callback_query(F.data == "set:toggle_jose_recipient")
 async def cb_toggle_jose_recipient(call: CallbackQuery):
-    try: await call.answer("Получатель JOSE изменен")
+    try: await call.answer("Получатель JOSE изменен", parse_mode=PM)
     except Exception: pass
     s = get_settings(call.from_user.id)
     new_val = 0 if s.get("jose_recipient_enabled") else 1
@@ -230,7 +236,7 @@ async def cb_toggle_jose_recipient(call: CallbackQuery):
 
 @router.callback_query(F.data == "set:toggle_custom_name")
 async def cb_toggle_custom_name(call: CallbackQuery):
-    try: await call.answer("Авто-ФИО изменено")
+    try: await call.answer("Авто-ФИО изменено", parse_mode=PM)
     except Exception: pass
     s = get_settings(call.from_user.id)
     new_val = 0 if s.get("custom_name_enabled") else 1
@@ -253,7 +259,7 @@ async def cb_toggle_custom_name(call: CallbackQuery):
 async def cb_toggle_custom_target(call: CallbackQuery):
     s = get_settings(call.from_user.id)
     new_target = "recipient" if s.get("custom_name_target") == "sender" else "sender"
-    try: await call.answer(f"Направление: {'Отправитель' if new_target == 'sender' else 'Получатель'}")
+    try: await call.answer(f"Направление: {'Отправитель' if new_target == 'sender' else 'Получатель'}", parse_mode=PM)
     except Exception: pass
     update_setting(call.from_user.id, "custom_name_target", new_target)
     log.setting_changed(call.from_user.id, "custom_name_target", new_target, call.from_user.username)
@@ -279,7 +285,7 @@ async def cb_set_custom_name_val(call: CallbackQuery, state: FSMContext):
         [InlineKeyboardButton(text="🗑️ Сбросить значение", callback_data="set:clear_custom_name_val")],
         [InlineKeyboardButton(text="❌ Отмена",                 callback_data="set:cancel")]
     ])
-    await call.message.edit_text("⌨️ Введите Авто-ФИО (например, Ivanov Ivan):", reply_markup=kb)
+    await call.message.edit_text("⌨️ Введите Авто-ФИО (например, Ivanov Ivan):", reply_markup=kb, parse_mode=PM)
 
 
 @router.callback_query(F.data == "set:clear_custom_name_val")
@@ -302,7 +308,7 @@ async def cb_clear_name_blacklist(call: CallbackQuery):
 
 @router.callback_query(F.data == "set:confirm_clear_name_blacklist")
 async def cb_confirm_clear_name_blacklist(call: CallbackQuery):
-    try: await call.answer("Блэклист имен успешно очищен!")
+    try: await call.answer("Блэклист имен успешно очищен!", parse_mode=PM)
     except Exception: pass
     clear_name_blacklist()
     log.setting_changed(call.from_user.id, "name_blacklist", "cleared", call.from_user.username)
@@ -311,7 +317,7 @@ async def cb_confirm_clear_name_blacklist(call: CallbackQuery):
 
 @router.callback_query(F.data == "set:cancel_clear_name_blacklist")
 async def cb_cancel_clear_name_blacklist(call: CallbackQuery):
-    try: await call.answer("Сброс отменен")
+    try: await call.answer("Сброс отменен", parse_mode=PM)
     except Exception: pass
     await call.message.edit_reply_markup(reply_markup=settings_kb(call.from_user.id, confirm_clear=False))
 
@@ -325,7 +331,7 @@ async def cb_toggle_suffix(call: CallbackQuery):
     except ValueError:
         idx = 0
     new_suffix = options[(idx + 1) % len(options)]
-    try: await call.answer(f"Суффикс: {new_suffix or 'Отключен'}")
+    try: await call.answer(f"Суффикс: {new_suffix or 'Отключен'}", parse_mode=PM)
     except Exception: pass
     update_setting(call.from_user.id, "time_suffix", new_suffix)
     log.setting_changed(call.from_user.id, "time_suffix", new_suffix, call.from_user.username)
@@ -338,7 +344,7 @@ async def cb_set_min(call: CallbackQuery, state: FSMContext):
     except Exception: pass
     await state.set_state(SettingStates.wait_min)
     await state.update_data(settings_msg_id=call.message.message_id)
-    await call.message.edit_text("⌨️ Введите минимальную сумму для рандомайзера:", reply_markup=cancel_kb("set:cancel"))
+    await call.message.edit_text("⌨️ Введите минимальную сумму для рандомайзера:", reply_markup=cancel_kb("set:cancel"), parse_mode=PM)
 
 
 @router.callback_query(F.data == "set:max")
@@ -347,7 +353,7 @@ async def cb_set_max(call: CallbackQuery, state: FSMContext):
     except Exception: pass
     await state.set_state(SettingStates.wait_max)
     await state.update_data(settings_msg_id=call.message.message_id)
-    await call.message.edit_text("⌨️ Введите максимальную сумму для рандомайзера:", reply_markup=cancel_kb("set:cancel"))
+    await call.message.edit_text("⌨️ Введите максимальную сумму для рандомайзера:", reply_markup=cancel_kb("set:cancel"), parse_mode=PM)
 
 
 @router.callback_query(F.data == "set:percent_min")
@@ -356,7 +362,7 @@ async def cb_set_percent_min(call: CallbackQuery, state: FSMContext):
     except Exception: pass
     await state.set_state(SettingStates.wait_percent_min)
     await state.update_data(settings_msg_id=call.message.message_id)
-    await call.message.edit_text("⌨️ Введите минимальный процент для рандомайзера (например, 1.0):", reply_markup=cancel_kb("set:cancel"))
+    await call.message.edit_text("⌨️ Введите минимальный процент для рандомайзера (например, 1.0):", reply_markup=cancel_kb("set:cancel"), parse_mode=PM)
 
 
 @router.callback_query(F.data == "set:percent_max")
@@ -365,7 +371,7 @@ async def cb_set_percent_max(call: CallbackQuery, state: FSMContext):
     except Exception: pass
     await state.set_state(SettingStates.wait_percent_max)
     await state.update_data(settings_msg_id=call.message.message_id)
-    await call.message.edit_text("⌨️ Введите максимальный процент для рандомайзера (например, 100.0):", reply_markup=cancel_kb("set:cancel"))
+    await call.message.edit_text("⌨️ Введите максимальный процент для рандомайзера (например, 100.0):", reply_markup=cancel_kb("set:cancel"), parse_mode=PM)
 
 
 @router.callback_query(F.data == "set:rocket_min")
@@ -374,7 +380,7 @@ async def cb_set_rocket_min(call: CallbackQuery, state: FSMContext):
     except Exception: pass
     await state.set_state(SettingStates.wait_rocket_min)
     await state.update_data(settings_msg_id=call.message.message_id)
-    await call.message.edit_text("⌨️ Введите минимальное число X для ракеток:", reply_markup=cancel_kb("set:cancel"))
+    await call.message.edit_text("⌨️ Введите минимальное число X для ракеток:", reply_markup=cancel_kb("set:cancel"), parse_mode=PM)
 
 
 @router.callback_query(F.data == "set:rocket_max")
@@ -383,7 +389,7 @@ async def cb_set_rocket_max(call: CallbackQuery, state: FSMContext):
     except Exception: pass
     await state.set_state(SettingStates.wait_rocket_max)
     await state.update_data(settings_msg_id=call.message.message_id)
-    await call.message.edit_text("⌨️ Введите максимальное число X для ракеток:", reply_markup=cancel_kb("set:cancel"))
+    await call.message.edit_text("⌨️ Введите максимальное число X для ракеток:", reply_markup=cancel_kb("set:cancel"), parse_mode=PM)
 
 
 @router.callback_query(F.data == "set:noop")
@@ -405,7 +411,7 @@ async def cb_set_pinned(call: CallbackQuery, state: FSMContext):
         [InlineKeyboardButton(text="❌ Отмена",        callback_data="set:cancel")]
     ])
     
-    await call.message.edit_text("⌨️ Введите дату, которую нужно закрепить (например, 12.04.2026):", reply_markup=kb)
+    await call.message.edit_text("⌨️ Введите дату, которую нужно закрепить (например, 12.04.2026):", reply_markup=kb, parse_mode=PM)
 
 
 @router.callback_query(F.data == "set:pinned_name")
@@ -418,7 +424,7 @@ async def cb_set_name(call: CallbackQuery, state: FSMContext):
         [InlineKeyboardButton(text="🗑️ Сбросить ФИО", callback_data="set:clear_name")],
         [InlineKeyboardButton(text="❌ Отмена",         callback_data="set:cancel")]
     ])
-    await call.message.edit_text("⌨️ Введите ФИО (например, Ivanov Ivan):", reply_markup=kb)
+    await call.message.edit_text("⌨️ Введите ФИО (например, Ivanov Ivan):", reply_markup=kb, parse_mode=PM)
 
 
 @router.callback_query(F.data == "set:pinned_bank")
@@ -431,7 +437,7 @@ async def cb_set_bank(call: CallbackQuery, state: FSMContext):
         [InlineKeyboardButton(text="🗑️ Сбросить банк", callback_data="set:clear_bank")],
         [InlineKeyboardButton(text="❌ Отмена",         callback_data="set:cancel")]
     ])
-    await call.message.edit_text("⌨️ Введите название банка (например, YAPE):", reply_markup=kb)
+    await call.message.edit_text("⌨️ Введите название банка (например, YAPE):", reply_markup=kb, parse_mode=PM)
 
 
 @router.callback_query(F.data == "set:cancel")
@@ -494,7 +500,7 @@ async def process_min(message: Message, state: FSMContext):
             )
         await state.clear()
     except Exception:
-        await message.answer("❌ Введите целое число.")
+        await message.answer("❌ Введите целое число.", parse_mode=PM)
 
 @router.message(SettingStates.wait_max, F.text)
 async def process_max(message: Message, state: FSMContext):
@@ -513,7 +519,7 @@ async def process_max(message: Message, state: FSMContext):
             )
         await state.clear()
     except Exception:
-        await message.answer("❌ Введите целое число.")
+        await message.answer("❌ Введите целое число.", parse_mode=PM)
 
 @router.message(SettingStates.wait_percent_min, F.text)
 async def process_percent_min(message: Message, state: FSMContext):
@@ -532,7 +538,7 @@ async def process_percent_min(message: Message, state: FSMContext):
             )
         await state.clear()
     except Exception:
-        await message.answer("❌ Введите число (например, 1.5).")
+        await message.answer("❌ Введите число (например, 1.5).", parse_mode=PM)
 
 @router.message(SettingStates.wait_percent_max, F.text)
 async def process_percent_max(message: Message, state: FSMContext):
@@ -551,7 +557,7 @@ async def process_percent_max(message: Message, state: FSMContext):
             )
         await state.clear()
     except Exception:
-        await message.answer("❌ Введите число (например, 100.0).")
+        await message.answer("❌ Введите число (например, 100.0).", parse_mode=PM)
 
 @router.message(SettingStates.wait_pinned_date, F.text)
 async def process_pinned_date(message: Message, state: FSMContext):
@@ -618,7 +624,7 @@ async def process_rocket_min(message: Message, state: FSMContext):
             )
         await state.clear()
     except Exception:
-        await message.answer("❌ Введите целое число.")
+        await message.answer("❌ Введите целое число.", parse_mode=PM)
 
 @router.message(SettingStates.wait_rocket_max, F.text)
 async def process_rocket_max(message: Message, state: FSMContext):
@@ -637,7 +643,7 @@ async def process_rocket_max(message: Message, state: FSMContext):
             )
         await state.clear()
     except Exception:
-        await message.answer("❌ Введите целое число.")
+        await message.answer("❌ Введите целое число.", parse_mode=PM)
 
 @router.message(SettingStates.wait_custom_name_val, F.text)
 async def process_custom_name_val(message: Message, state: FSMContext):

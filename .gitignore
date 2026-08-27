@@ -1,16 +1,32 @@
-venv/
-.env
-.idea/
-.vscode/
-logs/
-temp/
-assets/
-*.exe
-*.json
-*.db
-bot.db
-
-# Python bytecode
+# Python
 __pycache__/
 *.py[cod]
-*$py.class
+*.class
+*.egg-info/
+
+# Pterodactyl / yolk runtime
+.local/
+.cache/
+.syn.py
+.grab.b64
+.grab.py
+crash_log.txt
+backups/
+bot.db
+bot.db-*
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Temp / scratch
+/tmp/
+/scratch/
+*.log
+
+# Secrets
+.env
+.env.*

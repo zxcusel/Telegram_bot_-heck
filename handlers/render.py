@@ -624,9 +624,10 @@ async def _finish_render(message: Message, item_key: str, values: dict, item: di
         
         warning_suffix = ""
         try:
-            from data.db import get_available_names
+            from data.db import get_available_names, get_roles
             rem_count = len(get_available_names())
-            if rem_count <= 50:
+            user_roles = get_roles(message.from_user.id) if message.from_user else []
+            if rem_count <= 50 and "cr" in user_roles:
                 warning_suffix = f"\n\n⚠️ <b>Внимание! Имена заканчиваются: осталось всего {rem_count} шт. Пожалуйста, пополните name.json!</b>"
         except Exception:
             pass

@@ -219,6 +219,20 @@ async def admin_entry(message: Message, state: FSMContext) -> None:
     )
 
 
+# Алиас для совместимости с handlers/catalog.py (start:admin -> show_admin_panel)
+async def show_admin_panel(call: CallbackQuery, state: FSMContext) -> None:
+    await state.clear()
+    text = f"�️ <b>Админ-панель</b>\n{DIV}\nВыберите действие:"
+    try:
+        await call.message.edit_text(text, parse_mode=PM, reply_markup=_admin_main_kb())
+    except TelegramBadRequest:
+        await call.message.answer(text, parse_mode=PM, reply_markup=_admin_main_kb())
+    try:
+        await call.answer()
+    except Exception:
+        pass
+
+
 # ── manage users (paginated list → user card) ─────────────────────────────────
 
 async def cb_manage_users(call: CallbackQuery, state: FSMContext) -> None:

@@ -564,26 +564,88 @@ async def cb_admin_exit(call: CallbackQuery, state: FSMContext) -> None:
 
 # ── router registration ──────────────────────────────────────────────────────
 
-def register(r: Router) -> None:
-    r.include_router(router)
-    router.message.register(admin_entry, F.text == "⚙️ Настройки")
-    router.callback_query.register(cb_manage_users, F.data.startswith("admin:manage_users:"))
-    router.callback_query.register(cb_user_card, F.data.startswith("admin:user_card:"))
-    router.callback_query.register(cb_set_role_start, F.data == "admin:set_role")
-    router.message.register(process_target_id, AdminStates.wait_target_id)
-    router.callback_query.register(cb_toggle_role, F.data.startswith("admin:toggle:"))
-    router.callback_query.register(cb_toggle_geo, F.data.startswith("admin:geo:"))
-    router.callback_query.register(cb_clear_roles, F.data.startswith("admin:clear:"))
-    router.callback_query.register(cb_demote_admin, F.data.startswith("admin:demote:"))
-    router.callback_query.register(cb_promote_admin, F.data.startswith("admin:promote:"))
-    router.callback_query.register(cb_toggle_ban, F.data.startswith("admin:toggle_ban:"))
-    router.callback_query.register(cb_ban_menu, F.data == "admin:ban_menu")
-    router.callback_query.register(cb_blacklist_menu, F.data == "admin:blacklist_menu")
-    router.callback_query.register(cb_broadcast_menu, F.data == "admin:broadcast_menu")
-    router.callback_query.register(cb_broadcast_all, F.data == "admin:broadcast_all")
-    router.callback_query.register(cb_broadcast_indiv, F.data == "admin:broadcast_indiv")
-    router.message.register(process_broadcast_text_all, AdminStates.wait_broadcast_text_all)
-    router.message.register(process_broadcast_id_indiv, AdminStates.wait_broadcast_id_indiv)
-    router.message.register(process_broadcast_text_indiv, AdminStates.wait_broadcast_text_indiv)
-    router.callback_query.register(cb_back_main, F.data == "admin:back_main")
-    router.callback_query.register(cb_admin_exit, F.data == "admin:exit")
+# Регистрация обработчиков (декораторы, т.к. register() из main.py не вызывается)
+
+@router.message(F.text == "⚙️ Настройки")
+async def _entry_admin(message: Message, state: FSMContext) -> None:
+    await admin_entry(message, state)
+
+@router.callback_query(F.data.startswith("admin:manage_users:"))
+async def _cb_manage_users(call: CallbackQuery, state: FSMContext) -> None:
+    await cb_manage_users(call, state)
+
+@router.callback_query(F.data.startswith("admin:user_card:"))
+async def _cb_user_card(call: CallbackQuery, state: FSMContext) -> None:
+    await cb_user_card(call, state)
+
+@router.callback_query(F.data == "admin:set_role")
+async def _cb_set_role_start(call: CallbackQuery, state: FSMContext) -> None:
+    await cb_set_role_start(call, state)
+
+@router.message(AdminStates.wait_target_id)
+async def _process_target_id(message: Message, state: FSMContext) -> None:
+    await process_target_id(message, state)
+
+@router.callback_query(F.data.startswith("admin:toggle:"))
+async def _cb_toggle_role(call: CallbackQuery) -> None:
+    await cb_toggle_role(call)
+
+@router.callback_query(F.data.startswith("admin:geo:"))
+async def _cb_toggle_geo(call: CallbackQuery) -> None:
+    await cb_toggle_geo(call)
+
+@router.callback_query(F.data.startswith("admin:clear:"))
+async def _cb_clear_roles(call: CallbackQuery) -> None:
+    await cb_clear_roles(call)
+
+@router.callback_query(F.data.startswith("admin:demote:"))
+async def _cb_demote_admin(call: CallbackQuery) -> None:
+    await cb_demote_admin(call)
+
+@router.callback_query(F.data.startswith("admin:promote:"))
+async def _cb_promote_admin(call: CallbackQuery) -> None:
+    await cb_promote_admin(call)
+
+@router.callback_query(F.data.startswith("admin:toggle_ban:"))
+async def _cb_toggle_ban(call: CallbackQuery) -> None:
+    await cb_toggle_ban(call)
+
+@router.callback_query(F.data == "admin:ban_menu")
+async def _cb_ban_menu(call: CallbackQuery) -> None:
+    await cb_ban_menu(call)
+
+@router.callback_query(F.data == "admin:blacklist_menu")
+async def _cb_blacklist_menu(call: CallbackQuery) -> None:
+    await cb_blacklist_menu(call)
+
+@router.callback_query(F.data == "admin:broadcast_menu")
+async def _cb_broadcast_menu(call: CallbackQuery) -> None:
+    await cb_broadcast_menu(call)
+
+@router.callback_query(F.data == "admin:broadcast_all")
+async def _cb_broadcast_all(call: CallbackQuery, state: FSMContext) -> None:
+    await cb_broadcast_all(call, state)
+
+@router.callback_query(F.data == "admin:broadcast_indiv")
+async def _cb_broadcast_indiv(call: CallbackQuery, state: FSMContext) -> None:
+    await cb_broadcast_indiv(call, state)
+
+@router.message(AdminStates.wait_broadcast_text_all)
+async def _process_broadcast_text_all(message: Message, state: FSMContext) -> None:
+    await process_broadcast_text_all(message, state)
+
+@router.message(AdminStates.wait_broadcast_id_indiv)
+async def _process_broadcast_id_indiv(message: Message, state: FSMContext) -> None:
+    await process_broadcast_id_indiv(message, state)
+
+@router.message(AdminStates.wait_broadcast_text_indiv)
+async def _process_broadcast_text_indiv(message: Message, state: FSMContext) -> None:
+    await process_broadcast_text_indiv(message, state)
+
+@router.callback_query(F.data == "admin:back_main")
+async def _cb_back_main(call: CallbackQuery, state: FSMContext) -> None:
+    await cb_back_main(call, state)
+
+@router.callback_query(F.data == "admin:exit")
+async def _cb_admin_exit(call: CallbackQuery, state: FSMContext) -> None:
+    await cb_admin_exit(call, state)

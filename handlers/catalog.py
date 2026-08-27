@@ -76,22 +76,29 @@ async def cb_start_clear(call: CallbackQuery, state: FSMContext):
         parse_mode=PM,
     )
     start_id = new_msg.message_id - 1
-    # Ограничиваемся 500 сообщениями, чтобы не ловить 429 Too Many Requests от Telegram
-    # и не пытаться удалять сообщения старше 48 часов, которые Telegram всё равно не позволит удалить.
-    ids = list(range(start_id, max(start_id - 500, 0), -1))
+    # Чистим весь чат: идём от самого нового сообщения к самому старому.
+    # Лимит Telegram — удаление сообщений старше 48 часов ботом запрещено,
+    # поэтому по одной штуке с паузой и глушим исключения.
+    if start_id < 1:
+        ids: list[int] = []
+    else:
+        ids = list(range(start_id, 0, -1))
+    # Чтобы не словить flood limit от Telegram, удаляем по 100 штук
+    # через delete_messages (одна операция), с микропаузой между батчами.
     for i in range(0, len(ids), 100):
-        batch = ids[i:i+100]
+        batch = ids[i:i + 100]
         try:
             await call.bot.delete_messages(chat_id=chat_id, message_ids=batch)
         except Exception:
-            # Если пачка не удалилась целиком (например, из-за слишком старых сообщений),
-            # удаляем по одному с микро-паузой
+            # Если пачка целиком не удаляется (например, из-за старых сообщений),
+            # пробуем по одному — те, что старше 48 часов, просто пропускаются.
             for m_id in batch:
                 try:
                     await call.bot.delete_message(chat_id=chat_id, message_id=m_id)
                 except Exception:
                     pass
-                await asyncio.sleep(0.01)
+                await asyncio.sleep(0.04)
+        await asyncio.sleep(0.05)
 
 
 # ── Начать → выбор гео ───────────────────────────────────────────────────────

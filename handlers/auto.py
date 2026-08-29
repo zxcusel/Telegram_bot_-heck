@@ -38,12 +38,14 @@ from aiogram.types import (
 
 from data.config import GEO_CATALOG
 from data.db import (
+    get_available_names,
     get_geos,
     has_any_access,
     is_admin,
 )
 from keyboards.auto_kb import (
     auto_back_kb,
+    auto_batch_done_kb,
     auto_main_kb,
     auto_pick_geo_kb,
     auto_pick_items_kb,
@@ -69,6 +71,7 @@ class AutoFSM(StatesGroup):
     entering_sum = State()
     entering_date = State()
     entering_timeline = State()
+    changing_date = State()
 
 
 # ── Точка входа ───────────────────────────────────────────────────────────────
@@ -391,6 +394,18 @@ async def auto_run(call: CallbackQuery, state: FSMContext):
                 if item_key in section.get("items", {})
             )
             values = _render_values(item, preset["date"], time_str, amount)
+            # Рандомный банк на каждый чек (если у item есть список banks)
+            banks = item.get("banks")
+            if banks:
+                values["bank"] = random.choice(banks)
+            # 50/50 мужские/женские имена: чередуем по индексу
+            prefer_gender = "male" if (i % 2 == 0) else "female"
+            name = _pick_random_name(prefer_gender)
+            values["name"] = name
+            values["fullname"] = name
+            values["name_1"] = name
+            values["name_2"] = name
+            _apply_gender_field(item, values, prefer_gender)
             rendered = render_image(item_key, values, preset["geo"], item=item)
             png_bytes = rendered.getvalue()
         except Exception as e:
@@ -422,8 +437,69 @@ async def auto_run(call: CallbackQuery, state: FSMContext):
 
     await call.message.answer(
         f"✅ <b>Готово!</b>\n{DIV}\nВсе <b>{total}</b> чеков отработаны. 🎉",
+        reply_markup=auto_batch_done_kb(),
         parse_mode=PM,
     )
+
+
+# ── Смена даты без перенастройки всего пресета ──────────────────────────────
+@router.callback_query(F.data == "auto:change_date")
+async def auto_change_date(call: CallbackQuery, state: FSMContext):
+    user_id = call.from_user.id
+    if not has_any_access(user_id):
+        await call.answer("⛔ Доступ запрещён", show_alert=True)
+        return
+    preset = _load_preset(user_id)
+    if not preset:
+        await call.answer("⚠️ Сначала настройте пресет", show_alert=True)
+        return
+    await state.set_state(AutoFSM.changing_date)
+    cur = preset.get("date", "—")
+    text = (
+        f"📅 <b>Изменить дату</b>\n"
+        f"{DIV}\n"
+        f"Текущая дата: <b>{cur}</b>\n\n"
+        f"Отправьте новую дату в формате <code>dd.mm.yyyy</code>\n"
+        f"Пример: <code>26.08.2026</code>"
+    )
+    await call.message.answer(text, reply_markup=auto_back_kb(), parse_mode=PM)
+    await call.answer()
+
+
+@router.message(AutoFSM.changing_date)
+async def auto_change_date_entered(message: Message, state: FSMContext):
+    raw = (message.text or "").strip()
+    try:
+        datetime.strptime(raw, "%d.%m.%Y")
+    except ValueError:
+        await message.answer(
+            f"❌ <b>Неверный формат даты</b>\n\n"
+            f"Используйте <code>dd.mm.yyyy</code>, например <code>26.08.2026</code>",
+            parse_mode=PM,
+        )
+        return
+    user_id = message.from_user.id
+    preset = _load_preset(user_id)
+    if not preset:
+        await state.clear()
+        await message.answer(
+            f"⚠️ Пресет не найден, настройте автоматизацию заново.",
+            reply_markup=auto_main_kb(has_preset=False),
+            parse_mode=PM,
+        )
+        return
+    preset["date"] = raw
+    _save_preset(user_id, preset)
+    await state.clear()
+    text = (
+        f"✅ <b>Дата обновлена!</b>\n"
+        f"{DIV}\n"
+        f"📅 Новая дата: <b>{raw}</b>\n\n"
+        f"{_format_preset(preset)}\n\n"
+        f"{DIV}\n"
+        f"▶️ Нажмите <b>«🚀 Запустить автоматизацию»</b> для старта."
+    )
+    await message.answer(text, reply_markup=auto_run_kb(), parse_mode=PM)
 
 
 # ── Утилиты ───────────────────────────────────────────────────────────────────
@@ -617,6 +693,72 @@ def _load_preset(user_id: int) -> dict | None:
     if not row:
         return None
     return json.loads(row["preset_json"])
+
+
+# ── Генератор имён 50/50 M/F ─────────────────────────────────────────────
+_FEMALE_NAME_RE = re.compile(r"[aá]\s*$", re.IGNORECASE)
+_MALE_NAME_RE = re.compile(r"o\s*$", re.IGNORECASE)
+
+
+def _classify_fio_gender(fio: str) -> str:
+    """Эвристика пола по последнему слову ФИО.
+    Испанские имена: женские обычно заканчиваются на 'a', мужские на 'o'.
+    Если непонятно — возвращаем 'unknown'.
+    """
+    parts = (fio or "").strip().split()
+    if not parts:
+        return "unknown"
+    last = parts[-1]
+    if _FEMALE_NAME_RE.search(last):
+        return "female"
+    if _MALE_NAME_RE.search(last):
+        return "male"
+    return "unknown"
+
+
+def _pick_random_name(prefer: str) -> str:
+    """Берёт случайное ФИО из name.json с учётом предпочтительного пола.
+    prefer: 'male' | 'female' | что угодно (тогда без фильтра).
+    Если подходящих нет — fallback на любое случайное.
+    """
+    pool = get_available_names() or []
+    if not pool:
+        return "AUTOMATION USER"
+    if prefer in ("male", "female"):
+        filtered = [n for n in pool if _classify_fio_gender(n) == prefer]
+        if not filtered:
+            filtered = pool
+    else:
+        filtered = pool
+    return random.choice(filtered)
+
+
+def _apply_gender_field(item: dict, values: dict, prefer: str) -> None:
+    """Если в item.fields есть поле с key='gender' — подставляем значение пола.
+    Испанские шаблоны: 'o' (male) / 'a' (female).
+    Арабские (Morocco): 'y' (male) / 't' (female).
+    Определяем по уже существующему default значения: если в default встречается
+    'o'/'a' — испанский; если 'y'/'t' — арабский.
+    """
+    for field in item.get("fields", []):
+        if field.get("key") != "gender":
+            continue
+        default = str(field.get("default", ""))
+        if prefer == "male":
+            if "o" in default and "y" not in default and "t" not in default:
+                values["gender"] = "o"
+            elif "y" in default:
+                values["gender"] = "y"
+            else:
+                values["gender"] = default or "o"
+        elif prefer == "female":
+            if "a" in default and "t" not in default:
+                values["gender"] = "a"
+            elif "t" in default:
+                values["gender"] = "t"
+            else:
+                values["gender"] = default or "a"
+        break
 
 
 def _render_values(item: dict, date: str, time: str, amount: int) -> dict:

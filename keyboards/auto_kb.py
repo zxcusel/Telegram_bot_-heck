@@ -139,6 +139,20 @@ def auto_run_kb() -> InlineKeyboardMarkup:
     ])
 
 
+def auto_batch_done_kb() -> InlineKeyboardMarkup:
+    """Клавиатура после завершения батча: вернуться в меню или сменить дату."""
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(
+            text="🏠 Главное меню автоматизации",
+            callback_data="auto:open",
+        )],
+        [InlineKeyboardButton(
+            text="📅 Изменить дату",
+            callback_data="auto:change_date",
+        )],
+    ])
+
+
 def _allowed_lines(role: str | None) -> list[str] | None:
     """Возвращает список разрешённых линеек по роли.
     None — нет ограничений (супер-админ / 'all')."""

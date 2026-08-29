@@ -60,11 +60,57 @@ def _welcome_text() -> str:
 
 # ── /start ───────────────────────────────────────────────────────────────────
 
+async def _wipe_chat(bot, chat_id: int) -> None:
+    """Best-effort wipe of all messages in the chat.
+    Telegram Bot API cannot delete messages older than 48 hours — those
+    are silently skipped. Batches of 100 with short pauses respect
+    flood limits; if a batch fails (mixed-age range) we fall back to
+    per-message delete so old messages are skipped without aborting.
+    """
+    # Нужен хотя бы один месседж, чтобы понять диапазон id.
+    probe = await bot.send_message(chat_id=chat_id, text="…", parse_mode=PM)
+    top_id = probe.message_id
+    # Прокси-сообщение удалим отдельно в самом конце, чтобы оно не мешало.
+    if top_id <= 1:
+        return
+    ids = list(range(top_id - 1, 0, -1))
+    for i in range(0, len(ids), 100):
+        batch = ids[i:i + 100]
+        try:
+            await bot.delete_messages(chat_id=chat_id, message_ids=batch)
+        except Exception:
+            for m_id in batch:
+                try:
+                    await bot.delete_message(chat_id=chat_id, message_id=m_id)
+                except Exception:
+                    pass
+                await asyncio.sleep(0.04)
+        await asyncio.sleep(0.05)
+    # Удаляем прокси.
+    try:
+        await bot.delete_message(chat_id=chat_id, message_id=top_id)
+    except Exception:
+        pass
+
+
 @router.message(CommandStart())
 async def cmd_start(message: Message, state: FSMContext):
     await state.clear()
     log.start(message.from_user.id, message.from_user.username)
-    await message.answer(_welcome_text(), reply_markup=_start_kb(message.from_user.id), parse_mode=PM)
+    chat_id = message.chat.id
+    # Удаляем саму команду /start
+    try:
+        await message.delete()
+    except Exception:
+        pass
+    # Полная очистка истории (с учётом 48-часового лимита Telegram).
+    await _wipe_chat(message.bot, chat_id)
+    await message.bot.send_message(
+        chat_id=chat_id,
+        text=_welcome_text(),
+        reply_markup=_start_kb(message.from_user.id),
+        parse_mode=PM,
+    )
 
 
 # ── Очистка чата ─────────────────────────────────────────────────────────────
@@ -76,35 +122,18 @@ async def cb_start_clear(call: CallbackQuery, state: FSMContext):
     log.clear_chat(call.from_user.id, call.from_user.username)
     try: await call.answer()
     except Exception: pass
-    new_msg = await call.bot.send_message(
-        chat_id=chat_id, text=_welcome_text(),
+    # Удаляем само сообщение с кнопкой "Очистить чат".
+    try:
+        await call.bot.delete_message(chat_id=chat_id, message_id=call.message.message_id)
+    except Exception:
+        pass
+    await _wipe_chat(call.bot, chat_id)
+    await call.bot.send_message(
+        chat_id=chat_id,
+        text=_welcome_text(),
         reply_markup=_start_kb(call.from_user.id),
         parse_mode=PM,
     )
-    start_id = new_msg.message_id - 1
-    # Чистим весь чат: идём от самого нового сообщения к самому старому.
-    # Лимит Telegram — удаление сообщений старше 48 часов ботом запрещено,
-    # поэтому по одной штуке с паузой и глушим исключения.
-    if start_id < 1:
-        ids: list[int] = []
-    else:
-        ids = list(range(start_id, 0, -1))
-    # Чтобы не словить flood limit от Telegram, удаляем по 100 штук
-    # через delete_messages (одна операция), с микропаузой между батчами.
-    for i in range(0, len(ids), 100):
-        batch = ids[i:i + 100]
-        try:
-            await call.bot.delete_messages(chat_id=chat_id, message_ids=batch)
-        except Exception:
-            # Если пачка целиком не удаляется (например, из-за старых сообщений),
-            # пробуем по одному — те, что старше 48 часов, просто пропускаются.
-            for m_id in batch:
-                try:
-                    await call.bot.delete_message(chat_id=chat_id, message_id=m_id)
-                except Exception:
-                    pass
-                await asyncio.sleep(0.04)
-        await asyncio.sleep(0.05)
 
 
 # ── Начать → выбор гео ───────────────────────────────────────────────────────

@@ -38,6 +38,96 @@ BULLET = "▫️"
 TICKETS_PER_PAGE = 10
 NOTIFY_BATCH = 25  # как часто даём паузу при рассылке админам
 
+# ── Anti-flood: состояние последнего «экрана» в чате ────────────────────────
+# _last_screen[chat_id] = {"msg_id": int, "extras": [int, ...]}
+# • msg_id    — id сообщения бота с «главным контентом» экрана (меню/тред)
+# • extras    — id вспомогательных сообщений (медиа из тикета, заглушки)
+# При показе нового экрана старый удаляется → в чате остаётся 1-2-3 сообщения.
+_last_screen: dict[int, dict] = {}
+
+
+async def _cleanup_last_screen(bot, chat_id: int) -> None:
+    """Удаляет предыдущий «экран» бота в чате (если был). Игнорирует ошибки."""
+    st = _last_screen.pop(chat_id, None)
+    if not st:
+        return
+    for mid in [st.get("msg_id"), *st.get("extras", [])]:
+        if not mid:
+            continue
+        try:
+            await bot.delete_message(chat_id=chat_id, message_id=mid)
+        except Exception:
+            pass
+
+
+async def _safe_send(
+    bot,
+    chat_id: int,
+    text: str,
+    kb: InlineKeyboardMarkup | None = None,
+    parse_mode=PM,
+) -> int:
+    """Удаляет предыдущий экран и шлёт новое сообщение. Возвращает message_id."""
+    await _cleanup_last_screen(bot, chat_id)
+    msg = await bot.send_message(chat_id=chat_id, text=text, reply_markup=kb, parse_mode=parse_mode)
+    _last_screen[chat_id] = {"msg_id": msg.message_id, "extras": []}
+    return msg.message_id
+
+
+def _remember_extra(chat_id: int, msg_id: int) -> None:
+    st = _last_screen.get(chat_id)
+    if st is not None:
+        st.setdefault("extras", []).append(msg_id)
+
+
+async def _render_screen(
+    bot,
+    chat_id: int,
+    text: str,
+    kb: InlineKeyboardMarkup | None,
+    parse_mode=PM,
+) -> int:
+    """Единая отрисовка «экрана»: удалить предыдущий + отправить новый.
+    Возвращает message_id нового сообщения."""
+    await _cleanup_last_screen(bot, chat_id)
+    msg = await bot.send_message(chat_id=chat_id, text=text, reply_markup=kb, parse_mode=parse_mode)
+    _last_screen[chat_id] = {"msg_id": msg.message_id, "extras": []}
+    return msg.message_id
+
+
+async def _render_view_from_call(call: CallbackQuery, text: str, kb: InlineKeyboardMarkup | None) -> int:
+    """Отрисовка из callback: чистит прошлый «экран» (если он отличается от
+    текущего callback.message) и шлёт новый."""
+    chat_id = call.message.chat.id
+    cur = _last_screen.get(chat_id, {}).get("msg_id")
+    if cur and cur != call.message.message_id:
+        # прошлый экран висит отдельно — удалим
+        try:
+            await call.bot.delete_message(chat_id=chat_id, message_id=cur)
+        except Exception:
+            pass
+        # удаляем и текущий callback.message (это обычно inline-кнопка из другого экрана)
+        try:
+            await call.bot.delete_message(chat_id=chat_id, message_id=call.message.message_id)
+        except Exception:
+            pass
+    elif cur == call.message.message_id:
+        # редактируем то же сообщение — без дублей
+        try:
+            await call.message.edit_text(text, reply_markup=kb, parse_mode=PM)
+            return call.message.message_id
+        except TelegramBadRequest:
+            pass
+    else:
+        # нет трекинга — удаляем callback.message (на нём была inline-кнопка)
+        try:
+            await call.bot.delete_message(chat_id=chat_id, message_id=call.message.message_id)
+        except Exception:
+            pass
+    msg = await call.bot.send_message(chat_id=chat_id, text=text, reply_markup=kb, parse_mode=PM)
+    _last_screen[chat_id] = {"msg_id": msg.message_id, "extras": []}
+    return msg.message_id
+
 
 # ── FSM ──────────────────────────────────────────────────────────────────────
 class TicketStates(StatesGroup):
@@ -353,7 +443,7 @@ def _format_ticket_thread(t: dict, is_admin_view: bool) -> str:
             who = "👤 Вы" if not is_admin_view else f"👤 {_user_label(m['author_id'])}"
         else:
             # Пользователь не видит id конкретного админа — только «Поддержка».
-            who = "💼 Поддержка" if not is_admin_view else f"👨‍💼 Админ ({m['author_id']})"
+            who = "💼 Поддержка" if not is_admin_view else "👨‍💼 Admin"
         body_lines.append(f"<b>{who}</b> · <i>{m['created_at']}</i>")
         # Медиа в треде: показываем плашку вместо текста (само медиа отправлено выше отдельным сообщением)
         media_type = m.get("media_type")
@@ -430,13 +520,7 @@ async def cb_tkt_new(call: CallbackQuery, state: FSMContext):
         f"Введите <b>тему</b> обращения одним коротким сообщением.\n\n"
         f"<i>Например: <code>Не запускается автоматизация</code></i>"
     )
-    if call.message.photo:
-        await call.message.answer(text, reply_markup=cancel_kb("tkt:menu"), parse_mode=PM)
-    else:
-        try:
-            await call.message.edit_text(text, reply_markup=cancel_kb("tkt:menu"), parse_mode=PM)
-        except TelegramBadRequest:
-            await call.message.answer(text, reply_markup=cancel_kb("tkt:menu"), parse_mode=PM)
+    await _render_view_from_call(call, text, cancel_kb("tkt:menu"))
 
 
 @router.message(TicketStates.entering_subject)
@@ -518,7 +602,7 @@ async def tkt_body_entered(message: Message, state: FSMContext):
             cap = f"🆕 Тикет #{tid} · {_user_label(user.id)}"
             for uid in get_all_admins() or []:
                 try:
-                    await _send_media_to_chat(bot, uid, m_dict, caption=cap, reply_markup=kb)
+                    await _send_media_to_chat_tracked(bot, uid, m_dict, caption=cap, reply_markup=kb)
                 except Exception as e:
                     log.error(f"forward media to admin {uid} failed: {e}")
 
@@ -548,13 +632,7 @@ async def cb_tkt_my(call: CallbackQuery, state: FSMContext):
         return
     text = f"📂 <b>Мои тикеты</b> ({len(rows)})\n{DIV}\nВыберите тикет:"
     kb = user_tickets_list_kb(rows)
-    if call.message.photo:
-        await call.message.answer(text, reply_markup=kb, parse_mode=PM)
-    else:
-        try:
-            await call.message.edit_text(text, reply_markup=kb, parse_mode=PM)
-        except TelegramBadRequest:
-            await call.message.answer(text, reply_markup=kb, parse_mode=PM)
+    await _render_view_from_call(call, text, kb)
 
 
 @router.callback_query(F.data.startswith("tkt:view:"))
@@ -572,13 +650,7 @@ async def cb_tkt_view(call: CallbackQuery, state: FSMContext):
     await state.set_state(TicketStates.viewing)
     text = _format_ticket_thread(t, is_admin_view=False)
     kb = ticket_view_kb(tid, is_admin_view=False)
-    if call.message.photo:
-        await call.message.answer(text, reply_markup=kb, parse_mode=PM)
-    else:
-        try:
-            await call.message.edit_text(text, reply_markup=kb, parse_mode=PM)
-        except TelegramBadRequest:
-            await call.message.answer(text, reply_markup=kb, parse_mode=PM)
+    await _render_view_from_call(call, text, kb)
 
 
 @router.callback_query(F.data.startswith("tkt:reply:"))
@@ -647,13 +719,13 @@ async def tkt_reply_entered(message: Message, state: FSMContext):
         [InlineKeyboardButton(text="👀 Открыть", callback_data=f"tkt:admin_view:{tid}")],
     ])
     await _notify_admins(message.bot, note, reply_markup=kb)
-    # Если есть медиа — пересылаем админам отдельным сообщением
+    # Если есть медиа — пересылаем админам отдельным сообщением (отслеживаем для авто-чистки)
     if media_type and media_file_id:
         m_dict = {"media_type": media_type, "media_file_id": media_file_id}
         cap = f"💬 Тикет #{tid} · {_user_label(message.from_user.id)}"
         for uid in get_all_admins() or []:
             try:
-                await _send_media_to_chat(message.bot, uid, m_dict, caption=cap, reply_markup=kb)
+                await _send_media_to_chat_tracked(message.bot, uid, m_dict, caption=cap, reply_markup=kb)
             except Exception as e:
                 log.error(f"forward user media to admin {uid} failed: {e}")
     await message.answer(
@@ -687,13 +759,7 @@ async def cb_tkt_admin_menu(call: CallbackQuery, state: FSMContext):
         [InlineKeyboardButton(text="📋 Все тикеты", callback_data="tkt:admin_list_all:0")],
         [InlineKeyboardButton(text="🔙 Назад", callback_data="admin:back_main")],
     ])
-    if call.message.photo:
-        await call.message.answer(text, reply_markup=kb, parse_mode=PM)
-    else:
-        try:
-            await call.message.edit_text(text, reply_markup=kb, parse_mode=PM)
-        except TelegramBadRequest:
-            await call.message.answer(text, reply_markup=kb, parse_mode=PM)
+    await _render_view_from_call(call, text, kb)
 
 
 @router.callback_query(F.data == "tkt:admin_list:0")
@@ -713,13 +779,7 @@ async def cb_tkt_admin_list(call: CallbackQuery, state: FSMContext):
     kb = admin_tickets_list_kb(rows) if rows else InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="🔙 Назад", callback_data="tkt:admin_menu")]
     ])
-    if call.message.photo:
-        await call.message.answer(text, reply_markup=kb, parse_mode=PM)
-    else:
-        try:
-            await call.message.edit_text(text, reply_markup=kb, parse_mode=PM)
-        except TelegramBadRequest:
-            await call.message.answer(text, reply_markup=kb, parse_mode=PM)
+    await _render_view_from_call(call, text, kb)
 
 
 @router.callback_query(F.data == "tkt:admin_list_all:0")
@@ -739,13 +799,7 @@ async def cb_tkt_admin_list_all(call: CallbackQuery, state: FSMContext):
     kb = admin_tickets_list_kb(rows) if rows else InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="🔙 Назад", callback_data="tkt:admin_menu")]
     ])
-    if call.message.photo:
-        await call.message.answer(text, reply_markup=kb, parse_mode=PM)
-    else:
-        try:
-            await call.message.edit_text(text, reply_markup=kb, parse_mode=PM)
-        except TelegramBadRequest:
-            await call.message.answer(text, reply_markup=kb, parse_mode=PM)
+    await _render_view_from_call(call, text, kb)
 
 
 @router.callback_query(F.data.startswith("tkt:admin_view:"))
@@ -764,13 +818,7 @@ async def cb_tkt_admin_view(call: CallbackQuery, state: FSMContext):
     await state.update_data(admin_view_tid=tid)
     text = _format_ticket_thread(t, is_admin_view=True)
     kb = ticket_view_kb(tid, is_admin_view=True)
-    if call.message.photo:
-        await call.message.answer(text, reply_markup=kb, parse_mode=PM)
-    else:
-        try:
-            await call.message.edit_text(text, reply_markup=kb, parse_mode=PM)
-        except TelegramBadRequest:
-            await call.message.answer(text, reply_markup=kb, parse_mode=PM)
+    await _render_view_from_call(call, text, kb)
 
 
 @router.callback_query(F.data.startswith("tkt:admin_reply:"))
@@ -857,12 +905,12 @@ async def admin_reply_entered(message: Message, state: FSMContext):
         )
     except Exception as e:
         log.error(f"notify user {t['user_id']} about admin reply failed: {e}")
-    # Пересылаем медиа пользователю, если есть
+    # Пересылаем медиа пользователю (отслеживаем для авто-чистки)
     if media_type and media_file_id:
         m_dict = {"media_type": media_type, "media_file_id": media_file_id}
         cap = f"💬 Ответ в тикете #{tid}"
         try:
-            await _send_media_to_chat(message.bot, t["user_id"], m_dict, caption=cap, reply_markup=user_kb)
+            await _send_media_to_chat_tracked(message.bot, t["user_id"], m_dict, caption=cap, reply_markup=user_kb)
         except Exception as e:
             log.error(f"forward admin media to user {t['user_id']} failed: {e}")
 
@@ -901,6 +949,40 @@ async def cb_tkt_admin_close(call: CallbackQuery, state: FSMContext):
                 await call.message.edit_text(text, reply_markup=kb, parse_mode=PM)
             except TelegramBadRequest:
                 await call.message.answer(text, reply_markup=kb, parse_mode=PM)
+
+
+async def _send_media_to_chat_tracked(bot, chat_id: int, m: dict,
+                                         caption: str | None = None,
+                                         reply_markup=None) -> int | None:
+    """Как _send_media_to_chat, но запоминает message_id в _last_screen[chat_id].extras,
+    чтобы при следующем «экране» в чате это сообщение удалилось автоматически."""
+    media_type = m.get("media_type")
+    file_id = m.get("media_file_id")
+    parse_mode = PM
+    if not media_type or not file_id:
+        return None
+    try:
+        if media_type == "photo":
+            sent = await bot.send_photo(chat_id, file_id, caption=caption, parse_mode=parse_mode, reply_markup=reply_markup)
+        elif media_type == "video":
+            sent = await bot.send_video(chat_id, file_id, caption=caption, parse_mode=parse_mode, reply_markup=reply_markup)
+        elif media_type == "animation":
+            sent = await bot.send_animation(chat_id, file_id, caption=caption, parse_mode=parse_mode, reply_markup=reply_markup)
+        elif media_type == "voice":
+            sent = await bot.send_voice(chat_id, file_id, caption=caption, parse_mode=parse_mode, reply_markup=reply_markup)
+        elif media_type == "video_note":
+            sent = await bot.send_video_note(chat_id, file_id)
+        elif media_type == "document":
+            sent = await bot.send_document(chat_id, file_id, caption=caption, parse_mode=parse_mode, reply_markup=reply_markup)
+        elif media_type == "sticker":
+            sent = await bot.send_sticker(chat_id, file_id)
+        else:
+            return None
+        _remember_extra(chat_id, sent.message_id)
+        return sent.message_id
+    except Exception as e:
+        log.error(f"send media failed ({media_type}) -> {chat_id}: {e}")
+        return None
 
 
 @router.callback_query(F.data.startswith("tkt:admin_reopen:"))

@@ -121,7 +121,6 @@ async def ensure_pinned(bot: Bot, chat_id: int) -> None:
     text = _clock_text()
     kb = _clock_kb()
     pinned_mid = _get_pinned(chat_id)
-    print(f"[clock] ensure_pinned chat={chat_id} pinned_mid={pinned_mid}")
 
     # Если уже есть закреп — пробуем обновить содержимое.
     if pinned_mid:
@@ -133,12 +132,10 @@ async def ensure_pinned(bot: Bot, chat_id: int) -> None:
                 reply_markup=kb,
                 parse_mode=PM,
             )
-            print(f"[clock] ensure_pinned edit OK mid={pinned_mid}")
             return
         except Exception as e:
             # Сообщение было удалено / недоступно — снимаем запись и
             # отправим заново ниже.
-            print(f"[clock] ensure_pinned edit FAIL mid={pinned_mid}: {e!r}")
             _clear_pinned(chat_id)
 
     # Отправляем и пиним.
@@ -149,7 +146,6 @@ async def ensure_pinned(bot: Bot, chat_id: int) -> None:
             reply_markup=kb,
             parse_mode=PM,
         )
-        print(f"[clock] ensure_pinned sent mid={msg.message_id}")
         _set_pinned(chat_id, msg.message_id)
         # Небольшая задержка, чтобы _bg_wipe в catalog.py не конкурировал
         # с этим сообщением (wipe удаляет диапазон до cmd_mid-1, и если
@@ -157,7 +153,6 @@ async def ensure_pinned(bot: Bot, chat_id: int) -> None:
         # clock; на практике clock всегда > cmd_mid, но защитимся явно).
         import asyncio as _aio
         await _aio.sleep(0.2)
-        print(f"[clock] ensure_pinned pinning mid={msg.message_id}")
         # Бот должен иметь право pin в личке — обычно есть в личке с ботом,
         # в группе нужно явно назначить админом с правом pin.
         try:
@@ -166,7 +161,6 @@ async def ensure_pinned(bot: Bot, chat_id: int) -> None:
                 message_id=msg.message_id,
                 disable_notification=True,
             )
-            print(f"[clock] ensure_pinned pin OK mid={msg.message_id}")
         except Exception:
             # Если бот не может pin — ничего, сообщение просто висит сверху.
             pass
@@ -176,51 +170,120 @@ async def ensure_pinned(bot: Bot, chat_id: int) -> None:
 
 # ── callback: калькулятор времени ──────────────────────────────────────────────
 
-@router.callback_query(F.data == "clock:calc")
-async def cb_calc_time(call: CallbackQuery, state: FSMContext):
-    """Показывает разницу между поясами в часах и текущее время по каждому."""
-    try:
-        await call.answer()
-    except Exception:
-        pass
+# Live-сессии калькулятора: {chat_id: {"task": asyncio.Task, "mid": int}}
+_LIVE_CALC: dict[int, dict] = {}
 
+
+def _calc_live_kb():
+    from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="⏹ Стоп", callback_data="clock:calc_stop")],
+    ])
+
+
+def _calc_live_text() -> str:
+    """Текущее время по 3 поясам + разница с Москвой."""
     m_now = _now_in(TZ_MSK)
     b_now = m_now.astimezone(TZ_BOL)
     p_now = m_now.astimezone(TZ_PRY)
-
-    # Разница Москва ↔ Боливия / Парагвай
     msk_off = m_now.utcoffset().total_seconds() / 3600
     bol_off = b_now.utcoffset().total_seconds() / 3600
     pry_off = p_now.utcoffset().total_seconds() / 3600
-
     diff_bol = msk_off - bol_off
     diff_pry = msk_off - pry_off
-
     sign_bol = "+" if diff_bol >= 0 else ""
     sign_pry = "+" if diff_pry >= 0 else ""
-
-    body = (
-        f"🧮 <b>Калькулятор времени</b>\n"
+    return (
+        f"🧮 <b>Калькулятор времени (live)</b>\n"
         f"{DIV}\n"
         f"🇷🇺 Москва (UTC{msk_off:+.0f}): <b>{_fmt(m_now)}</b>\n"
         f"🇧🇴 Боливия (UTC{bol_off:+.0f}): <b>{_fmt(b_now)}</b>\n"
         f"🇵🇾 Парагвай (UTC{pry_off:+.0f}): <b>{_fmt(p_now)}</b>\n"
         f"{DIV}\n"
-        f"📐 Москва опережает Боливию на <b>{sign_bol}{diff_bol:g}h</b>\n"
-        f"📐 Москва опережает Парагвай на <b>{sign_pry}{diff_pry:g}h</b>\n"
+        f"📐 Москва vs Боливия: <b>{sign_bol}{diff_bol:g}h</b>\n"
+        f"📐 Москва vs Парагвай: <b>{sign_pry}{diff_pry:g}h</b>\n"
         f"{DIV}\n"
         f"🕓 Обновлено: <i>{_fmt(m_now)} МСК</i>"
     )
 
-    # Пытаемся отредактировать само закреплённое сообщение, чтобы
-    # кнопка осталась в нём же; если не вышло — отвечаем alert'ом.
-    try:
-        await call.message.edit_text(body, reply_markup=_clock_kb(), parse_mode=PM)
-    except Exception:
+
+async def _stop_live(chat_id: int) -> None:
+    info = _LIVE_CALC.pop(chat_id, None)
+    if not info:
+        return
+    task = info.get("task")
+    if task and not task.done():
+        task.cancel()
         try:
-            await call.answer(body, show_alert=True)
-        except Exception:
+            await task
+        except (asyncio.CancelledError, Exception):
             pass
+
+
+async def _live_loop(bot: Bot, chat_id: int, mid: int) -> None:
+    """Каждую секунду обновляет сообщение с временем. До отмены."""
+    try:
+        while True:
+            try:
+                await bot.edit_message_text(
+                    chat_id=chat_id,
+                    message_id=mid,
+                    text=_calc_live_text(),
+                    reply_markup=_calc_live_kb(),
+                    parse_mode=PM,
+                )
+            except Exception as e:
+                msg = str(e).lower()
+                if "message is not modified" in msg:
+                    pass
+                else:
+                    await _stop_live(chat_id)
+                    return
+            await asyncio.sleep(1.0)
+    except asyncio.CancelledError:
+        return
+    except Exception:
+        return
+
+
+@router.callback_query(F.data == "clock:calc")
+async def cb_calc_time(call: CallbackQuery, state: FSMContext):
+    """Запускает live-обновление времени. Каждую секунду."""
+    try:
+        await call.answer()
+    except Exception:
+        pass
+    chat_id = call.message.chat.id
+    await _stop_live(chat_id)
+    msg = await call.message.answer(
+        _calc_live_text(),
+        reply_markup=_calc_live_kb(),
+        parse_mode=PM,
+    )
+    _LIVE_CALC[chat_id] = {
+        "task": asyncio.create_task(_live_loop(call.bot, chat_id, msg.message_id)),
+        "mid": msg.message_id,
+    }
+
+
+@router.callback_query(F.data == "clock:calc_stop")
+async def cb_calc_stop(call: CallbackQuery, state: FSMContext):
+    try:
+        await call.answer()
+    except Exception:
+        pass
+    chat_id = call.message.chat.id
+    await _stop_live(chat_id)
+    try:
+        await call.message.edit_text(
+            "🧮 Калькулятор остановлен.",
+            reply_markup=_calc_live_kb(),
+            parse_mode=PM,
+        )
+    except Exception:
+        pass
+
+
 
 
 # ── авто-миграция при импорте модуля ─────────────────────────────────────────
@@ -229,7 +292,7 @@ _ensure_table()
 
 # ── фоновый авто-refresh закреплённого сообщения ────────────────────────────────
 
-async def clock_updater(bot: Bot, period_sec: int = 60) -> None:
+async def clock_updater(bot: Bot, period_sec: int = 5) -> None:
     """Каждые period_sec секунд обновляет все известные закреплённые
     сообщения. Никогда не падает."""
     while True:

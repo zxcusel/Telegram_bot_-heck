@@ -591,7 +591,7 @@ def _bias_round_minute(t: int, start_min: int, end_min: int) -> int:
     if t % 30 != 0:
         return t
     # 15% шанс оставить как есть
-    if random.random() < 0.15:
+    if random.random() < 0.05:
         return t
     for _ in range(8):
         # Знак берём случайно, чтобы сдвигать и вверх, и вниз

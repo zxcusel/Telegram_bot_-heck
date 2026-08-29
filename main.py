@@ -6,7 +6,7 @@ try:
     from aiogram import Bot, Dispatcher
     from aiogram.fsm.storage.memory import MemoryStorage
 
-    from handlers import admin, auto, catalog, render, settings, bulk, tickets, instruction, clock
+    from handlers import admin, auto, catalog, render, settings, bulk, tickets, instruction, clock, timezone
     from middlewares.role_check import RoleMiddleware
     from data.db import init_db, get_token
     from utils.logger import log
@@ -48,7 +48,7 @@ try:
         dp.include_router(tickets.router)
         dp.include_router(instruction.router)
         dp.include_router(clock.router)
-
+        dp.include_router(timezone.router)
 
         from handlers import fallback
         dp.include_router(fallback.router)

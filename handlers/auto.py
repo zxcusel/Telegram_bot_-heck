@@ -12,7 +12,7 @@
        3. Типы чеков (мультивыбор)
        4. Мин / Макс суммы
        5. Дата
-       6. Расписание слотов «ЧЧ:ММxN» по строкам
+       6. Таймлайн: диапазон «start–end» + количество чеков (бот сам распределит)
   3. Кнопка «🚀 Запустить автоматизацию» — генерация медиагруппы.
 """
 from __future__ import annotations
@@ -68,7 +68,7 @@ class AutoFSM(StatesGroup):
     picking_items = State()
     entering_sum = State()
     entering_date = State()
-    entering_slots = State()
+    entering_timeline = State()
 
 
 # ── Точка входа ───────────────────────────────────────────────────────────────
@@ -259,41 +259,51 @@ async def auto_date_entered(message: Message, state: FSMContext):
         )
         return
     await state.update_data(date=raw)
-    await state.set_state(AutoFSM.entering_slots)
+    await state.set_state(AutoFSM.entering_timeline)
     text = (
         f"⚙️ <b>Настройка автоматизации</b>\n"
         f"{DIV}\n"
-        f"⏰ <b>Шаг 6 / 6 — Расписание слотов</b>\n\n"
+        f"⏰ <b>Шаг 6 / 6 — Таймлайн и количество</b>\n\n"
         f"✅ Дата: <b>{raw}</b>\n\n"
-        f"Каждый слот — строка <code>ЧЧ:ММxN</code>, где N — сколько чеков в это время.\n"
-        f"Слоты по одному на строку. <b>Время должно возрастать</b>.\n\n"
-        f"<b>Пример:</b>\n<code>14:30x3\n15:30x2\n17:00x4\n19:30x1</code>"
+        f"Отправьте диапазон времени и количество чеков одной строкой:\n"
+        f"<code>start–end N</code>\n\n"
+        f"<b>Пример:</b> <code>14:30–18:00 10</code> — 10 чеков, "
+        f"бот сам распределит время внутри <b>14:30–18:00</b> "
+        f"с шагом <b>5–20 мин</b>, не вылезая за границы."
     )
     await message.answer(text, reply_markup=auto_back_kb(), parse_mode=PM)
 
 
 # ── Слоты → пресет ────────────────────────────────────────────────────────────
-@router.message(AutoFSM.entering_slots)
-async def auto_slots_entered(message: Message, state: FSMContext):
-    slots = _parse_slots(message.text or "")
-    if not slots:
+@router.message(AutoFSM.entering_timeline)
+async def auto_timeline_entered(message: Message, state: FSMContext):
+    """Парсит «start–end N», валидирует и сохраняет пресет с timeline."""
+    parsed = _parse_timeline(message.text or "")
+    if not parsed:
         await message.answer(
-            f"❌ <b>Не удалось разобрать расписание</b>\n\n"
-            f"Каждая строка: <code>ЧЧ:ММxN</code>. Пример:\n"
-            f"<code>14:30x3\n15:30x2</code>",
+            f"❌ <b>Неверный формат</b>\n\n"
+            f"Нужно: <code>ЧЧ:ММ–ЧЧ:ММ N</code>\n"
+            f"Пример: <code>14:30–18:00 10</code>",
             parse_mode=PM,
         )
         return
-    # Проверка возрастания времени
-    for i in range(1, len(slots)):
-        if slots[i]["minutes"] <= slots[i - 1]["minutes"]:
-            await message.answer(
-                f"� <b>Время должно возрастать</b>\n\n"
-                f"Строка <code>{slots[i]['time']}</code> идёт раньше или равна "
-                f"<code>{slots[i - 1]['time']}</code>.",
-                parse_mode=PM,
-            )
-            return
+    start_min, end_min, count = parsed
+    span = end_min - start_min
+    if span < 5:
+        await message.answer(
+            f"❌ <b>Диапазон слишком мал</b>\n\n"
+            f"Между <b>{start_min // 60:02d}:{start_min % 60:02d}</b> и "
+            f"<b>{end_min // 60:02d}:{end_min % 60:02d}</b> меньше 5 минут. "
+            f"Расширьте диапазон.",
+            parse_mode=PM,
+        )
+        return
+    if count < 1 or count > 200:
+        await message.answer(
+            f"❌ <b>Количество чеков</b> должно быть от 1 до 200.",
+            parse_mode=PM,
+        )
+        return
 
     data = await state.get_data()
     preset = {
@@ -303,18 +313,24 @@ async def auto_slots_entered(message: Message, state: FSMContext):
         "sum_min": data["sum_min"],
         "sum_max": data["sum_max"],
         "date": data["date"],
-        "slots": slots,
+        "timeline": {
+            "start_min": start_min,
+            "end_min": end_min,
+            "count": count,
+        },
     }
     _save_preset(message.from_user.id, preset)
     await state.clear()
 
-    total = sum(s["count"] for s in slots)
+    start_str = f"{start_min // 60:02d}:{start_min % 60:02d}"
+    end_str = f"{end_min // 60:02d}:{end_min % 60:02d}"
     text = (
         f"🎉 <b>Пресет сохранён!</b>\n"
         f"{DIV}\n"
         f"{_format_preset(preset)}\n\n"
         f"{DIV}\n"
-        f"📦 Всего чеков: <b>{total}</b> в <b>{len(slots)}</b> слотов\n\n"
+        f"⏰ <b>Таймлайн:</b> <b>{start_str}</b> – <b>{end_str}</b> · "
+        f"<b>{count}</b> чек(ов)\n\n"
         f"▶️ Нажмите <b>«🚀 Запустить автоматизацию»</b> для старта."
     )
     await message.answer(text, reply_markup=auto_run_kb(), parse_mode=PM)
@@ -332,104 +348,178 @@ async def auto_run(call: CallbackQuery, state: FSMContext):
         await call.answer("⚠️ Сначала настройте пресет", show_alert=True)
         return
 
-    total = sum(s["count"] for s in preset["slots"])
+    # Строим таймлайн (рандомные моменты времени с шагом 5-20 мин)
+    if "timeline" in preset:
+        tl = preset["timeline"]
+        times_list = _build_random_timeline(tl["start_min"], tl["end_min"], tl["count"])
+        total = len(times_list)
+    else:
+        # Backward compat: старые пресеты с ручными слотами
+        times_list = []
+        for slot in preset.get("slots", []):
+            for _ in range(slot["count"]):
+                times_list.append(slot["time"])
+        total = len(times_list)
+
     await call.message.edit_text(
         f"⏳ <b>Генерация запущена…</b>\n"
         f"{DIV}\n"
-        f"Будет создано <b>{total}</b> чеков в <b>{len(preset['slots'])}</b> слотов.\n\n"
+        f"Будет создано <b>{total}</b> чеков.\n\n"
         f"<i>Это может занять несколько секунд.</i>",
         parse_mode=PM,
     )
     await call.answer()
 
     bot: Bot = call.bot
-    # Краткое уведомление в чат, чтобы пользователь видел, что процесс пошёл
     await call.message.answer(
         f"🚀 <b>Автоматизация запущена</b>\n"
         f"{DIV}\n"
-        f"📦 Чеков: <b>{total}</b>\n"
-        f"⏰ Слотов: <b>{len(preset['slots'])}</b>",
+        f"📦 Чеков: <b>{total}</b>",
         parse_mode=PM,
     )
 
-    for slot in preset["slots"]:
-        time_str = slot["time"]
-        count = slot["count"]
-        # Соберём медиагруппу альбомом — все чеки этого слота одним сообщением
-        media = []
-        for i in range(count):
-            item_key = random.choice(preset["items"])
-            amount = random.randint(preset["sum_min"], preset["sum_max"])
-            try:
-                line = GEO_CATALOG[preset["geo"]]["catalog"][preset["line_key"]]
-                item = next(
-                    section["items"][item_key]
-                    for section in line.get("sections", {}).values()
-                    if item_key in section.get("items", {})
-                )
-                values = _render_values(item, preset["date"], time_str, amount)
-                rendered = render_image(item_key, values, preset["geo"], item=item)
-                png_bytes = rendered.getvalue()
-            except Exception as e:
-                log.error(f"auto_run render error: {e}")
-                continue
-            caption = (
-                f"⏰ <b>{time_str}</b>  ·  чек <b>{i + 1}/{count}</b>  ·  <code>{item_key}</code>"
+    media: list = []
+    BATCH = 10
+    for i, time_str in enumerate(times_list):
+        item_key = random.choice(preset["items"])
+        amount = random.randint(preset["sum_min"], preset["sum_max"])
+        try:
+            line = GEO_CATALOG[preset["geo"]]["catalog"][preset["line_key"]]
+            item = next(
+                section["items"][item_key]
+                for section in line.get("sections", {}).values()
+                if item_key in section.get("items", {})
             )
-            media.append(
-                InputMediaPhoto(
-                    media=BufferedInputFile(png_bytes, filename="check.png"),
-                    caption=caption if i == 0 else None,
-                    parse_mode=PM if i == 0 else None,
-                )
+            values = _render_values(item, preset["date"], time_str, amount)
+            rendered = render_image(item_key, values, preset["geo"], item=item)
+            png_bytes = rendered.getvalue()
+        except Exception as e:
+            log.error(f"auto_run render error: {e}")
+            continue
+        caption = (
+            f"⏰ <b>{time_str}</b>  ·  чек <b>{i + 1}/{total}</b>  ·  "
+            f"<code>{item_key}</code>"
+        )
+        media.append(
+            InputMediaPhoto(
+                media=BufferedInputFile(png_bytes, filename="check.png"),
+                caption=caption if i == 0 else None,
+                parse_mode=PM if i == 0 else None,
             )
-        if media:
+        )
+        if len(media) >= BATCH:
             try:
                 await bot.send_media_group(call.message.chat.id, media=media)
             except TelegramBadRequest as e:
                 log.error(f"auto_run send_media_group error: {e}")
-        # Небольшая пауза между слотами, чтобы Telegram не считал спамом
-        await asyncio.sleep(1.5)
+            media = []
+            await asyncio.sleep(1.0)
+    if media:
+        try:
+            await bot.send_media_group(call.message.chat.id, media=media)
+        except TelegramBadRequest as e:
+            log.error(f"auto_run send_media_group error: {e}")
 
-    # Финальное уведомление
     await call.message.answer(
-        f"✅ <b>Готово!</b>\n{DIV}\nВсе слоты отработаны. 🎉",
+        f"✅ <b>Готово!</b>\n{DIV}\nВсе <b>{total}</b> чеков отработаны. 🎉",
         parse_mode=PM,
     )
 
 
 # ── Утилиты ───────────────────────────────────────────────────────────────────
-def _parse_slots(text: str) -> list[dict]:
-    """Разбирает текст вида '14:30x3\n15:30x2' → [{'time':'14:30','count':3,'minutes':870}, ...]"""
-    out = []
-    for line in text.splitlines():
-        line = line.strip()
-        if not line:
-            continue
-        m = re.fullmatch(r"(\d{1,2}):(\d{2})\s*[xх*]\s*(\d{1,3})", line)
-        if not m:
-            return []
-        hh, mm, cnt = int(m.group(1)), int(m.group(2)), int(m.group(3))
-        if not (0 <= hh <= 23 and 0 <= mm <= 59 and 1 <= cnt <= 50):
-            return []
-        out.append({"time": f"{hh:02d}:{mm:02d}", "count": cnt, "minutes": hh * 60 + mm})
-    return out
+def _parse_hhmm(s: str) -> int | None:
+    m = re.fullmatch(r"\s*(\d{1,2}):(\d{2})\s*", s)
+    if not m:
+        return None
+    hh, mm = int(m.group(1)), int(m.group(2))
+    if not (0 <= hh <= 23 and 0 <= mm <= 59):
+        return None
+    return hh * 60 + mm
+
+
+def _parse_timeline(text: str) -> tuple[int, int, int] | None:
+    """Парсит «14:30–18:00 10» → (start_min, end_min, count)."""
+    s = (text or "").strip()
+    m = re.fullmatch(r"\s*(\d{1,2}:\d{2})\s*[-–—]\s*(\d{1,2}:\d{2})\s+(\d{1,3})\s*", s)
+    if not m:
+        return None
+    a, b, n = m.group(1), m.group(2), int(m.group(3))
+    start = _parse_hhmm(a)
+    end = _parse_hhmm(b)
+    if start is None or end is None:
+        return None
+    if start > end:
+        start, end = end, start
+    return (start, end, n)
+
+
+def _build_random_timeline(start_min: int, end_min: int, count: int) -> list[str]:
+    """Распределяет count чеков между start_min и end_min со случайным
+    шагом 5–20 минут, не вылезая за end_min.
+    Возвращает список строк времени (HH:MM), отсортированный по возрастанию."""
+    if count <= 0:
+        return []
+    span = end_min - start_min
+    if span < 0:
+        return []
+    # Тривиальные случаи
+    if count == 1:
+        return [f"{start_min // 60:02d}:{start_min % 60:02d}"]
+    # Равномерные точки по span с шагом ~span/(count-1), плюс случайный
+    # сдвиг ±(step/2) внутри окна, чтобы не вылезать за границы.
+    base_step = max(5, span // max(count - 1, 1))
+    times: list[int] = []
+    cur = start_min
+    last_gap_lo = 5
+    last_gap_hi = 20
+    for i in range(count):
+        if i == count - 1:
+            t = end_min
+        else:
+            gap = random.randint(last_gap_lo, last_gap_hi)
+            t = cur + gap
+            # Гарантируем, что влезает в диапазон с запасом на оставшиеся чеки
+            min_remaining_gap = 5 * (count - i - 1)
+            max_allowed = end_min - min_remaining_gap
+            if max_allowed < cur + gap:
+                t = max_allowed
+            # Дополнительно ограничим шаг
+            t = max(t, cur + 5)
+            if t > end_min:
+                t = end_min
+        times.append(t)
+        cur = t
+    times = sorted(set(times))
+    return [f"{t // 60:02d}:{t % 60:02d}" for t in times]
 
 
 def _format_preset(p: dict) -> str:
     geo_label = GEO_CATALOG.get(p["geo"], {}).get("label", p["geo"])
     items_str = ", ".join(f"<code>{x}</code>" for x in p["items"])
-    total = sum(s["count"] for s in p["slots"])
+    if "timeline" in p:
+        total = p["timeline"]["count"]
+    else:
+        total = sum(s["count"] for s in p["slots"])
     lines = [
         f"🌍 <b>ГЕО:</b> {geo_label}",
         f"📂 <b>Линейка:</b> <code>{p['line_key']}</code>",
         f"🎯 <b>Типы чеков:</b> {items_str}",
         f"💰 <b>Суммы:</b> <b>{p['sum_min']}–{p['sum_max']}</b>",
         f"📅 <b>Дата:</b> <b>{p['date']}</b>",
-        f"⏰ <b>Слоты ({len(p['slots'])} · {total} чеков):</b>",
+        f"⏰ <b>Таймлайн ({total} чеков):</b>",
     ]
-    for s in p["slots"]:
-        lines.append(f"   {BULLET} <b>{s['time']}</b> × <b>{s['count']}</b>")
+    if "timeline" in p:
+        tl = p["timeline"]
+        s_min = tl["start_min"]
+        e_min = tl["end_min"]
+        lines.append(
+            f"   {BULLET} <b>{s_min // 60:02d}:{s_min % 60:02d}</b>"
+            f" – <b>{e_min // 60:02d}:{e_min % 60:02d}</b> · "
+            f"<b>{tl['count']}</b> чек(ов) (ранд. шаг 5–20 мин)"
+        )
+    else:
+        for s in p.get("slots", []):
+            lines.append(f"   {BULLET} <b>{s['time']}</b> × <b>{s['count']}</b>")
     return "\n".join(lines)
 
 

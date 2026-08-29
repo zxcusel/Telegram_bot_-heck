@@ -60,6 +60,19 @@ def _welcome_text() -> str:
 
 # ── /start ───────────────────────────────────────────────────────────────────
 
+async def _try_delete(bot, chat_id: int, message_id: int) -> None:
+    """Delete a single message silently. Telegram may refuse (e.g. >48h,
+    или у бота нет права на удаление в этом чате) — это нормально."""
+    if not message_id:
+        return
+    for attempt in range(3):
+        try:
+            await bot.delete_message(chat_id=chat_id, message_id=message_id)
+            return
+        except Exception:
+            await asyncio.sleep(0.2 * (attempt + 1))
+
+
 async def _wipe_chat(bot, chat_id: int) -> None:
     """Best-effort wipe of all messages in the chat.
     Telegram Bot API cannot delete messages older than 48 hours — those
@@ -70,8 +83,8 @@ async def _wipe_chat(bot, chat_id: int) -> None:
     # Нужен хотя бы один месседж, чтобы понять диапазон id.
     probe = await bot.send_message(chat_id=chat_id, text="…", parse_mode=PM)
     top_id = probe.message_id
-    # Прокси-сообщение удалим отдельно в самом конце, чтобы оно не мешало.
     if top_id <= 1:
+        await _try_delete(bot, chat_id, top_id)
         return
     ids = list(range(top_id - 1, 0, -1))
     for i in range(0, len(ids), 100):
@@ -87,10 +100,7 @@ async def _wipe_chat(bot, chat_id: int) -> None:
                 await asyncio.sleep(0.04)
         await asyncio.sleep(0.05)
     # Удаляем прокси.
-    try:
-        await bot.delete_message(chat_id=chat_id, message_id=top_id)
-    except Exception:
-        pass
+    await _try_delete(bot, chat_id, top_id)
 
 
 @router.message(CommandStart())
@@ -98,17 +108,18 @@ async def cmd_start(message: Message, state: FSMContext):
     await state.clear()
     log.start(message.from_user.id, message.from_user.username)
     chat_id = message.chat.id
-    # Удаляем саму команду /start
-    try:
-        await message.delete()
-    except Exception:
-        pass
+    bot = message.bot
+    user_id = message.from_user.id
+    cmd_mid = message.message_id
+    # Удаляем саму команду /start — явно по id, через _try_delete,
+    # чтобы не зависеть от тихих падений message.delete().
+    await _try_delete(bot, chat_id, cmd_mid)
     # Полная очистка истории (с учётом 48-часового лимита Telegram).
-    await _wipe_chat(message.bot, chat_id)
-    await message.bot.send_message(
+    await _wipe_chat(bot, chat_id)
+    await bot.send_message(
         chat_id=chat_id,
         text=_welcome_text(),
-        reply_markup=_start_kb(message.from_user.id),
+        reply_markup=_start_kb(user_id),
         parse_mode=PM,
     )
 

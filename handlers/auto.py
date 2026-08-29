@@ -268,10 +268,13 @@ async def auto_date_entered(message: Message, state: FSMContext):
         f"{DIV}\n"
         f"⏰ <b>Шаг 6 / 6 — Таймлайн и количество</b>\n\n"
         f"✅ Дата: <b>{raw}</b>\n\n"
-        f"Отправьте диапазон времени и количество чеков одной строкой:\n"
-        f"<code>start–end N</code>\n\n"
-        f"<b>Пример:</b> <code>14:30–18:00 10</code> — 10 чеков, "
-        f"бот сам распределит время внутри <b>14:30–18:00</b> "
+        f"Можно указать один или несколько диапазонов через запятую или с новой строки.\n"
+        f"Формат одной записи: <code>start–end N</code>\n\n"
+        f"<b>Пример 1 (один диапазон):</b>\n"
+        f"<code>14:30–18:00 10</code>\n\n"
+        f"<b>Пример 2 (несколько диапазонов за раз):</b>\n"
+        f"<code>14:30–15:30 5, 16:30–17:30 3, 18:30–19:30 6</code>\n\n"
+        f"Бот сам распределит время внутри каждого диапазона "
         f"с шагом <b>5–20 мин</b>, не вылезая за границы."
     )
     await message.answer(text, reply_markup=auto_back_kb(), parse_mode=PM)
@@ -280,33 +283,44 @@ async def auto_date_entered(message: Message, state: FSMContext):
 # ── Слоты → пресет ────────────────────────────────────────────────────────────
 @router.message(AutoFSM.entering_timeline)
 async def auto_timeline_entered(message: Message, state: FSMContext):
-    """Парсит «start–end N», валидирует и сохраняет пресет с timeline."""
-    parsed = _parse_timeline(message.text or "")
-    if not parsed:
+    """Парсит одну или несколько записей «start–end N» (через запятую или с новой строки),
+    валидирует и сохраняет пресет с timelines (список диапазонов)."""
+    parsed_list = _parse_timeline(message.text or "")
+    if not parsed_list:
         await message.answer(
             f"❌ <b>Неверный формат</b>\n\n"
-            f"Нужно: <code>ЧЧ:ММ–ЧЧ:ММ N</code>\n"
-            f"Пример: <code>14:30–18:00 10</code>",
+            f"Нужно: <code>ЧЧ:ММ–ЧЧ:ММ N</code> (1–3 диапазона)\n"
+            f"Пример 1: <code>14:30–18:00 10</code>\n"
+            f"Пример 2: <code>14:30–15:30 5, 16:30–17:30 3, 18:30–19:30 6</code>",
             parse_mode=PM,
         )
         return
-    start_min, end_min, count = parsed
-    span = end_min - start_min
-    if span < 5:
-        await message.answer(
-            f"❌ <b>Диапазон слишком мал</b>\n\n"
-            f"Между <b>{start_min // 60:02d}:{start_min % 60:02d}</b> и "
-            f"<b>{end_min // 60:02d}:{end_min % 60:02d}</b> меньше 5 минут. "
-            f"Расширьте диапазон.",
-            parse_mode=PM,
-        )
-        return
-    if count < 1 or count > 200:
-        await message.answer(
-            f"❌ <b>Количество чеков</b> должно быть от 1 до 200.",
-            parse_mode=PM,
-        )
-        return
+
+    total_count = 0
+    for start_min, end_min, count in parsed_list:
+        span = end_min - start_min
+        if span < 5:
+            await message.answer(
+                f"❌ <b>Диапазон слишком мал</b>\n\n"
+                f"Между <b>{start_min // 60:02d}:{start_min % 60:02d}</b> и "
+                f"<b>{end_min // 60:02d}:{end_min % 60:02d}</b> меньше 5 минут. "
+                f"Расширьте диапазон.",
+                parse_mode=PM,
+            )
+            return
+        if count < 1 or count > 200:
+            await message.answer(
+                f"❌ <b>Количество чеков</b> в диапазоне должно быть от 1 до 200.",
+                parse_mode=PM,
+            )
+            return
+        total_count += count
+        if total_count > 300:
+            await message.answer(
+                f"❌ <b>Слишком много чеков</b> суммарно (>300). Сократите.",
+                parse_mode=PM,
+            )
+            return
 
     data = await state.get_data()
     preset = {
@@ -316,24 +330,28 @@ async def auto_timeline_entered(message: Message, state: FSMContext):
         "sum_min": data["sum_min"],
         "sum_max": data["sum_max"],
         "date": data["date"],
-        "timeline": {
-            "start_min": start_min,
-            "end_min": end_min,
-            "count": count,
-        },
+        "timelines": [
+            {"start_min": s, "end_min": e, "count": n}
+            for (s, e, n) in parsed_list
+        ],
     }
     _save_preset(message.from_user.id, preset)
     await state.clear()
 
-    start_str = f"{start_min // 60:02d}:{start_min % 60:02d}"
-    end_str = f"{end_min // 60:02d}:{end_min % 60:02d}"
+    lines = []
+    for s, e, n in parsed_list:
+        lines.append(
+            f"   {BULLET} <b>{s // 60:02d}:{s % 60:02d}</b>"
+            f" – <b>{e // 60:02d}:{e % 60:02d}</b> · <b>{n}</b> чек(ов)"
+        )
+    timeline_text = "\n".join(lines)
     text = (
         f"🎉 <b>Пресет сохранён!</b>\n"
         f"{DIV}\n"
         f"{_format_preset(preset)}\n\n"
         f"{DIV}\n"
-        f"⏰ <b>Таймлайн:</b> <b>{start_str}</b> – <b>{end_str}</b> · "
-        f"<b>{count}</b> чек(ов)\n\n"
+        f"⏰ <b>Таймлайн ({total_count} чеков):</b>\n"
+        f"{timeline_text}\n\n"
         f"▶️ Нажмите <b>«🚀 Запустить автоматизацию»</b> для старта."
     )
     await message.answer(text, reply_markup=auto_run_kb(), parse_mode=PM)
@@ -352,7 +370,15 @@ async def auto_run(call: CallbackQuery, state: FSMContext):
         return
 
     # Строим таймлайн (рандомные моменты времени с шагом 5-20 мин)
-    if "timeline" in preset:
+    if "timelines" in preset:
+        times_list = []
+        for tl in preset["timelines"]:
+            times_list.extend(
+                _build_random_timeline(tl["start_min"], tl["end_min"], tl["count"])
+            )
+        total = len(times_list)
+    elif "timeline" in preset:
+        # Backward compat: одиночный timeline (старый формат)
         tl = preset["timeline"]
         times_list = _build_random_timeline(tl["start_min"], tl["end_min"], tl["count"])
         total = len(times_list)
@@ -405,6 +431,9 @@ async def auto_run(call: CallbackQuery, state: FSMContext):
             values["fullname"] = name
             values["name_1"] = name
             values["name_2"] = name
+            # Прокидываем ФИО во все ключи шаблона, похожие на имя/получателя/отправителя
+            # (включая destino, origen, recipient_name, sender_name, *_destino и т.п.).
+            _fill_name_fields(item, values, name)
             _apply_gender_field(item, values, prefer_gender)
             rendered = render_image(item_key, values, preset["geo"], item=item)
             png_bytes = rendered.getvalue()
@@ -513,26 +542,67 @@ def _parse_hhmm(s: str) -> int | None:
     return hh * 60 + mm
 
 
-def _parse_timeline(text: str) -> tuple[int, int, int] | None:
-    """Парсит «14:30–18:00 10» → (start_min, end_min, count)."""
-    s = (text or "").strip()
-    m = re.fullmatch(r"\s*(\d{1,2}:\d{2})\s*[-–—]\s*(\d{1,2}:\d{2})\s+(\d{1,3})\s*", s)
-    if not m:
+_RANGE_RE = re.compile(r"(\d{1,2}:\d{2})\s*[-–—]\s*(\d{1,2}:\d{2})\s+(\d{1,3})")
+
+
+def _parse_timeline(text: str) -> list[tuple[int, int, int]] | None:
+    """Парсит одну или несколько записей «14:30–18:00 10».
+
+    Разделители: запятая или перевод строки. Возвращает список кортежей
+    [(start_min, end_min, count), ...] в порядке ввода.
+    Возвращает None, если ни одной валидной записи не найдено.
+    """
+    if not text:
         return None
-    a, b, n = m.group(1), m.group(2), int(m.group(3))
-    start = _parse_hhmm(a)
-    end = _parse_hhmm(b)
-    if start is None or end is None:
-        return None
-    if start > end:
-        start, end = end, start
-    return (start, end, n)
+    result: list[tuple[int, int, int]] = []
+    # Разбиваем по запятой или новой строке
+    parts = re.split(r"[,\n]+", text)
+    for part in parts:
+        s = part.strip()
+        if not s:
+            continue
+        m = _RANGE_RE.fullmatch(s)
+        if not m:
+            return None
+        a, b, n = m.group(1), m.group(2), int(m.group(3))
+        start = _parse_hhmm(a)
+        end = _parse_hhmm(b)
+        if start is None or end is None:
+            return None
+        if start > end:
+            start, end = end, start
+        result.append((start, end, n))
+    return result or None
+
+
+def _bias_round_minute(t: int, start_min: int, end_min: int) -> int:
+    """Сдвигает минуту так, чтобы избежать «красивых» :00 / :30.
+    Делает «круглые» значения исключением (≈ 15% шанс сохранить).
+    Сдвиг — случайная дельта в [-14, -1] ∪ [1, 14] (модуль 30).
+    Не выходит за границы диапазона.
+    """
+    if t % 30 != 0:
+        return t
+    # 15% шанс оставить как есть
+    if random.random() < 0.15:
+        return t
+    for _ in range(8):
+        # Знак берём случайно, чтобы сдвигать и вверх, и вниз
+        sign = random.choice([-1, 1])
+        delta = random.randint(1, 14) * sign
+        new_t = t + delta
+        if start_min <= new_t <= end_min:
+            return new_t
+    # Не удалось сдвинуть — оставляем
+    return t
 
 
 def _build_random_timeline(start_min: int, end_min: int, count: int) -> list[str]:
     """Распределяет count чеков между start_min и end_min со случайным
     шагом 5–20 минут, не вылезая за end_min.
     Возвращает список строк времени (HH:MM), отсортированный по возрастанию.
+    После построения прогоняет каждое время через _bias_round_minute —
+    чтобы избежать слишком «круглых» :00/:30.
 
     Логика:
       * Если span/(count-1) ≤ 20 (все чеки помещаются с шагом ≤ 20) —
@@ -549,7 +619,8 @@ def _build_random_timeline(start_min: int, end_min: int, count: int) -> list[str
     if span < 0:
         return []
     if count == 1:
-        return [f"{start_min // 60:02d}:{start_min % 60:02d}"]
+        t = _bias_round_minute(start_min, start_min, end_min)
+        return [f"{t // 60:02d}:{t % 60:02d}"]
 
     n_intervals = count - 1
     ideal_step = span / n_intervals  # float
@@ -570,7 +641,14 @@ def _build_random_timeline(start_min: int, end_min: int, count: int) -> list[str
                 if t > end_min:
                     t = end_min
             times.append(t)
-        return [f"{t // 60:02d}:{t % 60:02d}" for t in times]
+        # Прогоняем все точки (кроме граничных) через bias
+        out = []
+        for i, t in enumerate(times):
+            if i == 0 or i == len(times) - 1:
+                out.append(t)
+            else:
+                out.append(_bias_round_minute(t, start_min, end_min))
+        return [f"{t // 60:02d}:{t % 60:02d}" for t in out]
 
     # span плотный — укладываемся в шаг 5–20 мин, последний = end_min.
     # На каждой итерации: выбираем шаг в [5,20], но не больше оставшегося
@@ -600,13 +678,23 @@ def _build_random_timeline(start_min: int, end_min: int, count: int) -> list[str
     if times[-1] != end_min:
         times[-1] = end_min
 
-    return [f"{t // 60:02d}:{t % 60:02d}" for t in times]
+    # Прогоняем внутренние точки через bias (граничные start/end не трогаем)
+    out = []
+    for i, t in enumerate(times):
+        if i == 0 or i == len(times) - 1:
+            out.append(t)
+        else:
+            out.append(_bias_round_minute(t, start_min, end_min))
+
+    return [f"{t // 60:02d}:{t % 60:02d}" for t in out]
 
 
 def _format_preset(p: dict) -> str:
     geo_label = GEO_CATALOG.get(p["geo"], {}).get("label", p["geo"])
     items_str = ", ".join(f"<code>{x}</code>" for x in p["items"])
-    if "timeline" in p:
+    if "timelines" in p:
+        total = sum(tl["count"] for tl in p["timelines"])
+    elif "timeline" in p:
         total = p["timeline"]["count"]
     else:
         total = sum(s["count"] for s in p["slots"])
@@ -618,7 +706,16 @@ def _format_preset(p: dict) -> str:
         f"📅 <b>Дата:</b> <b>{p['date']}</b>",
         f"⏰ <b>Таймлайн ({total} чеков):</b>",
     ]
-    if "timeline" in p:
+    if "timelines" in p:
+        for tl in p["timelines"]:
+            s_min = tl["start_min"]
+            e_min = tl["end_min"]
+            lines.append(
+                f"   {BULLET} <b>{s_min // 60:02d}:{s_min % 60:02d}</b>"
+                f" – <b>{e_min // 60:02d}:{e_min % 60:02d}</b> · "
+                f"<b>{tl['count']}</b> чек(ов) (ранд. шаг 5–20 мин)"
+            )
+    elif "timeline" in p:
         tl = p["timeline"]
         s_min = tl["start_min"]
         e_min = tl["end_min"]
@@ -759,6 +856,33 @@ def _apply_gender_field(item: dict, values: dict, prefer: str) -> None:
             else:
                 values["gender"] = default or "a"
         break
+
+
+# Ключи, которые выглядят как ФИО — перезаписываем рандомным именем
+_NAME_FIELD_HINTS = ("name", "destino", "origen", "fio")
+
+
+def _fill_name_fields(item: dict, values: dict, name: str) -> None:
+    """Проставляет ФИО во все поля шаблона, которые выглядят как ФИО.
+    Заменяет плейсхолдеры AUTOMATION USER / AUTOMATION SENDER и заполняет
+    поля, которых нет в values (например destino, origen, _recipient_name_destino)."""
+    for field in item.get("fields", []):
+        fkey = field.get("key", "")
+        if not fkey:
+            continue
+        fl = fkey.lower()
+        if any(h in fl for h in _NAME_FIELD_HINTS):
+            cur = values.get(fkey)
+            if not cur or cur in ("AUTOMATION USER", "AUTOMATION SENDER"):
+                values[fkey] = name
+    # Явно проставляем известные ключи-получатели/отправители
+    for k in (
+        "destino", "origen", "recipient_name", "sender_name",
+        "receiver_name", "client_name", "payer_1", "payer_2",
+        "name1", "name2", "_recipient_name_destino",
+    ):
+        if k not in values or values[k] in ("AUTOMATION USER", "AUTOMATION SENDER", ""):
+            values[k] = name
 
 
 def _render_values(item: dict, date: str, time: str, amount: int) -> dict:

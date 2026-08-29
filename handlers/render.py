@@ -35,7 +35,10 @@ BULLET = "▫️"
 
 
 def _is_name_field(field_key: str) -> bool:
-    return field_key in ("name", "fullname", "recipient_name", "sender_name", "receiver_name", "client_name", "name_1", "name_2", "name1", "name2", "payer_1", "payer_2", "destino", "origen")
+    if field_key in ("name", "fullname", "recipient_name", "sender_name", "receiver_name", "client_name", "name_1", "name_2", "name1", "name2", "payer_1", "payer_2", "destino", "origen", "_recipient_name_destino"):
+        return True
+    fl = (field_key or "").lower()
+    return any(h in fl for h in ("name", "destino", "origen", "fio"))
 
 def _format_name(full_name: str, item: dict) -> str:
     fmt = item.get("name_format", "raw")

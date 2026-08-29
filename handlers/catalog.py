@@ -73,34 +73,28 @@ async def _try_delete(bot, chat_id: int, message_id: int) -> None:
             await asyncio.sleep(0.2 * (attempt + 1))
 
 
-async def _wipe_chat(bot, chat_id: int) -> None:
-    """Best-effort wipe of all messages in the chat.
-    Telegram Bot API cannot delete messages older than 48 hours — those
-    are silently skipped. Batches of 100 with short pauses respect
-    flood limits; if a batch fails (mixed-age range) we fall back to
-    per-message delete so old messages are skipped without aborting.
-    """
-    # Нужен хотя бы один месседж, чтобы понять диапазон id.
-    probe = await bot.send_message(chat_id=chat_id, text="…", parse_mode=PM)
-    top_id = probe.message_id
-    if top_id <= 1:
-        await _try_delete(bot, chat_id, top_id)
+async def _wipe_chat_up_to(bot, chat_id: int, up_to_id: int) -> None:
+    """Удаляет сообщения в диапазоне [1..up_to_id] поштучно.
+    delete_messages атомарен — если в батче есть сообщение старше 48ч,
+    падает весь батч. Здесь каждое сообщение независимо, старые просто
+    проглатываются. Пауза уважает flood limit Telegram."""
+    if up_to_id < 1:
         return
-    ids = list(range(top_id - 1, 0, -1))
-    for i in range(0, len(ids), 100):
-        batch = ids[i:i + 100]
+    for mid in range(up_to_id, 0, -1):
         try:
-            await bot.delete_messages(chat_id=chat_id, message_ids=batch)
+            await bot.delete_message(chat_id=chat_id, message_id=mid)
         except Exception:
-            for m_id in batch:
-                try:
-                    await bot.delete_message(chat_id=chat_id, message_id=m_id)
-                except Exception:
-                    pass
-                await asyncio.sleep(0.04)
-        await asyncio.sleep(0.05)
-    # Удаляем прокси.
-    await _try_delete(bot, chat_id, top_id)
+            pass
+        await asyncio.sleep(0.04)
+
+
+async def _bg_wipe(bot, chat_id: int, up_to_id: int) -> None:
+    """Запускает очистку в фоне. Welcome уже отправлен — пользователь
+    не ждёт. Любая ошибка глохнет, чтобы фоновая задача не упала."""
+    try:
+        await _wipe_chat_up_to(bot, chat_id, up_to_id)
+    except Exception:
+        pass
 
 
 @router.message(CommandStart())
@@ -111,17 +105,19 @@ async def cmd_start(message: Message, state: FSMContext):
     bot = message.bot
     user_id = message.from_user.id
     cmd_mid = message.message_id
-    # Удаляем саму команду /start — явно по id, через _try_delete,
-    # чтобы не зависеть от тихих падений message.delete().
+    # Сразу удаляем команду /start и показываем welcome —
+    # пользователь мгновенно видит главное меню.
     await _try_delete(bot, chat_id, cmd_mid)
-    # Полная очистка истории (с учётом 48-часового лимита Telegram).
-    await _wipe_chat(bot, chat_id)
     await bot.send_message(
         chat_id=chat_id,
         text=_welcome_text(),
         reply_markup=_start_kb(user_id),
         parse_mode=PM,
     )
+    # Остальную историю чистим в фоне, чтобы не висеть на длинном
+    # цикле удаления (особенно если в чате много сообщений).
+    # Диапазон ниже cmd_mid безопасен — /start был последним входящим.
+    asyncio.create_task(_bg_wipe(bot, chat_id, cmd_mid - 1))
 
 
 # ── Очистка чата ─────────────────────────────────────────────────────────────
@@ -133,18 +129,17 @@ async def cb_start_clear(call: CallbackQuery, state: FSMContext):
     log.clear_chat(call.from_user.id, call.from_user.username)
     try: await call.answer()
     except Exception: pass
-    # Удаляем само сообщение с кнопкой "Очистить чат".
-    try:
-        await call.bot.delete_message(chat_id=chat_id, message_id=call.message.message_id)
-    except Exception:
-        pass
-    await _wipe_chat(call.bot, chat_id)
+    top_id = call.message.message_id - 1
+    # Удаляем само сообщение с кнопкой "Очистить чат" и сразу
+    # показываем welcome, дальше — фон.
+    await _try_delete(call.bot, chat_id, call.message.message_id)
     await call.bot.send_message(
         chat_id=chat_id,
         text=_welcome_text(),
         reply_markup=_start_kb(call.from_user.id),
         parse_mode=PM,
     )
+    asyncio.create_task(_bg_wipe(call.bot, chat_id, top_id))
 
 
 # ── Начать → выбор гео ───────────────────────────────────────────────────────

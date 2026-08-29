@@ -72,9 +72,18 @@ def _ensure_tickets_tables() -> None:
                 author_id    INTEGER NOT NULL,
                 author_role  TEXT    NOT NULL CHECK(author_role IN ('user','admin')),
                 text         TEXT    NOT NULL,
+                media_type   TEXT    DEFAULT NULL,
+                media_file_id TEXT   DEFAULT NULL,
                 created_at   TEXT    DEFAULT (datetime('now'))
             )
         """)
+        # Миграция для уже созданных таблиц: добавить media_* если их нет
+        for col, decl in (("media_type", "TEXT DEFAULT NULL"),
+                          ("media_file_id", "TEXT DEFAULT NULL")):
+            try:
+                con.execute(f"ALTER TABLE ticket_messages ADD COLUMN {col} {decl}")
+            except Exception:
+                pass  # колонка уже есть — игнор
         con.execute(
             "CREATE INDEX IF NOT EXISTS idx_tickets_user ON tickets(user_id, status, updated_at DESC)"
         )
@@ -98,16 +107,84 @@ def create_ticket(user_id: int, subject: str, body: str) -> int:
     return tid
 
 
-def add_message(ticket_id: int, author_id: int, role: str, text: str) -> None:
+def add_message(ticket_id: int, author_id: int, role: str, text: str,
+                media_type: str | None = None, media_file_id: str | None = None) -> None:
+    """Сохраняет сообщение в тред тикета.
+    media_type: 'photo' | 'video' | 'document' | 'voice' | 'video_note' | 'animation' | 'sticker' | None
+    media_file_id: Telegram file_id для пересылки без скачивания.
+    """
     _ensure_tickets_tables()
     with _conn() as con:
         con.execute(
-            "INSERT INTO ticket_messages (ticket_id, author_id, author_role, text) VALUES (?, ?, ?, ?)",
-            (ticket_id, author_id, role, text.strip()[:4000]),
+            "INSERT INTO ticket_messages (ticket_id, author_id, author_role, text, media_type, media_file_id) "
+            "VALUES (?, ?, ?, ?, ?, ?)",
+            (ticket_id, author_id, role, (text or "").strip()[:4000], media_type, media_file_id),
         )
         con.execute(
             "UPDATE tickets SET updated_at = datetime('now') WHERE id = ?", (ticket_id,)
         )
+
+
+def _extract_media(message: Message) -> tuple[str, str] | None:
+    """Возвращает (media_type, file_id) для медиа-сообщения или None.
+    Приоритет: photo > video/animation > voice > video_note > document > sticker.
+    Берём самый большой photo (последний в списке).
+    """
+    if message.photo:
+        return "photo", message.photo[-1].file_id
+    if message.video:
+        return "video", message.video.file_id
+    if message.animation:
+        return "animation", message.animation.file_id
+    if message.voice:
+        return "voice", message.voice.file_id
+    if message.video_note:
+        return "video_note", message.video_note.file_id
+    if message.document:
+        return "document", message.document.file_id
+    if message.sticker:
+        return "sticker", message.sticker.file_id
+    return None
+
+
+_MEDIA_EMOJI = {
+    "photo": "📷 Фото",
+    "video": "🎬 Видео",
+    "animation": "🎞 GIF",
+    "voice": "🎙 Голосовое",
+    "video_note": "📹 Видеосообщение",
+    "document": "📎 Файл",
+    "sticker": "😺 Стикер",
+}
+
+
+async def _send_media_to_chat(bot, chat_id: int, m: dict, caption: str | None = None,
+                              reply_markup=None):
+    """Пересылает сохранённое медиа в указанный чат. caption/caption_parse_mode опционально."""
+    media_type = m.get("media_type")
+    file_id = m.get("media_file_id")
+    parse_mode = PM
+    if not media_type or not file_id:
+        return False
+    try:
+        if media_type == "photo":
+            await bot.send_photo(chat_id, file_id, caption=caption, parse_mode=parse_mode, reply_markup=reply_markup)
+        elif media_type == "video":
+            await bot.send_video(chat_id, file_id, caption=caption, parse_mode=parse_mode, reply_markup=reply_markup)
+        elif media_type == "animation":
+            await bot.send_animation(chat_id, file_id, caption=caption, parse_mode=parse_mode, reply_markup=reply_markup)
+        elif media_type == "voice":
+            await bot.send_voice(chat_id, file_id, caption=caption, parse_mode=parse_mode, reply_markup=reply_markup)
+        elif media_type == "video_note":
+            await bot.send_video_note(chat_id, file_id)
+        elif media_type == "document":
+            await bot.send_document(chat_id, file_id, caption=caption, parse_mode=parse_mode, reply_markup=reply_markup)
+        elif media_type == "sticker":
+            await bot.send_sticker(chat_id, file_id)
+        return True
+    except Exception as e:
+        log.error(f"send media failed ({media_type}) -> {chat_id}: {e}")
+        return False
 
 
 def list_user_tickets(user_id: int, status: str | None = None) -> list:
@@ -270,13 +347,25 @@ def _format_ticket_thread(t: dict, is_admin_view: bool) -> str:
         header += f"<b>Автор:</b> {_user_label(t['user_id'])} (<code>{t['user_id']}</code>)\n{DIV}\n"
     body_lines = []
     for m in t["messages"]:
-        # Пользователю не показываем, кто именно из админов ответил — только «Поддержка».
+        # FIX (Bug O): если смотрит админ — для user-сообщений показываем настоящее имя,
+        # а не «Вы» (админ не автор тикета).
         if m["author_role"] == "user":
-            who = "👤 Вы"
+            who = "👤 Вы" if not is_admin_view else f"👤 {_user_label(m['author_id'])}"
         else:
+            # Пользователь не видит id конкретного админа — только «Поддержка».
             who = "💼 Поддержка" if not is_admin_view else f"👨‍💼 Админ ({m['author_id']})"
         body_lines.append(f"<b>{who}</b> · <i>{m['created_at']}</i>")
-        body_lines.append(m["text"])
+        # Медиа в треде: показываем плашку вместо текста (само медиа отправлено выше отдельным сообщением)
+        media_type = m.get("media_type")
+        if media_type:
+            media_label = _MEDIA_EMOJI.get(media_type, f"📎 {media_type}")
+            if m["text"]:
+                body_lines.append(f"<i>{media_label}</i>")
+                body_lines.append(m["text"])
+            else:
+                body_lines.append(f"<i>{media_label}</i>")
+        else:
+            body_lines.append(m["text"])
         body_lines.append("")
     if not body_lines:
         body_lines = ["<i>(пусто)</i>"]
@@ -379,18 +468,26 @@ async def tkt_body_entered(message: Message, state: FSMContext):
         await state.clear()
         return
     body = (message.text or "").strip()
-    if not body:
-        await message.answer("❌ Текст не может быть пустым. Опишите ваш вопрос:", parse_mode=PM)
+    media = _extract_media(message)  # (media_type, file_id) или None
+    if not body and not media:
+        await message.answer("❌ Сообщение пустое. Опишите ваш вопрос или прикрепите фото/файл:", parse_mode=PM)
         return
     data = await state.get_data()
     subject = data.get("subject", "(без темы)")
     user = message.from_user
+    media_type, media_file_id = media if media else (None, None)
     tid = create_ticket(user.id, subject, body)
+    # Сохраняем первое сообщение (медиа + подпись)
+    add_message(tid, user.id, "user", body, media_type, media_file_id)
     await state.clear()
+    media_note = ""
+    if media_type:
+        media_note = f"\n📎 <b>Прикреплено:</b> <i>{_MEDIA_EMOJI.get(media_type, media_type)}</i>"
     await message.answer(
         f"🎫 <b>Тикет #{tid} создан!</b>\n"
         f"{DIV}\n"
-        f"<b>Тема:</b> <code>{subject}</code>\n"
+        f"<b>Тема:</b> <code>{subject}</code>"
+        f"{media_note}\n"
         f"Админы уведомлены. Ожидайте ответа.\n\n"
         f"Можно дописать что-то ещё через «🎫 Поддержка» → «Мои тикеты».",
         reply_markup=InlineKeyboardMarkup(inline_keyboard=[
@@ -399,20 +496,31 @@ async def tkt_body_entered(message: Message, state: FSMContext):
         ]),
         parse_mode=PM,
     )
-    # Notify admins
+    # Notify admins — текст + пересылка медиа
     note = (
         f"🆕 <b>Новый тикет #{tid}</b>\n"
         f"<b>От:</b> {_user_label(user.id)} (<code>{user.id}</code>)\n"
         f"<b>Тема:</b> <code>{subject}</code>\n"
         f"{DIV}\n"
-        f"<i>{body[:600]}{'…' if len(body) > 600 else ''}</i>"
+        f"<i>{(body or '—')[:600]}{'…' if len(body or '') > 600 else ''}</i>"
     )
+    if media_type:
+        note += f"\n📎 <i>{_MEDIA_EMOJI.get(media_type, media_type)}</i> прикреплено ниже"
     kb = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="👀 Открыть", callback_data=f"tkt:admin_view:{tid}")],
     ])
     bot = message.bot
     if bot is not None:
         await _notify_admins(bot, note, reply_markup=kb)
+        # Если есть медиа — пересылаем его админам отдельным сообщением
+        if media_type and media_file_id:
+            m_dict = {"media_type": media_type, "media_file_id": media_file_id}
+            cap = f"🆕 Тикет #{tid} · {_user_label(user.id)}"
+            for uid in get_all_admins() or []:
+                try:
+                    await _send_media_to_chat(bot, uid, m_dict, caption=cap, reply_markup=kb)
+                except Exception as e:
+                    log.error(f"forward media to admin {uid} failed: {e}")
 
 
 @router.callback_query(F.data.startswith("tkt:my:"))
@@ -504,8 +612,9 @@ async def cb_tkt_reply(call: CallbackQuery, state: FSMContext):
 @router.message(TicketStates.replying)
 async def tkt_reply_entered(message: Message, state: FSMContext):
     body = (message.text or "").strip()
-    if not body:
-        await message.answer("❌ Пустое сообщение. Напишите текст:", parse_mode=PM)
+    media = _extract_media(message)  # (media_type, file_id) или None
+    if not body and not media:
+        await message.answer("❌ Пустое сообщение. Напишите текст или прикрепите фото/файл:", parse_mode=PM)
         return
     data = await state.get_data()
     tid = data.get("reply_tid")
@@ -522,19 +631,31 @@ async def tkt_reply_entered(message: Message, state: FSMContext):
         await state.clear()
         await message.answer("⚠️ Тикет уже закрыт.", parse_mode=PM)
         return
-    add_message(tid, message.from_user.id, "user", body)
+    media_type, media_file_id = media if media else (None, None)
+    add_message(tid, message.from_user.id, "user", body, media_type, media_file_id)
     await state.set_state(TicketStates.viewing)
     # Notify admins
     note = (
         f"💬 <b>Новое сообщение в тикете #{tid}</b>\n"
         f"<b>От:</b> {_user_label(message.from_user.id)} (<code>{message.from_user.id}</code>)\n"
         f"{DIV}\n"
-        f"<i>{body[:600]}{'…' if len(body) > 600 else ''}</i>"
+        f"<i>{(body or '—')[:600]}{'…' if len(body or '') > 600 else ''}</i>"
     )
+    if media_type:
+        note += f"\n📎 <i>{_MEDIA_EMOJI.get(media_type, media_type)}</i> прикреплено ниже"
     kb = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="👀 Открыть", callback_data=f"tkt:admin_view:{tid}")],
     ])
     await _notify_admins(message.bot, note, reply_markup=kb)
+    # Если есть медиа — пересылаем админам отдельным сообщением
+    if media_type and media_file_id:
+        m_dict = {"media_type": media_type, "media_file_id": media_file_id}
+        cap = f"💬 Тикет #{tid} · {_user_label(message.from_user.id)}"
+        for uid in get_all_admins() or []:
+            try:
+                await _send_media_to_chat(message.bot, uid, m_dict, caption=cap, reply_markup=kb)
+            except Exception as e:
+                log.error(f"forward user media to admin {uid} failed: {e}")
     await message.answer(
         f"✅ Сообщение добавлено в тикет #{tid}.",
         reply_markup=ticket_view_kb(tid, is_admin_view=False),
@@ -685,8 +806,9 @@ async def admin_reply_entered(message: Message, state: FSMContext):
         await state.clear()
         return
     body = (message.text or "").strip()
-    if not body:
-        await message.answer("❌ Пустой ответ. Напишите текст:", parse_mode=PM)
+    media = _extract_media(message)  # (media_type, file_id) или None
+    if not body and not media:
+        await message.answer("❌ Пустой ответ. Напишите текст или прикрепите фото/файл:", parse_mode=PM)
         return
     data = await state.get_data()
     tid = data.get("reply_tid")
@@ -706,28 +828,43 @@ async def admin_reply_entered(message: Message, state: FSMContext):
             parse_mode=PM,
         )
         return
-    add_message(tid, message.from_user.id, "admin", body)
+    media_type, media_file_id = media if media else (None, None)
+    add_message(tid, message.from_user.id, "admin", body, media_type, media_file_id)
     await state.set_state(TicketStates.admin_viewing)
     await message.answer(
         f"✅ Ответ отправлен в тикет #{tid}.",
         reply_markup=ticket_view_kb(tid, is_admin_view=True),
         parse_mode=PM,
     )
-    # Notify user about admin reply
+    # Notify user about admin reply (текст)
+    user_kb = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="📂 Открыть тикет", callback_data=f"tkt:view:{tid}")],
+    ])
+    text_note = (
+        f"💬 <b>Ответ в тикете #{tid}</b>\n"
+        f"<b>Тема:</b> <code>{t['subject']}</code>\n"
+        f"{DIV}\n"
+        f"{(body or '—')[:3500]}"
+    )
+    if media_type:
+        text_note += f"\n📎 <i>{_MEDIA_EMOJI.get(media_type, media_type)}</i> прикреплено ниже"
     try:
         await message.bot.send_message(
             t["user_id"],
-            f"💬 <b>Ответ в тикете #{tid}</b>\n"
-            f"<b>Тема:</b> <code>{t['subject']}</code>\n"
-            f"{DIV}\n"
-            f"{body[:3500]}",
-            reply_markup=InlineKeyboardMarkup(inline_keyboard=[
-                [InlineKeyboardButton(text="📂 Открыть тикет", callback_data=f"tkt:view:{tid}")],
-            ]),
+            text_note,
+            reply_markup=user_kb,
             parse_mode=PM,
         )
     except Exception as e:
         log.error(f"notify user {t['user_id']} about admin reply failed: {e}")
+    # Пересылаем медиа пользователю, если есть
+    if media_type and media_file_id:
+        m_dict = {"media_type": media_type, "media_file_id": media_file_id}
+        cap = f"💬 Ответ в тикете #{tid}"
+        try:
+            await _send_media_to_chat(message.bot, t["user_id"], m_dict, caption=cap, reply_markup=user_kb)
+        except Exception as e:
+            log.error(f"forward admin media to user {t['user_id']} failed: {e}")
 
 
 @router.callback_query(F.data.startswith("tkt:admin_close:"))

@@ -45,7 +45,9 @@ class TicketStates(StatesGroup):
     entering_subject = State()   # ввод темы нового тикета
     entering_body = State()      # ввод первого сообщения
     viewing = State()            # просмотр треда (можно дописать)
-    replying = State()          # дописывание сообщения в существующий тикет
+    replying = State()          # дописывание сообщения в существующий тикет (юзер)
+    admin_viewing = State()     # админ просматривает тикет
+    admin_replying = State()    # админ пишет ответ в тикет
     admin_viewing = State()      # админ смотрит тред
 
 
@@ -259,15 +261,20 @@ def _format_ticket_thread(t: dict, is_admin_view: bool) -> str:
         f"🎫 <b>Тикет #{t['id']}</b> · {status}\n"
         f"{DIV}\n"
         f"<b>Тема:</b> {t['subject']}\n"
-        f"<b>Автор:</b> {_user_label(t['user_id'])} (<code>{t['user_id']}</code>)\n"
         f"<b>Создан:</b> {t['created_at']}\n"
         f"<b>Обновлён:</b> {t['updated_at']}\n"
         f"{DIV}\n"
     )
+    # В шапке автор тикета виден только админу. Пользователь автора и так знает (это он).
+    if is_admin_view:
+        header += f"<b>Автор:</b> {_user_label(t['user_id'])} (<code>{t['user_id']}</code>)\n{DIV}\n"
     body_lines = []
     for m in t["messages"]:
-        who = "👤 Юзер" if m["author_role"] == "user" else "👨‍💼 Админ"
-        who += f" ({m['author_id']})"
+        # Пользователю не показываем, кто именно из админов ответил — только «Поддержка».
+        if m["author_role"] == "user":
+            who = "👤 Вы"
+        else:
+            who = "💼 Поддержка" if not is_admin_view else f"👨‍💼 Админ ({m['author_id']})"
         body_lines.append(f"<b>{who}</b> · <i>{m['created_at']}</i>")
         body_lines.append(m["text"])
         body_lines.append("")
@@ -496,10 +503,6 @@ async def cb_tkt_reply(call: CallbackQuery, state: FSMContext):
 
 @router.message(TicketStates.replying)
 async def tkt_reply_entered(message: Message, state: FSMContext):
-    # Если это админ-ответ (reply_role='admin'), пропускаем — обработает admin_reply_entered ниже
-    _data = await state.get_data()
-    if _data.get("reply_role") == "admin":
-        return  # пусть сработает admin-handler
     body = (message.text or "").strip()
     if not body:
         await message.answer("❌ Пустое сообщение. Напишите текст:", parse_mode=PM)
@@ -661,8 +664,8 @@ async def cb_tkt_admin_reply(call: CallbackQuery, state: FSMContext):
     if not t:
         await call.answer("Тикет не найден", show_alert=True)
         return
-    await state.set_state(TicketStates.replying)
-    await state.update_data(reply_tid=tid, reply_role="admin")
+    await state.set_state(TicketStates.admin_replying)
+    await state.update_data(reply_tid=tid)
     await call.message.answer(
         f"✏️ <b>Ответ на тикет #{tid}</b>\n"
         f"<b>Кому:</b> {_user_label(t['user_id'])} (<code>{t['user_id']}</code>)\n"
@@ -675,12 +678,9 @@ async def cb_tkt_admin_reply(call: CallbackQuery, state: FSMContext):
     )
 
 
-@router.message(TicketStates.replying)
+@router.message(TicketStates.admin_replying)
 async def admin_reply_entered(message: Message, state: FSMContext):
-    """Обработчик ответа админа (тот же state, но с reply_role='admin')."""
-    data = await state.get_data()
-    if data.get("reply_role") != "admin":
-        return  # не наш случай — пусть обработает user-handler выше
+    """Обработчик ответа админа."""
     if not is_admin(message.from_user.id):
         await state.clear()
         return
@@ -688,6 +688,7 @@ async def admin_reply_entered(message: Message, state: FSMContext):
     if not body:
         await message.answer("❌ Пустой ответ. Напишите текст:", parse_mode=PM)
         return
+    data = await state.get_data()
     tid = data.get("reply_tid")
     t = get_ticket(tid) if tid else None
     if not t:

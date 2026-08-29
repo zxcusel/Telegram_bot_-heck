@@ -243,7 +243,7 @@ async def cb_manage_users(call: CallbackQuery, state: FSMContext) -> None:
     except (ValueError, IndexError):
         page = 0
 
-    users = get_all_users_all()
+    users = [u for u in get_all_users_all() if not is_banned(u)]
     if not users:
         return await _edit_or_answer(
             call,
@@ -496,7 +496,7 @@ async def cb_broadcast_indiv(call: CallbackQuery, state: FSMContext) -> None:
 
 async def process_broadcast_text_all(message: Message, state: FSMContext) -> None:
     text = message.text or ""
-    users = get_all_users_all()
+    users = [u for u in get_all_users_all() if not is_banned(u)]
     sent = 0
     for uid in users:
         try:

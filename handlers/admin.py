@@ -54,6 +54,7 @@ def _admin_main_kb() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="👥 Управление ролями", callback_data="admin:manage_users:0")],
         [InlineKeyboardButton(text="🎭 Выдать роль по ID", callback_data="admin:set_role")],
+        [InlineKeyboardButton(text="🎫 Тикеты",            callback_data="tkt:admin_menu")],
         [InlineKeyboardButton(text="🚫 Забанить",          callback_data="admin:ban_menu")],
         [InlineKeyboardButton(text="⛔️ ЧС",                  callback_data="admin:blacklist_menu")],
         [InlineKeyboardButton(text="📢 Отправить сообщение", callback_data="admin:broadcast_menu")],
@@ -496,7 +497,7 @@ async def cb_broadcast_indiv(call: CallbackQuery, state: FSMContext) -> None:
 
 async def process_broadcast_text_all(message: Message, state: FSMContext) -> None:
     text = message.text or ""
-    users = [u for u in get_all_users_all() if not is_banned(u)]
+    users = get_all_users_all()
     sent = 0
     for uid in users:
         try:

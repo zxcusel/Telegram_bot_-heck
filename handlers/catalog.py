@@ -28,6 +28,7 @@ def _start_kb(user_id: int) -> InlineKeyboardMarkup:
         [InlineKeyboardButton(text="▶️ Начать", callback_data="start:begin")],
         [InlineKeyboardButton(text="🤖 Автоматизация", callback_data="auto:open")],
         # [InlineKeyboardButton(text="🎲 Массовая генерация", callback_data="start:bulk_gen")],
+        [InlineKeyboardButton(text="🎫 Поддержка", callback_data="tkt:menu")],
         [InlineKeyboardButton(text="⚙️ Настройки", callback_data="start:settings")],
     ]
     if is_admin(user_id):
@@ -44,6 +45,7 @@ def _welcome_text() -> str:
         f"<i>{WELCOME_TAG}</i>\n\n"
         f"{BULLET} <b>Начать</b> — выбрать гео и сгенерировать чек\n"
         f"{BULLET} <b>Автоматизация</b> — запуск по расписанию\n"
+        f"{BULLET} <b>Поддержка</b> — обратиться в поддержку\n"
         f"{BULLET} <b>Настройки</b> — параметры генерации\n"
         f"{DIV}\n"
         f"<i>Выберите действие:</i>"

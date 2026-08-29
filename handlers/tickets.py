@@ -695,6 +695,17 @@ async def admin_reply_entered(message: Message, state: FSMContext):
         await state.clear()
         await message.answer("⚠️ Тикет не найден.", parse_mode=PM)
         return
+    # FIX (Bug N): не отправлять ответ в закрытый тикет — пусть админ сначала переоткроет
+    if t["status"] == "closed":
+        await state.set_state(TicketStates.admin_viewing)
+        await message.answer(
+            f"⚠️ <b>Тикет #{tid} закрыт.</b>\n"
+            f"{DIV}\n"
+            f"Сначала переоткройте его через меню тикета, чтобы дописать ответ.",
+            reply_markup=ticket_view_kb(tid, is_admin_view=True),
+            parse_mode=PM,
+        )
+        return
     add_message(tid, message.from_user.id, "admin", body)
     await state.set_state(TicketStates.admin_viewing)
     await message.answer(

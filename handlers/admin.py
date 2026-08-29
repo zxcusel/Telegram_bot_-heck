@@ -549,18 +549,24 @@ async def cb_broadcast_indiv(call: CallbackQuery, state: FSMContext) -> None:
 
 
 async def process_broadcast_text_all(message: Message, state: FSMContext) -> None:
+    import asyncio as _aio
     text = message.text or ""
     users = get_all_users_all()
     sent = 0
-    for uid in users:
+    failed = 0
+    for i, uid in enumerate(users, 1):
         try:
             await message.bot.send_message(uid, text)
             sent += 1
         except Exception:
-            continue
+            failed += 1
+        # FIX (Bug I): не давить Telegram-флуд — пауза каждые ~25 отправок (≈ лимит 30/сек)
+        if i % 25 == 0:
+            await _aio.sleep(1.0)
     await state.clear()
     await message.answer(
-        f"📢 Рассылка завершена.\nДоставлено: <b>{sent}/{len(users)}</b>",
+        f"📢 Рассылка завершена.\nДоставлено: <b>{sent}/{len(users)}</b>"
+        + (f"\nНе доставлено: <b>{failed}</b>" if failed else ""),
         reply_markup=_admin_main_kb(),
     )
 
@@ -715,12 +721,16 @@ async def process_broadcast_text_picked(message: Message, state: FSMContext) -> 
     targets = list(sel)
     sent = 0
     failed = 0
-    for uid in targets:
+    import asyncio as _aio
+    for i, uid in enumerate(targets, 1):
         try:
             await message.bot.send_message(uid, text)
             sent += 1
         except Exception:
             failed += 1
+        # FIX (Bug J): не давить Telegram-флуд — пауза каждые 25 отправок
+        if i % 25 == 0:
+            await _aio.sleep(1.0)
     await state.clear()
     await message.answer(
         f"📢 Рассылка завершена.\nДоставлено: <b>{sent}/{len(targets)}</b>" + (f"\nНе доставлено: <b>{failed}</b>" if failed else ""),

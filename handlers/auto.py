@@ -409,6 +409,7 @@ async def auto_run(call: CallbackQuery, state: FSMContext):
 
     media: list = []
     BATCH = 10
+    render_errors = 0  # FIX (Bug F): трекать неудачные рендеры
     for i, time_str in enumerate(times_list):
         item_key = random.choice(preset["items"])
         amount = random.randint(preset["sum_min"], preset["sum_max"])
@@ -439,6 +440,8 @@ async def auto_run(call: CallbackQuery, state: FSMContext):
             png_bytes = rendered.getvalue()
         except Exception as e:
             log.error(f"auto_run render error: {e}")
+            # FIX (Bug F): считать ошибки рендеринга, чтобы итоговое сообщение не врало
+            render_errors += 1
             continue
         caption = (
             f"⏰ <b>{time_str}</b>  ·  чек <b>{i + 1}/{total}</b>  ·  "
@@ -464,8 +467,12 @@ async def auto_run(call: CallbackQuery, state: FSMContext):
         except TelegramBadRequest as e:
             log.error(f"auto_run send_media_group error: {e}")
 
+    sent_ok = total - render_errors
     await call.message.answer(
-        f"✅ <b>Готово!</b>\n{DIV}\nВсе <b>{total}</b> чеков отработаны. 🎉",
+        f"✅ <b>Готово!</b>\n{DIV}\n"
+        f"Удачно создано: <b>{sent_ok}/{total}</b> чеков"
+        + (f"\nОшибок рендера: <b>{render_errors}</b>" if render_errors else "")
+        + " 🎉",
         reply_markup=auto_batch_done_kb(),
         parse_mode=PM,
     )

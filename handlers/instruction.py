@@ -56,7 +56,7 @@ def _back_to_instruction_kb() -> InlineKeyboardMarkup:
 # ── Главная инструкции ──────────────────────────────────────────────────────
 
 INSTRUCTION_MAIN = (
-    f"📖 <b>Инструкция к BCKPS F-BOT</b>\n"
+    f"📖 <b>Инструкция к FIRE-BOT</b>\n"
     f"{DIV}\n"
     f"Короткое и понятное описание всех разделов бота.\n\n"
     f"{BULLET} <b>🚀 Начать работу</b> — что нажимать сразу после /start\n"

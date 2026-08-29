@@ -20,7 +20,7 @@ router = Router()
 PM = ParseMode.HTML
 DIV = "━━━━━━━━━━━━━━━━━━━━"
 BULLET = "▫️"
-WELCOME_TITLE = "🤖 <b>BCKPS F-BOT</b>"
+WELCOME_TITLE = "🤖 <b>FIRE-BOT</b>"
 WELCOME_TAG = "Генератор чеков · Расписание · Автоматизация"
 
 

@@ -880,7 +880,7 @@ def _fill_name_fields(item: dict, values: dict, name: str) -> None:
         fl = fkey.lower()
         if any(h in fl for h in _NAME_FIELD_HINTS):
             cur = values.get(fkey)
-            if not cur or cur in ("AUTOMATION USER", "AUTOMATION SENDER"):
+            if not cur or cur in ("AUTOMATION USER", "AUTOMATION SENDER", "Jose Garcia"):
                 values[fkey] = name
     # Явно проставляем известные ключи-получатели/отправители
     for k in (
@@ -888,7 +888,7 @@ def _fill_name_fields(item: dict, values: dict, name: str) -> None:
         "receiver_name", "client_name", "payer_1", "payer_2",
         "name1", "name2", "_recipient_name_destino",
     ):
-        if k not in values or values[k] in ("AUTOMATION USER", "AUTOMATION SENDER", ""):
+        if k not in values or values[k] in ("AUTOMATION USER", "AUTOMATION SENDER", "Jose Garcia", ""):
             values[k] = name
 
 
@@ -902,7 +902,7 @@ def _render_values(item: dict, date: str, time: str, amount: int) -> dict:
         "fullname": "AUTOMATION USER",
         "name_1": "AUTOMATION USER",
         "name_2": "AUTOMATION USER",
-        "sender_name": "AUTOMATION SENDER",
+        "sender_name": "Jose Garcia",
         "account": "00000000",
         "acc_num": "00000000",
         "transaction": "000000000",

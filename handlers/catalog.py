@@ -28,11 +28,13 @@ def _start_kb(user_id: int) -> InlineKeyboardMarkup:
         [InlineKeyboardButton(text="▶️ Начать", callback_data="start:begin")],
         [InlineKeyboardButton(text="🤖 Автоматизация", callback_data="auto:open")],
         # [InlineKeyboardButton(text="🎲 Массовая генерация", callback_data="start:bulk_gen")],
-        [InlineKeyboardButton(text="🎫 Поддержка", callback_data="tkt:menu")],
         [InlineKeyboardButton(text="⚙️ Настройки", callback_data="start:settings")],
     ]
     if is_admin(user_id):
         buttons.append([InlineKeyboardButton(text="👨‍💼 Админ-панель", callback_data="start:admin")])
+    else:
+        # Тикеты — только для пользователей (админы управляют через админ-панель)
+        buttons.insert(2, [InlineKeyboardButton(text="🎫 Поддержка", callback_data="tkt:menu")])
     buttons.append([InlineKeyboardButton(text="🗑 Очистить чат", callback_data="start:clear")])
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 

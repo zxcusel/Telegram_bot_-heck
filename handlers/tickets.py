@@ -295,6 +295,9 @@ async def cb_tkt_menu(call: CallbackQuery, state: FSMContext):
     """Главное меню тикетов (пользователь)."""
     try: await call.answer()
     except Exception: pass
+    if is_admin(call.from_user.id):
+        await call.answer("Раздел «Поддержка» только для пользователей.\nАдмины: «🎫 Тикеты» в админ-панели.", show_alert=True)
+        return
     await state.clear()
     rows = list_user_tickets(call.from_user.id, "open")
     open_n = len(rows)
@@ -321,6 +324,9 @@ async def cb_tkt_menu(call: CallbackQuery, state: FSMContext):
 async def cb_tkt_new(call: CallbackQuery, state: FSMContext):
     try: await call.answer()
     except Exception: pass
+    if is_admin(call.from_user.id):
+        await call.answer("Создавать тикеты могут только пользователи.", show_alert=True)
+        return
     await state.set_state(TicketStates.entering_subject)
     text = (
         f"✏️ <b>Новое обращение</b>\n"
@@ -339,6 +345,9 @@ async def cb_tkt_new(call: CallbackQuery, state: FSMContext):
 
 @router.message(TicketStates.entering_subject)
 async def tkt_subject_entered(message: Message, state: FSMContext):
+    if is_admin(message.from_user.id):
+        await state.clear()
+        return
     subject = (message.text or "").strip()
     if not subject:
         await message.answer("❌ Тема не может быть пустой. Введите тему:", parse_mode=PM)
@@ -358,7 +367,10 @@ async def tkt_subject_entered(message: Message, state: FSMContext):
 
 
 @router.message(TicketStates.entering_body)
-async def tkt_body_entered(message: Message, state: FSMContext, bot=None):
+async def tkt_body_entered(message: Message, state: FSMContext):
+    if is_admin(message.from_user.id):
+        await state.clear()
+        return
     body = (message.text or "").strip()
     if not body:
         await message.answer("❌ Текст не может быть пустым. Опишите ваш вопрос:", parse_mode=PM)
@@ -391,10 +403,7 @@ async def tkt_body_entered(message: Message, state: FSMContext, bot=None):
     kb = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="👀 Открыть", callback_data=f"tkt:admin_view:{tid}")],
     ])
-    try:
-        bot = message.bot
-    except Exception:
-        bot = None
+    bot = message.bot
     if bot is not None:
         await _notify_admins(bot, note, reply_markup=kb)
 
@@ -403,6 +412,9 @@ async def tkt_body_entered(message: Message, state: FSMContext, bot=None):
 async def cb_tkt_my(call: CallbackQuery, state: FSMContext):
     try: await call.answer()
     except Exception: pass
+    if is_admin(call.from_user.id):
+        await call.answer("Админы не ведут свои тикеты. Управление — «🎫 Тикеты» в админ-панели.", show_alert=True)
+        return
     await state.clear()
     rows = list_user_tickets(call.from_user.id)
     if not rows:
@@ -434,6 +446,9 @@ async def cb_tkt_my(call: CallbackQuery, state: FSMContext):
 async def cb_tkt_view(call: CallbackQuery, state: FSMContext):
     try: await call.answer()
     except Exception: pass
+    if is_admin(call.from_user.id):
+        await call.answer("Админы просматривают тикеты через «🎫 Тикеты» в админ-панели.", show_alert=True)
+        return
     tid = int(call.data.split(":")[2])
     t = get_ticket(tid)
     if not t or t["user_id"] != call.from_user.id:
@@ -455,6 +470,9 @@ async def cb_tkt_view(call: CallbackQuery, state: FSMContext):
 async def cb_tkt_reply(call: CallbackQuery, state: FSMContext):
     try: await call.answer()
     except Exception: pass
+    if is_admin(call.from_user.id):
+        await call.answer("Отвечать на тикеты из админ-раздела «🎫 Тикеты».", show_alert=True)
+        return
     tid = int(call.data.split(":")[2])
     t = get_ticket(tid)
     if not t or t["user_id"] != call.from_user.id:

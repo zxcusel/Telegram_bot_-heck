@@ -46,6 +46,7 @@ class AdminStates(StatesGroup):
     wait_broadcast_text_all = State()
     wait_broadcast_id_indiv = State()
     wait_broadcast_text_indiv = State()
+    wait_broadcast_text_picked = State()
 
 
 # ── keyboards ─────────────────────────────────────────────────────────────────
@@ -66,10 +67,62 @@ def _broadcast_menu_kb() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="📢 Всем пользователям", callback_data="admin:broadcast_all")],
         [InlineKeyboardButton(text="👤 Индивидуально (по ID)", callback_data="admin:broadcast_indiv")],
+        [InlineKeyboardButton(text="📋 Выбрать из списка", callback_data="admin:broadcast_pick:0")],
         [InlineKeyboardButton(text="🔙 Назад", callback_data="admin:back_main")]
     ])
 
 
+
+# ── broadcast: pick users from list ──────────────────────────────────────────
+# Per-admin in-memory storage: {admin_id: set[user_id]}.
+# Чистится при «🗑 Сбросить выбор» и после отправки.
+_BC_PICK: dict[int, set[int]] = {}
+
+
+def _bc_pick_get(admin_id: int) -> set[int]:
+    s = _BC_PICK.get(admin_id)
+    if s is None:
+        s = set()
+        _BC_PICK[admin_id] = s
+    return s
+
+
+def _bc_pick_all_users() -> list[int]:
+    # Все пользователи из БД, кроме забаненных.
+    return [u for u in get_all_users_all() if not is_banned(u)]
+
+
+def _build_broadcast_pick_kb(users: list[int], page: int, selected: set[int]) -> InlineKeyboardMarkup:
+    total = len(users)
+    total_pages = max(1, (total + USERS_PER_PAGE - 1) // USERS_PER_PAGE)
+    page = max(0, min(page, total_pages - 1))
+    start = page * USERS_PER_PAGE
+    chunk = users[start:start + USERS_PER_PAGE]
+
+    rows: list[list[InlineKeyboardButton]] = []
+    for uid in chunk:
+        mark = "✅" if uid in selected else "⬜️"
+        label = f"{mark} {uid} · {_short_name(uid)}"[:64]
+        rows.append([InlineKeyboardButton(text=label, callback_data=f"admin:bcast_toggle:{uid}:{page}")])
+
+    nav: list[InlineKeyboardButton] = []
+    if page > 0:
+        nav.append(InlineKeyboardButton(text="◀", callback_data=f"admin:broadcast_pick:{page - 1}"))
+    nav.append(InlineKeyboardButton(text=f"{page + 1}/{total_pages}", callback_data="noop"))
+    if page < total_pages - 1:
+        nav.append(InlineKeyboardButton(text="▶", callback_data=f"admin:broadcast_pick:{page + 1}"))
+    rows.append(nav)
+
+    rows.append([
+        InlineKeyboardButton(text="☑ Все на стр.", callback_data=f"admin:bcast_page_all:{page}"),
+        InlineKeyboardButton(text="☐ Снять всех",   callback_data=f"admin:bcast_page_none:{page}"),
+    ])
+    rows.append([
+        InlineKeyboardButton(text=f"🚀 Отправить ({len(selected)})", callback_data="admin:bcast_done"),
+        InlineKeyboardButton(text="🗑 Сбросить выбор",                callback_data="admin:bcast_reset"),
+    ])
+    rows.append([InlineKeyboardButton(text="🔙 Назад", callback_data="admin:broadcast_menu")])
+    return InlineKeyboardMarkup(inline_keyboard=rows)
 def _back_to_main_kb() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="🔙 Назад", callback_data="admin:back_main")]
@@ -544,6 +597,137 @@ async def process_broadcast_text_indiv(message: Message, state: FSMContext) -> N
     await message.answer("📢 Готово", reply_markup=_admin_main_kb())
 
 
+# ── broadcast: pick users from list ───────────────────────────────────────────
+
+async def cb_broadcast_pick(call: CallbackQuery, state: FSMContext) -> None:
+    """Показывает первую страницу списка пользователей с чекбоксами."""
+    aid = call.from_user.id
+    _BC_PICK.pop(aid, None)  # сбрасываем предыдущий выбор при входе
+    users = _bc_pick_all_users()
+    await _edit_or_answer(
+        call,
+        f"📋 <b>Выбор пользователей для рассылки</b>\n{DIV}\nНажмите на пользователя, чтобы добавить/убрать из выборки. Нажмите 🚀 для отправки.\n\nВсего доступно: <b>{len(users)}</b>",
+        _build_broadcast_pick_kb(users, 0, _bc_pick_get(aid)),
+    )
+
+
+async def cb_broadcast_pick_page(call: CallbackQuery, state: FSMContext) -> None:
+    """Переключение страницы."""
+    aid = call.from_user.id
+    page = int((call.data or "").split(":")[-1] or 0)
+    users = _bc_pick_all_users()
+    await _edit_or_answer(
+        call,
+        f"📋 <b>Выбор пользователей для рассылки</b>\n{DIV}\nНажмите на пользователя, чтобы добавить/убрать из выборки. Нажмите 🚀 для отправки.\n\nВсего доступно: <b>{len(users)}</b>",
+        _build_broadcast_pick_kb(users, page, _bc_pick_get(aid)),
+    )
+
+
+async def cb_bcast_toggle(call: CallbackQuery, state: FSMContext) -> None:
+    """Тоггл одного пользователя. data = 'admin:bcast_toggle:UID:PAGE'."""
+    aid = call.from_user.id
+    parts = (call.data or "").split(":")
+    try:
+        uid = int(parts[2]); page = int(parts[3])
+    except (IndexError, ValueError):
+        return await call.answer("⚠️ Ошибка данных", show_alert=True)
+    sel = _bc_pick_get(aid)
+    if uid in sel:
+        sel.discard(uid)
+    else:
+        sel.add(uid)
+    users = _bc_pick_all_users()
+    await _edit_or_answer(
+        call,
+        f"📋 <b>Выбор пользователей для рассылки</b>\n{DIV}\nНажмите на пользователя, чтобы добавить/убрать из выборки. Нажмите 🚀 для отправки.\n\nВсего доступно: <b>{len(users)}</b>",
+        _build_broadcast_pick_kb(users, page, sel),
+    )
+
+
+async def cb_bcast_page_all(call: CallbackQuery, state: FSMContext) -> None:
+    """Выбрать всех пользователей на текущей странице."""
+    aid = call.from_user.id
+    page = int((call.data or "").split(":")[-1] or 0)
+    users = _bc_pick_all_users()
+    start = page * USERS_PER_PAGE
+    chunk = users[start:start + USERS_PER_PAGE]
+    sel = _bc_pick_get(aid)
+    sel.update(chunk)
+    await _edit_or_answer(
+        call,
+        f"📋 <b>Выбор пользователей для рассылки</b>\n{DIV}\nНажмите на пользователя, чтобы добавить/убрать из выборки. Нажмите 🚀 для отправки.\n\nВсего доступно: <b>{len(users)}</b>",
+        _build_broadcast_pick_kb(users, page, sel),
+    )
+
+
+async def cb_bcast_page_none(call: CallbackQuery, state: FSMContext) -> None:
+    """Снять выбор со всех пользователей на текущей странице."""
+    aid = call.from_user.id
+    page = int((call.data or "").split(":")[-1] or 0)
+    users = _bc_pick_all_users()
+    start = page * USERS_PER_PAGE
+    chunk = users[start:start + USERS_PER_PAGE]
+    sel = _bc_pick_get(aid)
+    sel.difference_update(chunk)
+    await _edit_or_answer(
+        call,
+        f"📋 <b>Выбор пользователей для рассылки</b>\n{DIV}\nНажмите на пользователя, чтобы добавить/убрать из выборки. Нажмите 🚀 для отправки.\n\nВсего доступно: <b>{len(users)}</b>",
+        _build_broadcast_pick_kb(users, page, sel),
+    )
+
+
+async def cb_bcast_reset(call: CallbackQuery, state: FSMContext) -> None:
+    """Сбросить весь выбор админа."""
+    aid = call.from_user.id
+    _BC_PICK.pop(aid, None)
+    users = _bc_pick_all_users()
+    await _edit_or_answer(
+        call,
+        f"📋 <b>Выбор пользователей для рассылки</b>\n{DIV}\nНажмите на пользователя, чтобы добавить/убрать из выборки. Нажмите 🚀 для отправки.\n\nВсего доступно: <b>{len(users)}</b>",
+        _build_broadcast_pick_kb(users, 0, _bc_pick_get(aid)),
+    )
+
+
+async def cb_bcast_done(call: CallbackQuery, state: FSMContext) -> None:
+    """Готово: переход в состояние ожидания текста рассылки."""
+    aid = call.from_user.id
+    sel = _bc_pick_get(aid)
+    if not sel:
+        return await call.answer("⚠️ Никто не выбран", show_alert=True)
+    await state.set_state(AdminStates.wait_broadcast_text_picked)
+    await _edit_or_answer(
+        call,
+        f"📋 Выбрано: <b>{len(sel)}</b> пользователей.\n\nВведите текст для рассылки:",
+        InlineKeyboardMarkup(inline_keyboard=[
+            [InlineKeyboardButton(text="🔙 Назад к выбору", callback_data="admin:broadcast_pick:0")]
+        ]),
+    )
+
+
+async def process_broadcast_text_picked(message: Message, state: FSMContext) -> None:
+    """Отправляет сообщение всем выбранным пользователям."""
+    aid = message.from_user.id if message.from_user else None
+    sel = _BC_PICK.pop(aid, None) if aid is not None else None
+    text = message.text or ""
+    if not sel:
+        await state.clear()
+        return await message.answer("❌ Никто не выбран.")
+    targets = list(sel)
+    sent = 0
+    failed = 0
+    for uid in targets:
+        try:
+            await message.bot.send_message(uid, text)
+            sent += 1
+        except Exception:
+            failed += 1
+    await state.clear()
+    await message.answer(
+        f"📢 Рассылка завершена.\nДоставлено: <b>{sent}/{len(targets)}</b>" + (f"\nНе доставлено: <b>{failed}</b>" if failed else ""),
+        reply_markup=_admin_main_kb(),
+    )
+
+
 # ── back / exit ───────────────────────────────────────────────────────────────
 
 async def cb_back_main(call: CallbackQuery, state: FSMContext) -> None:
@@ -642,6 +826,46 @@ async def _process_broadcast_id_indiv(message: Message, state: FSMContext) -> No
 @router.message(AdminStates.wait_broadcast_text_indiv)
 async def _process_broadcast_text_indiv(message: Message, state: FSMContext) -> None:
     await process_broadcast_text_indiv(message, state)
+
+
+@router.callback_query(F.data == "admin:broadcast_pick")
+async def _cb_broadcast_pick(call: CallbackQuery, state: FSMContext) -> None:
+    await cb_broadcast_pick(call, state)
+
+
+@router.callback_query(F.data.startswith("admin:broadcast_pick:"))
+async def _cb_broadcast_pick_page(call: CallbackQuery, state: FSMContext) -> None:
+    await cb_broadcast_pick_page(call, state)
+
+
+@router.callback_query(F.data.startswith("admin:bcast_toggle:"))
+async def _cb_bcast_toggle(call: CallbackQuery, state: FSMContext) -> None:
+    await cb_bcast_toggle(call, state)
+
+
+@router.callback_query(F.data.startswith("admin:bcast_page_all:"))
+async def _cb_bcast_page_all(call: CallbackQuery, state: FSMContext) -> None:
+    await cb_bcast_page_all(call, state)
+
+
+@router.callback_query(F.data.startswith("admin:bcast_page_none:"))
+async def _cb_bcast_page_none(call: CallbackQuery, state: FSMContext) -> None:
+    await cb_bcast_page_none(call, state)
+
+
+@router.callback_query(F.data == "admin:bcast_done")
+async def _cb_bcast_done(call: CallbackQuery, state: FSMContext) -> None:
+    await cb_bcast_done(call, state)
+
+
+@router.callback_query(F.data == "admin:bcast_reset")
+async def _cb_bcast_reset(call: CallbackQuery, state: FSMContext) -> None:
+    await cb_bcast_reset(call, state)
+
+
+@router.message(AdminStates.wait_broadcast_text_picked)
+async def _process_broadcast_text_picked(message: Message, state: FSMContext) -> None:
+    await process_broadcast_text_picked(message, state)
 
 @router.callback_query(F.data == "admin:back_main")
 async def _cb_back_main(call: CallbackQuery, state: FSMContext) -> None:

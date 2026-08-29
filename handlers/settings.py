@@ -43,6 +43,7 @@ def settings_kb(user_id: int, confirm_clear: bool = False) -> InlineKeyboardMark
     blur_qr_text = "🌫 Блюр КР / счета: ВКЛ" if s.get("blur_qr_enabled", 1) else "👁 Блюр КР / счета: ВЫКЛ"
     jose_sender_text = "👤 Отправитель JOSE: ВКЛ" if s.get("jose_sender_enabled") else "👤 Отправитель JOSE: ВЫКЛ"
     jose_recipient_text = "👤 Получатель JOSE: ВКЛ" if s.get("jose_recipient_enabled") else "👤 Получатель JOSE: ВЫКЛ"
+    pinned_clock_text = "🕒 Закреп с часами: ВКЛ" if s.get("pinned_clock_enabled", 1) else "🕒 Закреп с часами: ВЫКЛ"
     
     # AM/PM
     suffix = s["time_suffix"] or "Нет"
@@ -95,6 +96,7 @@ def settings_kb(user_id: int, confirm_clear: bool = False) -> InlineKeyboardMark
         [InlineKeyboardButton(text=blur_qr_text, callback_data="set:toggle_blur_qr")],
         [InlineKeyboardButton(text=jose_sender_text, callback_data="set:toggle_jose_sender")],
         [InlineKeyboardButton(text=jose_recipient_text, callback_data="set:toggle_jose_recipient")],
+        [InlineKeyboardButton(text=pinned_clock_text, callback_data="set:toggle_pinned_clock")],
         [InlineKeyboardButton(text=custom_name_enabled_text, callback_data="set:toggle_custom_name")],
         [InlineKeyboardButton(text=custom_name_target_text, callback_data="set:toggle_custom_target")],
         [InlineKeyboardButton(text=custom_name_val_text, callback_data="set:custom_name_val")],
@@ -192,6 +194,24 @@ async def cb_toggle_blur_qr(call: CallbackQuery):
     new_val = 0 if s.get("blur_qr_enabled", 1) else 1
     update_setting(call.from_user.id, "blur_qr_enabled", new_val)
     log.setting_changed(call.from_user.id, "blur_qr_enabled", new_val, call.from_user.username)
+    await call.message.edit_reply_markup(reply_markup=settings_kb(call.from_user.id))
+
+
+@router.callback_query(F.data == "set:toggle_pinned_clock")
+async def cb_toggle_pinned_clock(call: CallbackQuery):
+    """Тумблер «Закреп с часами» — если выключают, сразу снимаем пин."""
+    try:
+        await call.answer("Закреп с часами изменён", parse_mode=PM)
+    except Exception:
+        pass
+    s = get_settings(call.from_user.id)
+    # Дефолт ВКЛ, поэтому флаг = 0 если нет ключа
+    cur = 1 if s.get("pinned_clock_enabled", 1) else 0
+    new_val = 0 if cur else 1
+    update_setting(call.from_user.id, "pinned_clock_enabled", new_val)
+    log.setting_changed(call.from_user.id, "pinned_clock_enabled", new_val, call.from_user.username)
+    # Если выключили — попросим clock_updater / ensure_pinned снять пин:
+    # обновим markup у пользователя сразу, фоновый цикл подхватит.
     await call.message.edit_reply_markup(reply_markup=settings_kb(call.from_user.id))
 
 

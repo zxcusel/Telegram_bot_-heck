@@ -9,11 +9,26 @@ import asyncio
 import sqlite3
 import pytz
 
-from data.db import _conn  # type: ignore  # используем общий коннектор
+from data.db import _conn, get_settings  # type: ignore  # используем общий коннектор
 
 router = Router()
 PM = ParseMode.HTML
 DIV = "━━━━━━━━━━━━━━━━━━━━"
+
+
+def _clock_enabled(user_id: int) -> bool:
+    """Возвращает True, если у пользователя включён закреп с часами.
+    Дефолт = ВКЛ (1), чтобы старые /start не сломались без настройки в БД."""
+    try:
+        s = get_settings(user_id)
+    except Exception:
+        return True
+    # По умолчанию ВКЛ; 0 — выключено.
+    val = s.get("pinned_clock_enabled", 1)
+    try:
+        return int(val) != 0
+    except Exception:
+        return True
 
 # Пояса
 TZ_MSK = pytz.timezone("Europe/Moscow")
@@ -116,8 +131,24 @@ async def ensure_pinned(bot: Bot, chat_id: int) -> None:
       закреп сохранялся при обновлении текста).
     - Если нет — отправляем и pin'им.
     - Любые ошибки глохнут — функция best-effort, не должна ломать /start.
+    - Если в настройках пользователя закреп выключен — ничего не делаем и
+      снимаем старый пин.
     """
     _ensure_table()
+    if not _clock_enabled(chat_id):
+        # Выключено — если было закреплённое сообщение, удаляем и чистим БД
+        old = _get_pinned(chat_id)
+        if old:
+            try:
+                await bot.delete_message(chat_id=chat_id, message_id=int(old))
+            except Exception:
+                pass
+            try:
+                await bot.unpin_chat_message(chat_id=chat_id)
+            except Exception:
+                pass
+            _clear_pinned(chat_id)
+        return
     text = _clock_text()
     kb = _clock_kb()
     pinned_mid = _get_pinned(chat_id)
@@ -292,9 +323,10 @@ _ensure_table()
 
 # ── фоновый авто-refresh закреплённого сообщения ────────────────────────────────
 
-async def clock_updater(bot: Bot, period_sec: int = 5) -> None:
+async def clock_updater(bot: Bot, period_sec: int = 1) -> None:
     """Каждые period_sec секунд обновляет все известные закреплённые
-    сообщения. Никогда не падает."""
+    сообщения. Никогда не падает. Обновление каждую секунду, чтобы
+    отображаемые часы тикали по-настоящему (HH:MM:SS)."""
     while True:
         try:
             try:
@@ -305,6 +337,19 @@ async def clock_updater(bot: Bot, period_sec: int = 5) -> None:
                 rows = c.execute("SELECT chat_id, message_id FROM pinned_clock").fetchall()
             for chat_id, mid in rows:
                 try:
+                    # Если у пользователя закреп выключен — снимаем и удаляем
+                    if not _clock_enabled(int(chat_id)):
+                        try:
+                            await bot.delete_message(chat_id=int(chat_id), message_id=int(mid))
+                        except Exception:
+                            pass
+                        try:
+                            await bot.unpin_chat_message(chat_id=int(chat_id))
+                        except Exception:
+                            pass
+                        _clear_pinned(int(chat_id))
+                        await asyncio.sleep(0.1)
+                        continue
                     await bot.edit_message_text(
                         chat_id=chat_id,
                         message_id=int(mid),
@@ -316,7 +361,7 @@ async def clock_updater(bot: Bot, period_sec: int = 5) -> None:
                     # Если сообщение пропало — почистим запись
                     _clear_pinned(int(chat_id))
                 # Чтобы не словить flood — короткая пауза между чатами
-                await asyncio.sleep(0.2)
+                await asyncio.sleep(0.15)
         except Exception as e:
             print(f"clock_updater loop error: {e}")
         await asyncio.sleep(period_sec)

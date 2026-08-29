@@ -29,6 +29,7 @@ def _start_kb(user_id: int) -> InlineKeyboardMarkup:
         [InlineKeyboardButton(text="🤖 Автоматизация", callback_data="auto:open")],
         # [InlineKeyboardButton(text="🎲 Массовая генерация", callback_data="start:bulk_gen")],
         [InlineKeyboardButton(text="⚙️ Настройки", callback_data="start:settings")],
+        [InlineKeyboardButton(text="📖 Инструкция", callback_data="ins:main")],
     ]
     if is_admin(user_id):
         buttons.append([InlineKeyboardButton(text="👨‍💼 Админ-панель", callback_data="start:admin")])
@@ -49,6 +50,7 @@ def _welcome_text() -> str:
         f"{BULLET} <b>Автоматизация</b> — запуск по расписанию\n"
         f"{BULLET} <b>Поддержка</b> — обратиться в поддержку\n"
         f"{BULLET} <b>Настройки</b> — параметры генерации\n"
+        f"{BULLET} <b>Инструкция</b> — описание всех разделов бота\n"
         f"{DIV}\n"
         f"<i>Выберите действие:</i>"
     )

@@ -496,6 +496,10 @@ async def cb_tkt_reply(call: CallbackQuery, state: FSMContext):
 
 @router.message(TicketStates.replying)
 async def tkt_reply_entered(message: Message, state: FSMContext):
+    # Если это админ-ответ (reply_role='admin'), пропускаем — обработает admin_reply_entered ниже
+    _data = await state.get_data()
+    if _data.get("reply_role") == "admin":
+        return  # пусть сработает admin-handler
     body = (message.text or "").strip()
     if not body:
         await message.answer("❌ Пустое сообщение. Напишите текст:", parse_mode=PM)

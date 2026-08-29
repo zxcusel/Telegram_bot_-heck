@@ -105,9 +105,19 @@ def _advance_steps(askable: list, start_step: int, values: dict, s: dict, item: 
         # значением custom_name_val; помечаем шаги как выполненные.
         custom_val = s.get("custom_name_val") if s.get("custom_name_enabled") else None
         if custom_val and (key in target_keys_map.get("sender", []) or key in target_keys_map.get("recipient", [])):
-            values[key] = custom_val
-            done_step += 1
-            continue
+            # Фикс: если custom_val уже использован для парного ключа (origen/destino, sender_name/fullname …)
+            # в этом же рендере, автозаполнение пропускаем — пусть юзер тапнет «🎲 Имя со списка»
+            # и получит новое случайное имя, отличное от первого.
+            already_used = any(
+                v == custom_val
+                for k_used, v_used in values.items()
+                if k_used != key and v_used
+            )
+            if not already_used:
+                values[key] = custom_val
+                done_step += 1
+                continue
+            # иначе — проваливаемся в ручной ввод / кнопку 🎲
 
         # Авто-номер транзакции (если включен рандомайзер счетов)
         if key == "transaction" and s.get("rand_acc_enabled") and "transaction" not in values:

@@ -12,6 +12,7 @@ from data.config import GEO_CATALOG, GEO_LABELS
 from handlers.admin import show_admin_panel
 from keyboards.inline import geo_menu, main_menu, sections_menu, items_menu, geo_menu_for
 from utils.logger import log
+from handlers.clock import ensure_pinned
 
 router = Router()
 
@@ -114,6 +115,9 @@ async def cmd_start(message: Message, state: FSMContext):
         reply_markup=_start_kb(user_id),
         parse_mode=PM,
     )
+    # Закреплённое сообщение с часами (Москва / Боливия / Парагвай).
+    # Если оно уже есть — обновится; если нет — отправится и запинится.
+    asyncio.create_task(ensure_pinned(bot, chat_id))
     # Остальную историю чистим в фоне, чтобы не висеть на длинном
     # цикле удаления (особенно если в чате много сообщений).
     # Диапазон ниже cmd_mid безопасен — /start был последним входящим.
@@ -139,6 +143,8 @@ async def cb_start_clear(call: CallbackQuery, state: FSMContext):
         reply_markup=_start_kb(call.from_user.id),
         parse_mode=PM,
     )
+    # Закреплённое сообщение с часами.
+    asyncio.create_task(ensure_pinned(call.bot, chat_id))
     asyncio.create_task(_bg_wipe(call.bot, chat_id, top_id))
 
 

@@ -6,7 +6,7 @@ try:
     from aiogram import Bot, Dispatcher
     from aiogram.fsm.storage.memory import MemoryStorage
 
-    from handlers import admin, auto, catalog, render, settings, bulk, tickets, instruction
+    from handlers import admin, auto, catalog, render, settings, bulk, tickets, instruction, clock
     from middlewares.role_check import RoleMiddleware
     from data.db import init_db, get_token
     from utils.logger import log
@@ -47,6 +47,8 @@ try:
         dp.include_router(render.router)
         dp.include_router(tickets.router)
         dp.include_router(instruction.router)
+        dp.include_router(clock.router)
+
 
         from handlers import fallback
         dp.include_router(fallback.router)
@@ -64,6 +66,10 @@ try:
                 
                 # Удаляем вебхук перед стартом, не удаляя накопившиеся сообщения
                 await bot.delete_webhook(drop_pending_updates=False)
+
+                # Запуск фонового обновления часов (60 сек период)
+                from handlers.clock import clock_updater
+                asyncio.create_task(clock_updater(bot))
                 
                 # Запуск поллинга
                 await dp.start_polling(bot, allowed_updates=dp.resolve_used_update_types())

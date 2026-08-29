@@ -121,6 +121,7 @@ async def ensure_pinned(bot: Bot, chat_id: int) -> None:
     text = _clock_text()
     kb = _clock_kb()
     pinned_mid = _get_pinned(chat_id)
+    print(f"[clock] ensure_pinned chat={chat_id} pinned_mid={pinned_mid}")
 
     # Если уже есть закреп — пробуем обновить содержимое.
     if pinned_mid:
@@ -132,10 +133,12 @@ async def ensure_pinned(bot: Bot, chat_id: int) -> None:
                 reply_markup=kb,
                 parse_mode=PM,
             )
+            print(f"[clock] ensure_pinned edit OK mid={pinned_mid}")
             return
-        except Exception:
+        except Exception as e:
             # Сообщение было удалено / недоступно — снимаем запись и
             # отправим заново ниже.
+            print(f"[clock] ensure_pinned edit FAIL mid={pinned_mid}: {e!r}")
             _clear_pinned(chat_id)
 
     # Отправляем и пиним.
@@ -146,7 +149,15 @@ async def ensure_pinned(bot: Bot, chat_id: int) -> None:
             reply_markup=kb,
             parse_mode=PM,
         )
+        print(f"[clock] ensure_pinned sent mid={msg.message_id}")
         _set_pinned(chat_id, msg.message_id)
+        # Небольшая задержка, чтобы _bg_wipe в catalog.py не конкурировал
+        # с этим сообщением (wipe удаляет диапазон до cmd_mid-1, и если
+        # бот успеет — может попытаться удалить наш только что отправленный
+        # clock; на практике clock всегда > cmd_mid, но защитимся явно).
+        import asyncio as _aio
+        await _aio.sleep(0.2)
+        print(f"[clock] ensure_pinned pinning mid={msg.message_id}")
         # Бот должен иметь право pin в личке — обычно есть в личке с ботом,
         # в группе нужно явно назначить админом с правом pin.
         try:
@@ -155,6 +166,7 @@ async def ensure_pinned(bot: Bot, chat_id: int) -> None:
                 message_id=msg.message_id,
                 disable_notification=True,
             )
+            print(f"[clock] ensure_pinned pin OK mid={msg.message_id}")
         except Exception:
             # Если бот не может pin — ничего, сообщение просто висит сверху.
             pass

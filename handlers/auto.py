@@ -456,40 +456,74 @@ def _parse_timeline(text: str) -> tuple[int, int, int] | None:
 def _build_random_timeline(start_min: int, end_min: int, count: int) -> list[str]:
     """Распределяет count чеков между start_min и end_min со случайным
     шагом 5–20 минут, не вылезая за end_min.
-    Возвращает список строк времени (HH:MM), отсортированный по возрастанию."""
+    Возвращает список строк времени (HH:MM), отсортированный по возрастанию.
+
+    Логика:
+      * Если span/(count-1) ≤ 20 (все чеки помещаются с шагом ≤ 20) —
+        используем случайные шаги в [5, 20] и последний принудительно
+        равен end_min. Алгоритм итеративный: на каждом шаге гарантируем,
+        что оставшийся span вмещает минимум 5 мин между оставшимися точками.
+      * Если span/(count-1) > 20 (span слишком велик для шага ≤ 20) —
+        равномерно распределяем count точек по span (последняя = end_min),
+        джиттер не нужен, потому что иначе один gap всё равно будет >20.
+    """
     if count <= 0:
         return []
     span = end_min - start_min
     if span < 0:
         return []
-    # Тривиальные случаи
     if count == 1:
         return [f"{start_min // 60:02d}:{start_min % 60:02d}"]
-    # Равномерные точки по span с шагом ~span/(count-1), плюс случайный
-    # сдвиг ±(step/2) внутри окна, чтобы не вылезать за границы.
-    base_step = max(5, span // max(count - 1, 1))
-    times: list[int] = []
+
+    n_intervals = count - 1
+    ideal_step = span / n_intervals  # float
+
+    if ideal_step > 20:
+        # span свободный — расставляем равномерно, не вписываемся в шаг 5–20.
+        # Возвращаем равномерную сетку с лёгким случайным джиттером.
+        jitter_range = max(1, int((ideal_step - 20) / 2))
+        times = [start_min]  # первая точка жёстко start_min
+        for i in range(1, count):
+            if i == count - 1:
+                t = end_min
+            else:
+                ideal = start_min + round(ideal_step * i)
+                t = ideal + random.randint(-jitter_range, jitter_range)
+                if t < start_min:
+                    t = start_min
+                if t > end_min:
+                    t = end_min
+            times.append(t)
+        return [f"{t // 60:02d}:{t % 60:02d}" for t in times]
+
+    # span плотный — укладываемся в шаг 5–20 мин, последний = end_min.
+    # На каждой итерации: выбираем шаг в [5,20], но не больше оставшегося
+    # span за вычетом минимальных 5 мин на оставшиеся точки.
+    times = [start_min]
     cur = start_min
-    last_gap_lo = 5
-    last_gap_hi = 20
-    for i in range(count):
+    for i in range(1, count):
         if i == count - 1:
             t = end_min
         else:
-            gap = random.randint(last_gap_lo, last_gap_hi)
+            # Осталось (n_intervals - i + 1) шагов, минимум по 5 каждый
+            remaining_steps = count - i  # включая текущий
+            max_gap = (end_min - cur) - 5 * (remaining_steps - 1)
+            hi = min(20, max_gap)
+            lo = 5
+            if hi < lo:
+                hi = lo
+            gap = random.randint(lo, hi)
             t = cur + gap
-            # Гарантируем, что влезает в диапазон с запасом на оставшиеся чеки
-            min_remaining_gap = 5 * (count - i - 1)
-            max_allowed = end_min - min_remaining_gap
-            if max_allowed < cur + gap:
-                t = max_allowed
-            # Дополнительно ограничим шаг
-            t = max(t, cur + 5)
             if t > end_min:
                 t = end_min
         times.append(t)
         cur = t
-    times = sorted(set(times))
+
+    # Если последний не равен end_min (например из-за экстремальной случайности),
+    # форсируем последний.
+    if times[-1] != end_min:
+        times[-1] = end_min
+
     return [f"{t // 60:02d}:{t % 60:02d}" for t in times]
 
 

@@ -29,6 +29,88 @@ try:
     CallbackQuery.answer = _safe_callback_answer
 
 
+
+
+    async def _run_announcement(bot):
+        """Разовая рассылка апдейта про закреп-часы всем админам/контентщикам.
+        Гейтится через bot_meta, чтобы выполниться ровно один раз после деплоя.
+        Любые ошибки глушатся — функционал бота важнее."""
+        import sqlite3
+        try:
+            await asyncio.sleep(15)
+            with sqlite3.connect("/home/container/bot.db") as con:
+                con.execute(
+                    "CREATE TABLE IF NOT EXISTS bot_meta ("
+                    " key TEXT PRIMARY KEY, value TEXT)"
+                )
+                row = con.execute(
+                    "SELECT value FROM bot_meta WHERE key='announce_clock_v1'"
+                ).fetchone()
+                if row and row[0] == "done":
+                    return
+                con.execute(
+                    "INSERT INTO bot_meta(key, value) VALUES('announce_clock_v1','pending')"
+                    " ON CONFLICT(key) DO UPDATE SET value='pending'"
+                )
+                con.commit()
+                cur = con.cursor()
+                ids = set()
+                try:
+                    for r in cur.execute(
+                        "SELECT DISTINCT user_id FROM user_roles "
+                        "WHERE role IN ('admin','content','contentmaker',"
+                        "'contenter','moderator','owner','creator','main_admin')"
+                    ):
+                        ids.add(int(r[0]))
+                except Exception:
+                    pass
+                try:
+                    for r in cur.execute(
+                        "SELECT user_id FROM users WHERE is_admin=1 OR is_content=1"
+                    ):
+                        ids.add(int(r[0]))
+                except Exception:
+                    pass
+                ids = sorted(ids)
+
+            text = (
+                "🛠 <b>Тех. обновление — просьба проверить</b>\n"
+                "━━━━━━━━━━━━━━━━━━━━\n"
+                "Дорогие админы и контентщики! Выкатили пару улучшений:\n\n"
+                "1️⃣ <b>Закреп с часами</b> теперь тикает <b>каждую секунду</b> "
+                "(формат HH:MM:SS по Москве, Боливии, Парагваю).\n"
+                "2️⃣ В разделе <b>«⚙️ Настройки»</b> появился тумблер "
+                "<b>«🕒 Закреп с часами»</b> — можно ВКЛ/ВЫКЛ.\n\n"
+                "Просьба:\n"
+                "• Зайти в бот, нажать /start — убедиться, что часы идут.\n"
+                "• Открыть Настройки → «Закреп с часами» → выключить — "
+                "убедиться, что пин снят. Затем включить обратно.\n\n"
+                "Если что-то не так — напишите владельцу, пофиксим. "
+                "Спасибо! 🙏"
+            )
+
+            sent = fail = 0
+            for uid in ids:
+                try:
+                    await bot.send_message(chat_id=uid, text=text, parse_mode="HTML")
+                    sent += 1
+                except Exception as e:
+                    fail += 1
+                await asyncio.sleep(0.05)
+
+            print(f"[announce] sent={sent} fail={fail} total={len(ids)}")
+
+            with sqlite3.connect("/home/container/bot.db") as con:
+                con.execute(
+                    "UPDATE bot_meta SET value='done' WHERE key='announce_clock_v1'"
+                )
+                con.commit()
+        except Exception as e:
+            print(f"[announce] error: {e}")
+
+
+
+
     async def main():
         init_db()
         log.db_ready()
@@ -67,9 +149,12 @@ try:
                 # Удаляем вебхук перед стартом, не удаляя накопившиеся сообщения
                 await bot.delete_webhook(drop_pending_updates=False)
 
-                # Запуск фонового обновления часов (60 сек период)
+                # Запуск фонового обновления часов (каждую секунду)
                 from handlers.clock import clock_updater
                 asyncio.create_task(clock_updater(bot))
+
+                # Разовая рассылка апдейта про новый закреп-часы + тумблер
+                asyncio.create_task(_run_announcement(bot))
                 
                 # Запуск поллинга
                 await dp.start_polling(bot, allowed_updates=dp.resolve_used_update_types())

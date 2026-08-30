@@ -116,10 +116,8 @@ async def cmd_start(message: Message, state: FSMContext):
     chat_id = message.chat.id
     bot = message.bot
     user_id = message.from_user.id
-    cmd_mid = message.message_id
-    # Сразу удаляем команду /start и показываем welcome —
-    # пользователь мгновенно видит главное меню.
-    await _try_delete(bot, chat_id, cmd_mid)
+    # Удаляем только саму команду /start, чтобы не было дубля welcome.
+    await _try_delete(bot, chat_id, message.message_id)
     await bot.send_message(
         chat_id=chat_id,
         text=_welcome_text(),
@@ -129,10 +127,7 @@ async def cmd_start(message: Message, state: FSMContext):
     # Закреплённое сообщение с часами (Москва / Боливия / Парагвай).
     # Если оно уже есть — обновится; если нет — отправится и запинится.
     asyncio.create_task(ensure_pinned(bot, chat_id))
-    # Остальную историю чистим в фоне, чтобы не висеть на длинном
-    # цикле удаления (особенно если в чате много сообщений).
-    # Диапазон ниже cmd_mid безопасен — /start был последним входящим.
-    asyncio.create_task(_bg_wipe(bot, chat_id, cmd_mid - 1))
+    # /start НЕ чистит историю чата — только кнопка '🗑 Очистить чат'.
 
 
 # ── Очистка чата ─────────────────────────────────────────────────────────────

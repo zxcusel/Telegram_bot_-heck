@@ -74,18 +74,20 @@ async def _try_delete(bot, chat_id: int, message_id: int) -> None:
             await asyncio.sleep(0.2 * (attempt + 1))
 
 
-async def _wipe_chat_up_to(bot, chat_id: int, up_to_id: int) -> None:
-    """Удаляет сообщения в диапазоне [1..up_to_id] батчами по 100 через
-    deleteMessages. Telegram возвращает частичный успех, если в батче есть
-    сообщения старше 48ч или без права на удаление — невалидные просто
-    игнорируются, остальные удаляются. Так очистка 300+ сообщений
-    происходит почти мгновенно, без визуального 'удаляет по одному'."""
-    if up_to_id < 1:
+async def _wipe_chat_up_to(bot, chat_id: int, anchor_id: int) -> None:
+    """Удаляет ВСЕ сообщения в чате, которые бот может удалить, от 1 до
+    anchor_id (старая часть) И от anchor_id+1 вверх батчами по 100, пока
+    Telegram не перестанет находить сообщения. Это покрывает случай, когда
+    сверху anchor_id появились новые чеки, которые нужно тоже зачистить.
+    Telegram возвращает частичный успех, если в батче есть сообщения
+    старше 48ч — невалидные игнорируются, остальные удаляются."""
+    if anchor_id < 1:
         return
     BATCH = 100
+    # 1) Нижняя часть: [1 .. anchor_id]
     start = 1
-    while start <= up_to_id:
-        end = min(start + BATCH - 1, up_to_id)
+    while start <= anchor_id:
+        end = min(start + BATCH - 1, anchor_id)
         ids = list(range(start, end + 1))
         try:
             await bot.delete_messages(chat_id=chat_id, message_ids=ids)
@@ -98,6 +100,28 @@ async def _wipe_chat_up_to(bot, chat_id: int, up_to_id: int) -> None:
                 await asyncio.sleep(0.04)
         await asyncio.sleep(0.25)
         start = end + 1
+    # 2) Верхняя часть: всё, что выше anchor_id — идём окнами по BATCH,
+    #    расширяя диапазон, пока deleteMessages не начнёт давать пустой
+    #    результат (Telegram возвращает ошибку, если все id не существуют).
+    #    Чтобы не уйти в бесконечность при пустых диапазонах — лимит шагов.
+    high = anchor_id + 1
+    MAX_STEPS = 50  # до 5000 сообщений сверху
+    for _ in range(MAX_STEPS):
+        ids = list(range(high, high + BATCH))
+        try:
+            await bot.delete_messages(chat_id=chat_id, message_ids=ids)
+            # Если Telegram сказал "ok" — двигаемся выше
+            high += BATCH
+        except Exception as e:
+            msg = str(e).lower()
+            # "message can't be deleted" / "message to delete not found"
+            # — значит в этом окне ничего валидного; пробуем двигаться дальше
+            if "not found" in msg or "can\'t be deleted" in msg or "can't be deleted" in msg:
+                high += BATCH
+                continue
+            # Любая другая ошибка — стоп, чтобы не спамить
+            break
+        await asyncio.sleep(0.25)
 
 
 async def _bg_wipe(bot, chat_id: int, up_to_id: int) -> None:
@@ -139,11 +163,10 @@ async def cb_start_clear(call: CallbackQuery, state: FSMContext):
     log.clear_chat(call.from_user.id, call.from_user.username)
     try: await call.answer()
     except Exception: pass
-    top_id = call.message.message_id - 1
     # Удаляем само сообщение с кнопкой "Очистить чат" и сразу
-    # показываем welcome, дальше — фон.
+    # показываем welcome, дальше — фоновая полная очистка истории чата.
     await _try_delete(call.bot, chat_id, call.message.message_id)
-    await call.bot.send_message(
+    welcome = await call.bot.send_message(
         chat_id=chat_id,
         text=_welcome_text(),
         reply_markup=_start_kb(call.from_user.id),
@@ -151,7 +174,9 @@ async def cb_start_clear(call: CallbackQuery, state: FSMContext):
     )
     # Закреплённое сообщение с часами.
     asyncio.create_task(ensure_pinned(call.bot, chat_id))
-    asyncio.create_task(_bg_wipe(call.bot, chat_id, top_id))
+    # Передаём message_id нового welcome как опорную точку:
+    # _wipe_chat_up_to удалит всё ниже И всё выше этого id батчами.
+    asyncio.create_task(_bg_wipe(call.bot, chat_id, welcome.message_id))
 
 
 # ── Начать → выбор гео ───────────────────────────────────────────────────────

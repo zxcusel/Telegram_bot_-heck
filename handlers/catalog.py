@@ -75,18 +75,29 @@ async def _try_delete(bot, chat_id: int, message_id: int) -> None:
 
 
 async def _wipe_chat_up_to(bot, chat_id: int, up_to_id: int) -> None:
-    """Удаляет сообщения в диапазоне [1..up_to_id] поштучно.
-    delete_messages атомарен — если в батче есть сообщение старше 48ч,
-    падает весь батч. Здесь каждое сообщение независимо, старые просто
-    проглатываются. Пауза уважает flood limit Telegram."""
+    """Удаляет сообщения в диапазоне [1..up_to_id] батчами по 100 через
+    deleteMessages. Telegram возвращает частичный успех, если в батче есть
+    сообщения старше 48ч или без права на удаление — невалидные просто
+    игнорируются, остальные удаляются. Так очистка 300+ сообщений
+    происходит почти мгновенно, без визуального 'удаляет по одному'."""
     if up_to_id < 1:
         return
-    for mid in range(up_to_id, 0, -1):
+    BATCH = 100
+    start = 1
+    while start <= up_to_id:
+        end = min(start + BATCH - 1, up_to_id)
+        ids = list(range(start, end + 1))
         try:
-            await bot.delete_message(chat_id=chat_id, message_id=mid)
+            await bot.delete_messages(chat_id=chat_id, message_ids=ids)
         except Exception:
-            pass
-        await asyncio.sleep(0.04)
+            for mid in ids:
+                try:
+                    await bot.delete_message(chat_id=chat_id, message_id=mid)
+                except Exception:
+                    pass
+                await asyncio.sleep(0.04)
+        await asyncio.sleep(0.25)
+        start = end + 1
 
 
 async def _bg_wipe(bot, chat_id: int, up_to_id: int) -> None:

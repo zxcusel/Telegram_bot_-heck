@@ -89,7 +89,8 @@ MIGRATIONS: list[tuple[str, str]] = [
     ("023_add_jose_recipient_enabled", "ALTER TABLE users ADD COLUMN jose_recipient_enabled INTEGER DEFAULT 0"),
     ("024_add_custom_name_enabled", "ALTER TABLE users ADD COLUMN custom_name_enabled INTEGER DEFAULT 0"),
     ("025_add_custom_name_target", "ALTER TABLE users ADD COLUMN custom_name_target TEXT DEFAULT 'sender'"),
-    ("026_add_custom_name_val", "ALTER TABLE users ADD COLUMN custom_name_val TEXT DEFAULT NULL")
+    ("026_add_custom_name_val", "ALTER TABLE users ADD COLUMN custom_name_val TEXT DEFAULT NULL"),
+    ("027_add_pinned_clock_enabled", "ALTER TABLE users ADD COLUMN pinned_clock_enabled INTEGER DEFAULT 1")
 ]
 
 def _run_migrations(con):
@@ -158,7 +159,8 @@ def init_db():
                 jose_sender_enabled  INTEGER DEFAULT 0,
                 jose_recipient_enabled INTEGER DEFAULT 0,
                 rand_rocket_min      INTEGER DEFAULT 10,
-                rand_rocket_max      INTEGER DEFAULT 1000
+                rand_rocket_max      INTEGER DEFAULT 1000,
+                pinned_clock_enabled INTEGER DEFAULT 1
             )
         """)
 
@@ -461,7 +463,8 @@ def get_settings(user_id: int) -> dict:
                    rand_percent_enabled, rand_percent_min, rand_percent_max,
                    rand_bank_enabled, rand_acc_enabled, rand_name_enabled, blur_enabled, blur_qr_enabled, jose_sender_enabled, jose_recipient_enabled,
                    rand_rocket_min, rand_rocket_max,
-                   custom_name_enabled, custom_name_target, custom_name_val
+                   custom_name_enabled, custom_name_target, custom_name_val,
+                   pinned_clock_enabled
             FROM users WHERE user_id = ?
         """, (user_id,)).fetchone()
     if not row:
@@ -473,7 +476,8 @@ def get_settings(user_id: int) -> dict:
                 "rand_bank_enabled": 0, "rand_acc_enabled": 0, "rand_name_enabled": 0,
                 "blur_enabled": 1, "blur_qr_enabled": 1, "jose_sender_enabled": 0, "jose_recipient_enabled": 0,
                 "rand_rocket_min": 10, "rand_rocket_max": 1000,
-                "custom_name_enabled": 0, "custom_name_target": "sender", "custom_name_val": None}
+                "custom_name_enabled": 0, "custom_name_target": "sender", "custom_name_val": None,
+                "pinned_clock_enabled": 1}
     return dict(row)
 
 def update_setting(user_id: int, key: str, value):
@@ -483,7 +487,8 @@ def update_setting(user_id: int, key: str, value):
                   "rand_percent_enabled", "rand_percent_min", "rand_percent_max",
                   "rand_bank_enabled", "rand_acc_enabled", "rand_name_enabled", "blur_enabled", "blur_qr_enabled", "jose_sender_enabled", "jose_recipient_enabled",
                   "rand_rocket_min", "rand_rocket_max",
-                  "custom_name_enabled", "custom_name_target", "custom_name_val")
+                  "custom_name_enabled", "custom_name_target", "custom_name_val",
+                  "pinned_clock_enabled")
     if key not in valid_keys: return
     with _conn() as con:
         con.execute(f"UPDATE users SET {key} = ? WHERE user_id = ?", (value, user_id))

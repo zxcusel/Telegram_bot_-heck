@@ -55,22 +55,17 @@ try:
                 con.commit()
                 cur = con.cursor()
                 ids = set()
-                try:
-                    for r in cur.execute(
-                        "SELECT DISTINCT user_id FROM user_roles "
-                        "WHERE role IN ('admin','content','contentmaker',"
-                        "'contenter','moderator','owner','creator','main_admin')"
-                    ):
-                        ids.add(int(r[0]))
-                except Exception:
-                    pass
-                try:
-                    for r in cur.execute(
-                        "SELECT user_id FROM users WHERE is_admin=1 OR is_content=1"
-                    ):
-                        ids.add(int(r[0]))
-                except Exception:
-                    pass
+                # Реальная схема: таблица admins и таблица roles (cr/rd/fd - права создателей).
+                for q in (
+                    "SELECT user_id FROM admins",
+                    "SELECT user_id FROM roles WHERE role IN ('cr','rd','fd')",
+                    "SELECT user_id FROM users",
+                ):
+                    try:
+                        for r in cur.execute(q):
+                            ids.add(int(r[0]))
+                    except Exception:
+                        pass
                 ids = sorted(ids)
 
             text = (
